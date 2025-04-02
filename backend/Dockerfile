@@ -7,7 +7,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-ENV ENV_FILE=.env.production
+ENV ENV_FILE=.env
 
 EXPOSE 8000
 

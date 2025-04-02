@@ -5,6 +5,7 @@ import shortuuid
 import os
 from dotenv import load_dotenv
 
+
 from .models import URLBase, URLInfo
 from .database import (
     createTable,
@@ -16,11 +17,11 @@ from .database import (
 )
 from .auth import validate_admin_token
 from .limiter import limiter, _rate_limit_exceeded_handler, RateLimitExceeded, DEFAULT_LIMITS
-
-PORT = os.getenv("PORT")
-HOST = os.getenv("HOST")
-
 load_dotenv()
+
+PORT = int(os.getenv("PORT", 8000))
+HOST = os.getenv("HOST", "0.0.0.0")
+
 
 app = FastAPI(title="Zipway - Url Shortener", description= "A simple and efficient URL shortening service", version="1.0.0")
 
@@ -29,8 +30,8 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For production, specify exact origins
-    allow_methods=["*"],
+    allow_origins=["https://zipway-shortener.me"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"], 
     allow_headers=["*"],
     allow_credentials=True
 )
@@ -42,7 +43,7 @@ def startup_event():
 
 
 
-@app.get("/", tags="Information")
+@app.get("/", tags=["Information"])
 async def root(): 
     return {
         "app": "URL Shortener",
@@ -109,5 +110,4 @@ async def redirect_to_target(short_id: str):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app",host=HOST, port=PORT, reload=True)
-    
+    uvicorn.run("app.main:app", host=HOST, port=PORT, reload=True)
