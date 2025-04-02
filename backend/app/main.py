@@ -97,7 +97,7 @@ async def get_statistics(request: Request, limit: int= 10, token: str = Depends(
     
 @app.get("/{short_id}", tags=["URLs"])
 @limiter.limit(DEFAULT_LIMITS["redirect"])
-async def redirect_to_target(short_id: str):
+async def redirect_to_target(short_id: str, request: Request):
     
     url_data = get_url_by_id(short_id)
     
