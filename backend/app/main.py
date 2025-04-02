@@ -49,9 +49,9 @@ async def root():
         "app": "URL Shortener",
         "version": "1.0.0",
         "endpoints": {
-            "POST /shorten": "Criar uma URL curta",
-            "GET /{short_id}": "Redirecionar para a URL original",
-            "GET /stats": "Obter estatísticas de uso"
+            "POST /shorten": "Create a Short URL",
+            "GET /{short_id}": "Redirect to the original URL",
+            "GET /stats": "Get use stats"
         }
     }
     
