@@ -87,7 +87,7 @@ async def create_short_url(url: URLBase, request: Request):
 
 @app.get("/stats", tags=["Statistics"])
 @limiter.limit(DEFAULT_LIMITS["admin"])
-async def get_statistics(limit: int= 10, token: str = Depends(validate_admin_token)):
+async def get_statistics(request: Request, limit: int= 10, token: str = Depends(validate_admin_token)):
     stats = get_url_stats(limit)
     return {
         "top_urls": stats,
