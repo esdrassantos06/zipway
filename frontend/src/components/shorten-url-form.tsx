@@ -6,8 +6,8 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
+import { shortenUrl } from "@/utils/axios";
 
 export function ShortenUrlForm() {
   const [url, setUrl] = useState("");
@@ -17,6 +17,13 @@ export function ShortenUrlForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w.-]*)*\/?$/;
+    if (!urlRegex.test(url.trim())) {
+      setError("Please enter a valid URL");
+      toast.error("Please enter a valid URL");
+      return;
+    }
 
     if (!url || !url.trim()) {
       setError("Please enter a URL");
@@ -33,7 +40,7 @@ export function ShortenUrlForm() {
         throw new Error("API URL not configured");
       }
 
-      const response = await axios.post(apiUrl, { target_url: url });
+      const response = await shortenUrl(url);
       toast.success("URL Shortened Sucessfully.");
 
       if (response.data?.short_url) {

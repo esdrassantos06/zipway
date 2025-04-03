@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="overflow-hidden">
       <body
-        className={`${inter.variable} antialiased`} suppressHydrationWarning
+        className={`${inter.className} antialiased`} suppressHydrationWarning
       >
         {children}
       </body>
