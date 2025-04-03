@@ -31,7 +31,7 @@ Both components are containerized using Docker for easy deployment.
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/zipway.git
+   git clone https://github.com/esdrassantos06/zipway.git
    cd zipway
    ```
 
