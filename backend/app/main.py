@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,8 +23,13 @@ load_dotenv()
 PORT = int(os.getenv("PORT", 8000))
 HOST = os.getenv("HOST", "0.0.0.0")
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    createTable()
+    yield
 
-app = FastAPI(title="Zipway - Url Shortener", description= "A simple and efficient URL shortening service", version="1.0.0")
+
+app = FastAPI(title="Zipway - Url Shortener", description="A simple and efficient URL shortening service", version="1.0.0", lifespan=lifespan)
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -35,13 +41,6 @@ app.add_middleware(
     allow_headers=["*"],
     allow_credentials=True
 )
-
-
-@app.on_event("startup")
-def startup_event():
-    createTable()
-
-
 
 @app.get("/", tags=["Information"])
 async def root(): 
@@ -61,12 +60,18 @@ async def create_short_url(url: URLBase, request: Request):
     
     if not url.target_url.startswith(("http://", "https://")):
         url.target_url = f"https://{url.target_url}"
+        
+    reserved_paths= ["", "shorten", "stats"]
+    
     
     if url.custom_id:
         short_id = url.custom_id
+        
+        if short_id in reserved_paths:
+            raise HTTPException(status_code=400, detail="This custom ID is reserved for system use. Please choose another one.")
+        
         if check_id_exists(short_id):
             raise HTTPException(status_code=400, detail="Custom ID already exists")
-
 
     else: 
         while True:

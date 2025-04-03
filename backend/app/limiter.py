@@ -9,5 +9,5 @@ DEFAULT_LIMITS = {
     "general": "100/minute",
     "shorten": "20/minute",     
     "redirect": "200/minute",
-    "admin": "30/minute"
+    "admin": "10/minute"
 }
