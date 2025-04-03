@@ -36,7 +36,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://zipway-shortener.me"],
+    allow_origins=["https://zipway-shortener.me",],
     allow_methods=["GET", "POST", "PUT", "DELETE"], 
     allow_headers=["*"],
     allow_credentials=True
