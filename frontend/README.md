@@ -1,36 +1,121 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Zipway URL Shortener - Frontend
 
-## Getting Started
+This is the frontend application for the Zipway URL shortener, built with Next.js, React, and Tailwind CSS.
 
-First, run the development server:
+## 🚀 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Clean, responsive user interface
+- URL shortening with copy-to-clipboard functionality
+- Error handling and user feedback
+- Tabs for URL shortening and information
+- Modern design using Tailwind CSS and shadcn/ui components
+
+## 🔧 Technology Stack
+
+- [Next.js](https://nextjs.org/) - React framework with server-side rendering
+- [React](https://reactjs.org/) - UI library
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- [shadcn/ui](https://ui.shadcn.com/) - Reusable UI components
+- [Axios](https://axios-http.com/) - HTTP client
+- [React Hot Toast](https://react-hot-toast.com/) - Toast notifications
+
+## 📁 Project Structure
+
+```
+frontend/
+├── public/                   # Static files
+├── src/                      # Source code
+│   ├── app/                  # Next.js app directory
+│   │   ├── globals.css       # Global styles
+│   │   ├── layout.tsx        # Root layout
+│   │   └── page.tsx          # Home page
+│   ├── components/           # React components
+│   │   ├── ui/               # UI components
+│   │   └── shorten-url-form.tsx # Form component
+│   ├── lib/                  # Utility functions
+│   └── services/             # API services (add this directory)
+├── .env                      # Environment variables (create this)
+├── .gitignore                # Git ignore file
+├── Dockerfile                # Docker container definition
+├── next.config.ts            # Next.js configuration
+├── package.json              # Node.js dependencies
+├── postcss.config.mjs        # PostCSS configuration
+├── tailwind.config.js        # Tailwind configuration (add this file)
+└── tsconfig.json             # TypeScript configuration
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Environment Variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Create a `.env` file in the frontend directory with the following variables:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
-## Learn More
+## 🚀 Running Locally
 
-To learn more about Next.js, take a look at the following resources:
+### With Node.js
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Install dependencies:
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. Run the development server:
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
 
-## Deploy on Vercel
+3. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### With Docker
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+docker build -t zipway-frontend .
+docker run -p 3000:3000 --env-file .env zipway-frontend
+```
+
+## 🔍 Component Overview
+
+### Main Components
+
+- **ShortenUrlForm**: Handles URL input, submission, and displays the shortened URL
+- **UI Components**: Reusable components like Button, Input, Card, etc.
+
+
+## 🎨 UI Customization
+
+The project uses Tailwind CSS with custom theme variables. To modify the theme:
+
+1. Adjust color variables in `src/app/globals.css`
+2. Use Tailwind utility classes for component styling
+3. Modify shadcn/ui components in the `src/components/ui` directory
+
+## 📱 Responsive Design
+
+The UI is responsive by default, using Tailwind's responsive utility classes:
+
+- Mobile-first approach
+- Breakpoints for different screen sizes
+- Flexible layouts with proper spacing
+
+## 🧪 Testing
+
+Currently, there are no automated tests. This is an area for improvement.
+
+Suggested test tools:
+- [Jest](https://jestjs.io/) for unit testing
+- [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) for component testing
+- [Cypress](https://www.cypress.io/) for end-to-end testing
+
+## 🚧 Future Improvements
+
+-  Add state management (Context API or Redux) for more complex state
+- Implement user authentication for personalized shortened URLs
+- Add analytics dashboard for registered users
+- Implement dark mode toggle
+- Add internationalization (i18n) support
