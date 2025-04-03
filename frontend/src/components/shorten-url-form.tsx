@@ -110,6 +110,7 @@ export function ShortenUrlForm() {
               variant="outline"
               onClick={() => {
                 navigator.clipboard.writeText(shortenedUrl);
+                toast.success("Copied to clipboard")
               }}
             >
               Copy
