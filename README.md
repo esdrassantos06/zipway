@@ -9,21 +9,25 @@ Zipway is a modern, efficient URL shortening service that allows users to create
 - Click tracking and analytics
 - Rate limiting to prevent abuse
 - Responsive, modern UI
+- Single domain experience with middleware redirection
 
 ## 🏗️ Architecture
 
 The application is split into two main components:
 
-- **Backend**: FastAPI-based REST API with SQLite database
-- **Frontend**: Next.js application with React and Tailwind CSS
+- **Backend**: FastAPI-based REST API with SQLite database (deployed on Render)
+- **Frontend**: Next.js application with React and Tailwind CSS (deployed on Vercel)
 
-Both components are containerized using Docker for easy deployment.
+The Next.js middleware enables all shortened URLs to be accessed directly from the main domain.
 
 ## 🔧 Prerequisites
 
-- [Docker](https://www.docker.com/get-started) and Docker Compose
+- [Docker](https://www.docker.com/get-started) and Docker Compose (for local development)
 - [Node.js](https://nodejs.org/) (v18+) for frontend development
 - [Python](https://www.python.org/) (v3.9+) for backend development
+- [Vercel](https://vercel.com/) account for frontend deployment
+- [Render](https://render.com/) account for backend deployment
+- [UptimeRobot](https://uptimerobot.com/) for keeping the backend alive
 
 ## 🛠️ Getting Started
 
@@ -39,18 +43,18 @@ Both components are containerized using Docker for easy deployment.
 
    For backend (create `backend/.env`):
    ```
-   ALLOWED_ORIGINS=http://localhost:3000
    ADMIN_API_TOKEN=your_secure_admin_token
    HOST=0.0.0.0
    PORT=8000
+   BASE_URL=https://www.zipway-shortener.me
    ```
 
    For frontend (create `frontend/.env`):
    ```
-   NEXT_PUBLIC_API_URL=http://localhost:8000
+   NEXT_PUBLIC_API_URL=/api
    ```
 
-### Running with Docker Compose
+### Running with Docker Compose (Development)
 
 ```bash
 docker-compose up
@@ -59,6 +63,29 @@ docker-compose up
 This will start both the backend and frontend services. The application will be available at:
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8000
+
+### Deployment Setup
+
+#### Backend (Render)
+1. Push your code to a Git repository
+2. Create a new Web Service on Render connected to your repository
+3. Set the build command to `pip install -r requirements.txt`
+4. Set the start command to `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+5. Add the environment variables from the `.env` file
+6. Deploy the service
+
+#### Frontend (Vercel)
+1. Push your code to a Git repository
+2. Import the project into Vercel
+3. Set the environment variables
+4. Deploy the project
+5. Configure your custom domain (zipway-shortener.me)
+
+#### Keep Backend Alive
+1. Create an account on UptimeRobot
+2. Add a new HTTP(s) monitor
+3. Set the URL to your backend ping endpoint (https://your-backend.onrender.com/ping)
+4. Set the monitoring interval to 5 minutes
 
 ## 📁 Project Structure
 
@@ -70,6 +97,7 @@ zipway/
 │   └── requirements.txt    # Python dependencies
 ├── frontend/               # Next.js frontend
 │   ├── src/                # Source code
+│   │   ├── middleware.ts   # URL redirection logic
 │   ├── Dockerfile          # Frontend container definition
 │   └── package.json        # Node.js dependencies
 └── docker-compose.yml      # Service orchestration
@@ -77,7 +105,7 @@ zipway/
 
 ## 🔍 Documentation
 
-- Backend API documentation is available at http://localhost:8000/docs when the service is running
+- Backend API documentation is available at https://your-backend.onrender.com/docs when the service is running
 - More detailed documentation for each component is available in their respective directories
 
 ## 👥 Contributing

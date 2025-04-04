@@ -9,6 +9,7 @@ This is the backend service for the Zipway URL shortener application, built with
 - Track click statistics
 - Admin-only statistics endpoint with token authentication
 - Rate limiting to prevent abuse
+- Health check endpoint for uptime monitoring
 
 ## 🔧 Technology Stack
 
@@ -41,10 +42,10 @@ backend/
 Create a `.env` file in the backend directory with the following variables:
 
 ```
-ALLOWED_ORIGINS=http://localhost:3000
 ADMIN_API_TOKEN=your_secure_admin_token
 HOST=0.0.0.0
 PORT=8000
+BASE_URL=https://www.zipway-shortener.me
 ```
 
 ## 🚀 Running Locally
@@ -85,6 +86,7 @@ Once the server is running, access the API documentation at:
 | Endpoint             | Method | Description                                   | Rate Limit      |
 |----------------------|--------|-----------------------------------------------|-----------------|
 | `/`                  | GET    | API information                               | 100/minute      |
+| `/ping`              | GET    | Health check endpoint                         | (no limit)      |
 | `/shorten`           | POST   | Create a shortened URL                        | 20/minute       |
 | `/{short_id}`        | GET    | Redirect to the original URL                  | 200/minute      |
 | `/stats`             | GET    | Get usage statistics (admin only)             | 10/minute       |
@@ -101,6 +103,26 @@ CREATE TABLE urls (
     clicks INTEGER DEFAULT 0
 )
 ```
+
+## 🚀 Deployment
+
+### Deploying to Render
+
+1. Push your code to a Git repository
+2. Create a new Web Service on Render connected to your repository
+3. Set the build command to `pip install -r requirements.txt`
+4. Set the start command to `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+5. Add the environment variables from the `.env` file
+6. Deploy the service
+
+### Keeping the Service Active
+
+To prevent Render's free tier from putting your service to sleep:
+
+1. Create an account on UptimeRobot
+2. Add a new HTTP(s) monitor
+3. Set the URL to your backend ping endpoint (https://your-backend.onrender.com/ping)
+4. Set the monitoring interval to 5 minutes
 
 ## 🚧 Development
 

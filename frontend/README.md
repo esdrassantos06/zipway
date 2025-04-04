@@ -9,6 +9,7 @@ This is the frontend application for the Zipway URL shortener, built with Next.j
 - Error handling and user feedback
 - Tabs for URL shortening and information
 - Modern design using Tailwind CSS and shadcn/ui components
+- Middleware for handling short URL redirects through the same domain
 
 ## 🔧 Technology Stack
 
@@ -33,14 +34,14 @@ frontend/
 │   │   ├── ui/               # UI components
 │   │   └── shorten-url-form.tsx # Form component
 │   ├── lib/                  # Utility functions
-│   └── services/             # API services (add this directory)
+│   ├── utils/                # Utilities like API client
+│   └── middleware.ts         # URL redirection logic
 ├── .env                      # Environment variables (create this)
 ├── .gitignore                # Git ignore file
 ├── Dockerfile                # Docker container definition
 ├── next.config.ts            # Next.js configuration
 ├── package.json              # Node.js dependencies
 ├── postcss.config.mjs        # PostCSS configuration
-├── tailwind.config.js        # Tailwind configuration (add this file)
 └── tsconfig.json             # TypeScript configuration
 ```
 
@@ -49,7 +50,7 @@ frontend/
 Create a `.env` file in the frontend directory with the following variables:
 
 ```
-NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_URL=/api
 ```
 
 ## 🚀 Running Locally
@@ -79,13 +80,34 @@ docker build -t zipway-frontend .
 docker run -p 3000:3000 --env-file .env zipway-frontend
 ```
 
-## 🔍 Component Overview
+## 🔍 Key Components
+
+### URL Shortening
+
+The application uses a combination of Next.js rewrites and middleware to provide a seamless experience:
+
+- API requests are forwarded to the backend using rewrites in `next.config.ts`
+- Short URL redirects are handled by the middleware in `middleware.ts`
 
 ### Main Components
 
 - **ShortenUrlForm**: Handles URL input, submission, and displays the shortened URL
 - **UI Components**: Reusable components like Button, Input, Card, etc.
 
+## 🚀 Deployment
+
+### Deploying to Vercel
+
+1. Push your code to a Git repository
+2. Import the project into Vercel
+3. Set the environment variables:
+   - `NEXT_PUBLIC_API_URL=/api`
+4. Deploy the project
+5. Configure your custom domain (zipway-shortener.me)
+
+### Configuring Middleware
+
+The middleware in `src/middleware.ts` is automatically detected and used by Vercel. It intercepts requests to your domain and redirects short URL requests to your backend API.
 
 ## 🎨 UI Customization
 
@@ -114,7 +136,7 @@ Suggested test tools:
 
 ## 🚧 Future Improvements
 
--  Add state management (Context API or Redux) for more complex state
+- Add state management (Context API or Redux) for more complex state
 - Implement user authentication for personalized shortened URLs
 - Add analytics dashboard for registered users
 - Implement dark mode toggle
