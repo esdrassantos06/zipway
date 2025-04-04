@@ -54,6 +54,10 @@ async def root():
         }
     }
     
+@app.get("/ping", tags=["Health"])
+async def ping():
+    return {"status": "ok"}
+    
 @app.post("/shorten", response_model=URLInfo, tags=["URLs"])
 @limiter.limit(DEFAULT_LIMITS["shorten"])
 async def create_short_url(url: URLBase, request: Request):
