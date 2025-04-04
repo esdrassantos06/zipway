@@ -87,7 +87,7 @@ async def create_short_url(url: URLBase, request: Request):
     if not success:
         raise HTTPException(status_code=500, detail="Error saving URL")
     
-    base_url = str(request.base_url).rstrip("/")
+    base_url = os.getenv("BASE_URL")
     short_url = f"{base_url}/{short_id}"
     
     return URLInfo(id=short_id, target_url=url.target_url, short_url=short_url)
