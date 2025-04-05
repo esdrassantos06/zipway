@@ -9,11 +9,24 @@ import { Label } from "@/components/ui/label";
 import toast, { Toaster } from "react-hot-toast";
 import { shortenUrl } from "@/utils/axios";
 
+let globalUrl = "";
+let globalShortenedUrl: string | (() => string | null) | null = null;
+
 export function ShortenUrlForm() {
-  const [url, setUrl] = useState("");
-  const [shortenedUrl, setShortenedUrl] = useState<string | null>(null);
+  const [url, setUrl] = useState(globalUrl);
+  const [shortenedUrl, setShortenedUrl] = useState<string | null>(globalShortenedUrl);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const updateUrl = (newUrl: string) => {
+    setUrl(newUrl);
+    globalUrl = newUrl;
+  };
+
+  const updateShortenedUrl = (newShortenedUrl: string | null) => {
+    setShortenedUrl(newShortenedUrl);
+    globalShortenedUrl = newShortenedUrl;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +57,7 @@ export function ShortenUrlForm() {
       toast.success("URL Shortened Sucessfully.");
 
       if (response.data?.short_url) {
-        setShortenedUrl(response.data.short_url);
+        updateShortenedUrl(response.data.short_url);
       } else {
         throw new Error("Invalid response from server");
       }
@@ -67,7 +80,7 @@ export function ShortenUrlForm() {
             id="url"
             type="text"
             value={url}
-            onChange={(e) => setUrl(e.target.value)}
+            onChange={(e) => updateUrl(e.target.value)}
             placeholder="https://example.com/very/long/url"
             disabled={isLoading}
             required
