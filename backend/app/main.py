@@ -55,6 +55,7 @@ async def root():
     }
     
 @app.get("/ping", tags=["Health"])
+@app.head("/ping", tags=["Health"])
 async def ping():
     return {"status": "ok"}
     
