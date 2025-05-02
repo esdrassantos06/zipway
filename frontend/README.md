@@ -19,6 +19,8 @@ This is the frontend application for the Zipway URL shortener, built with Next.j
 - [shadcn/ui](https://ui.shadcn.com/) - Reusable UI components
 - [Axios](https://axios-http.com/) - HTTP client
 - [React Hot Toast](https://react-hot-toast.com/) - Toast notifications
+- [Jest](https://jestjs.io/) - Testing Framework
+- [React Testing Library](https://testing-library.com/) - Testing Library
 
 ## 📁 Project Structure
 
@@ -35,7 +37,8 @@ frontend/
 │   │   └── shorten-url-form.tsx # Form component
 │   ├── lib/                  # Utility functions
 │   ├── utils/                # Utilities like API client
-│   └── middleware.ts         # URL redirection logic
+│   ├──  middleware.ts        # URL redirection logic
+│   └── tests/                # Jest Tests
 ├── .env                      # Environment variables (create this)
 ├── .gitignore                # Git ignore file
 ├── Dockerfile                # Docker container definition
@@ -58,6 +61,7 @@ NEXT_PUBLIC_API_URL=/api
 ### With Node.js
 
 1. Install dependencies:
+
    ```bash
    npm install
    # or
@@ -65,6 +69,7 @@ NEXT_PUBLIC_API_URL=/api
    ```
 
 2. Run the development server:
+
    ```bash
    npm run dev
    # or
@@ -127,12 +132,22 @@ The UI is responsive by default, using Tailwind's responsive utility classes:
 
 ## 🧪 Testing
 
-Currently, there are no automated tests. This is an area for improvement.
+The project includes automated tests with:
 
-Suggested test tools:
-- [Jest](https://jestjs.io/) for unit testing
-- [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) for component testing
-- [Cypress](https://www.cypress.io/) for end-to-end testing
+- **Jest** for unit testing
+- **React Testing Library** for component testing
+
+Run tests with:
+
+```bash
+npm test
+# or
+npm run test:watch
+```
+
+Planned testing improvements:
+
+- Implement **Cypress** for end-to-end testing
 
 ## 🚧 Future Improvements
 
