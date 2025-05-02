@@ -1,4 +1,4 @@
-import { ShortenUrlForm } from "@/components/shorten-url-form"
+import { ShortenUrlForm } from "@/components/ShortenUrlForm"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 

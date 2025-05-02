@@ -31,7 +31,7 @@ export function ShortenUrlForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w.-]*)*\/?$/;
+    const urlRegex = /^https?:\/\/(?:localhost(?::\d+)?|[a-zA-Z0-9][\w\.-]*\.[a-zA-Z]{2,}(?::\d+)?)(?:\/[\w\.\-\/]*)*(?:\?[\w\.\-\=\&\%\+\~\:]*)?(?:\#[\w\-]*)?$/; 
     if (!urlRegex.test(url.trim())) {
       setError("Please enter a valid URL");
       toast.error("Please enter a valid URL");
@@ -73,7 +73,7 @@ export function ShortenUrlForm() {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" data-testid="shorten-url-form">
         <div className="space-y-2">
           <Label htmlFor="url">Enter your URL</Label>
           <Input
@@ -100,7 +100,7 @@ export function ShortenUrlForm() {
           />
         </div>
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
+        <Button type="submit" className="w-full" disabled={isLoading} data-testid="shorten-url-button">
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
