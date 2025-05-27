@@ -41,11 +41,12 @@ backend/
 
 Create a `.env` file in the backend directory with the following variables:
 
-```
+```bash
 ADMIN_API_TOKEN=your_secure_admin_token
 HOST=0.0.0.0
 PORT=8000
-BASE_URL=https://www.zipway-shortener.me
+BASE_URL=https://yourlink.com
+ALLOWED_ORIGINS=link1.com,link2.com
 ```
 
 ## 🚀 Running Locally

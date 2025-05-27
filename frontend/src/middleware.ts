@@ -16,7 +16,7 @@ export function middleware(request: NextRequest) {
 
   if (segments.length === 1 && !PROTECTED_ROUTES.includes(segments[0])) {
     return NextResponse.rewrite(
-      new URL(`https://zipway-backend.onrender.com${pathname}`, request.url)
+      new URL(`${process.env.API_BASE_URL}${pathname}`, request.url)
     );
   }
 

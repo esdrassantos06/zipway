@@ -54,6 +54,7 @@ Create a `.env` file in the frontend directory with the following variables:
 
 ```
 NEXT_PUBLIC_API_URL=/api
+API_BASE_URL=https://your-backendlink.com
 ```
 
 ## 🚀 Running Locally
@@ -99,16 +100,6 @@ The application uses a combination of Next.js rewrites and middleware to provide
 - **ShortenUrlForm**: Handles URL input, submission, and displays the shortened URL
 - **UI Components**: Reusable components like Button, Input, Card, etc.
 
-## 🚀 Deployment
-
-### Deploying to Vercel
-
-1. Push your code to a Git repository
-2. Import the project into Vercel
-3. Set the environment variables:
-   - `NEXT_PUBLIC_API_URL=/api`
-4. Deploy the project
-5. Configure your custom domain (zipway-shortener.me)
 
 ### Configuring Middleware
 

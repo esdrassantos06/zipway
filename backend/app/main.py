@@ -34,9 +34,11 @@ app = FastAPI(title="Zipway - Url Shortener", description="A simple and efficien
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+allow_origins = os.getenv("ALLOWED_ORIGINS", "").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://zipway-shortener.me", "https://www.zipway-shortener.me"],
+    allow_origins= allow_origins,
     allow_methods=["GET", "POST", "PUT", "DELETE"], 
     allow_headers=["*"],
     allow_credentials=True
