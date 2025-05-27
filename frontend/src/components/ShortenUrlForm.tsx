@@ -8,13 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import toast, { Toaster } from "react-hot-toast";
 import { shortenUrl } from "@/utils/axios";
+import validator from "validator";
 
 let globalUrl = "";
 let globalShortenedUrl: string | (() => string | null) | null = null;
 
 export function ShortenUrlForm() {
   const [url, setUrl] = useState(globalUrl);
-  const [shortenedUrl, setShortenedUrl] = useState<string | null>(globalShortenedUrl);
+  const [shortenedUrl, setShortenedUrl] = useState<string | null>(
+    globalShortenedUrl
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,16 +34,17 @@ export function ShortenUrlForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const urlRegex = /^https?:\/\/(?:localhost(?::\d+)?|[a-zA-Z0-9][\w\.-]*\.[a-zA-Z]{2,}(?::\d+)?)(?:\/[\w\.\-\/]*)*(?:\?[\w\.\-\=\&\%\+\~\:]*)?(?:\#[\w\-]*)?$/; 
-    if (!urlRegex.test(url.trim())) {
-      setError("Please enter a valid URL");
-      toast.error("Please enter a valid URL");
+    const trimmedURL = url.trim();
+
+    if (!url || !trimmedURL) {
+      setError("Please enter a URL");
+      toast.error("Please, enter a URL.");
       return;
     }
 
-    if (!url || !url.trim()) {
-      setError("Please enter a URL");
-      toast.error("Please, enter a URL.");
+    if (!validator.isURL(trimmedURL)) {
+      setError("Please enter a valid URL");
+      toast.error("Please enter a valid URL");
       return;
     }
 
@@ -53,7 +57,7 @@ export function ShortenUrlForm() {
         throw new Error("API URL not configured");
       }
 
-      const response = await shortenUrl(url);
+      const response = await shortenUrl(trimmedURL);
       toast.success("URL Shortened Sucessfully.");
 
       if (response.data?.short_url) {
@@ -73,7 +77,11 @@ export function ShortenUrlForm() {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={handleSubmit} className="space-y-4" data-testid="shorten-url-form">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4"
+        data-testid="shorten-url-form"
+      >
         <div className="space-y-2">
           <Label htmlFor="url">Enter your URL</Label>
           <Input
@@ -83,7 +91,6 @@ export function ShortenUrlForm() {
             onChange={(e) => updateUrl(e.target.value)}
             placeholder="https://example.com/very/long/url"
             disabled={isLoading}
-            required
           />
           <Toaster
             position="top-center"
@@ -100,7 +107,12 @@ export function ShortenUrlForm() {
           />
         </div>
 
-        <Button type="submit" className="w-full" disabled={isLoading} data-testid="shorten-url-button">
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isLoading}
+          data-testid="shorten-url-button"
+        >
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -130,7 +142,7 @@ export function ShortenUrlForm() {
               variant="outline"
               onClick={() => {
                 navigator.clipboard.writeText(shortenedUrl);
-                toast.success("Copied to clipboard")
+                toast.success("Copied to clipboard");
               }}
             >
               Copy
