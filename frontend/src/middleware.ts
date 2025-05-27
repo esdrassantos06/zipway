@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 
 const PROTECTED_ROUTES = [
   "api",
+  "backend",
   "_next",
   "favicon.ico",
   "robots.txt",

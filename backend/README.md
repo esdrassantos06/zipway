@@ -45,6 +45,7 @@ Create a `.env` file in the backend directory with the following variables:
 ADMIN_API_TOKEN=your_secure_admin_token
 HOST=0.0.0.0
 PORT=8000
+ENV=development # development, staging, production
 BASE_URL=https://yourlink.com
 ALLOWED_ORIGINS=link1.com,link2.com
 ```
@@ -73,7 +74,31 @@ ALLOWED_ORIGINS=link1.com,link2.com
 
 ```bash
 docker build -t zipway-backend .
-docker run -p 8000:8000 -v $(pwd)/shortener.db:/app/shortener.db --env-file .env zipway-backend
+docker run -d --name zipway-backend-container -p 8000:8000 -v $(pwd)/shortener.db:/app/shortener.db --env-file .env zipway-backend
+```
+When you use docker run, Docker always creates a new container from the specified image (in this case, zipway-backend). It does not reuse an existing container; instead, it instantiates a new container from that image.
+
+### Why?
+- The image is the blueprint, an immutable model.
+- The container is the running instance of that model.
+- Each docker run creates a new instance (container) from the image.
+
+If you want to use the same container repeatedly, you need to:
+
+- Create the container once with docker run (using a specific name).
+- Then start, stop, or restart that container using docker start and docker stop.
+
+#### Example of creating and naming the container:
+
+```bash
+docker run -d --name zipway-backend-container -p 8000:8000 -v $(pwd)/shortener.db:/app/shortener.db --env-file .env zipway-backend
+```
+
+#### Later, to stop and restart the same container:
+
+   ```bash
+   docker start zipway-backend-container
+   docker stop zipway-backend-container
 ```
 
 ## 📝 API Documentation
@@ -120,10 +145,11 @@ CREATE TABLE urls (
 
 To prevent Render's free tier from putting your service to sleep:
 
-1. Create an account on UptimeRobot
+1. Create an account on Uptime Better Stack
 2. Add a new HTTP(s) monitor
 3. Set the URL to your backend ping endpoint (https://your-backend.onrender.com/ping)
-4. Set the monitoring interval to 5 minutes
+4. Set the monitoring interval to 3 minutes
+5. Set your Bearer Token (Admin Token)
 
 ## 🚧 Development
 

@@ -27,7 +27,7 @@ The Next.js middleware enables all shortened URLs to be accessed directly from t
 - [Python](https://www.python.org/) (v3.9+) for backend development
 - [Vercel](https://vercel.com/) account for frontend deployment
 - [Render](https://render.com/) account for backend deployment
-- [UptimeRobot](https://uptimerobot.com/) for keeping the backend alive
+- [Uptime BetterStack](https://uptime.betterstack.com/) for keeping the backend alive
 
 ## 🛠️ Getting Started
 
@@ -46,12 +46,13 @@ The Next.js middleware enables all shortened URLs to be accessed directly from t
    ADMIN_API_TOKEN=your_secure_admin_token
    HOST=0.0.0.0
    PORT=8000
-   BASE_URL=https://www.zipway-shortener.me
+   BASE_URL=yoursiteurl.com
    ```
 
    For frontend (create `frontend/.env`):
    ```
-   NEXT_PUBLIC_API_URL=/api
+   NEXT_PUBLIC_API_URL=/backend
+   API_BASE_URL=http://localhost:8000 or your api Link
    ```
 
 ### Running with Docker Compose (Development)

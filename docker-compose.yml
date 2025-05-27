@@ -6,6 +6,7 @@ services:
     env_file:
       - ./backend/.env
     volumes:
+      - ./backend:/app
       - ./backend/shortener.db:/app/shortener.db
     restart: always
 
@@ -15,6 +16,9 @@ services:
       - "3000:3000"
     env_file:
       - ./frontend/.env
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     depends_on:
       - backend
     restart: always

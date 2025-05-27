@@ -53,8 +53,8 @@ frontend/
 Create a `.env` file in the frontend directory with the following variables:
 
 ```
-NEXT_PUBLIC_API_URL=/api
-API_BASE_URL=https://your-backendlink.com
+NEXT_PUBLIC_API_URL=/backend
+API_BASE_URL=https://your-backendlink.com or http://backend:8000 (Docker) or http://localhost:8000
 ```
 
 ## 🚀 Running Locally
@@ -83,8 +83,40 @@ API_BASE_URL=https://your-backendlink.com
 
 ```bash
 docker build -t zipway-frontend .
-docker run -p 3000:3000 --env-file .env zipway-frontend
+docker run -d --name zipway-frontend-container -p 3000:3000 --env-file .env zipway-frontend
 ```
+
+When you use docker run, Docker always creates a new container from the specified image (in this case, zipway-frontend). It does not reuse an existing container; instead, it creates a fresh instance of the image every time.
+
+### Why?
+
+- The image is a static blueprint.
+
+- The container is a running instance created from that image.
+
+- Running docker run multiple times will create multiple containers.
+
+To reuse the same container across runs, follow these steps:
+
+1. Create the container once and give it a name using --name.
+
+2. Use docker start and docker stop to manage that named container.
+
+Example of creating and naming the frontend container:
+
+```bash
+docker run -d --name zipway-frontend-container -p 3000:3000 --env-file .env zipway-frontend
+```
+
+Later, to stop and restart the same container:
+
+```bash
+docker stop zipway-frontend-container
+docker start zipway-frontend-container
+```
+
+
+
 
 ## 🔍 Key Components
 

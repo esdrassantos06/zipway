@@ -11,7 +11,7 @@ import { shortenUrl } from "@/utils/axios";
 import validator from "validator";
 
 let globalUrl = "";
-let globalShortenedUrl: string | (() => string | null) | null = null;
+let globalShortenedUrl: string | null = null;
 
 export function ShortenUrlForm() {
   const [url, setUrl] = useState(globalUrl);
@@ -23,7 +23,9 @@ export function ShortenUrlForm() {
 
   const updateUrl = (newUrl: string) => {
     setUrl(newUrl);
+    setShortenedUrl(null);
     globalUrl = newUrl;
+    globalShortenedUrl = null;
   };
 
   const updateShortenedUrl = (newShortenedUrl: string | null) => {
@@ -42,7 +44,7 @@ export function ShortenUrlForm() {
       return;
     }
 
-    if (!validator.isURL(trimmedURL)) {
+    if (!validator.isURL(trimmedURL, { require_protocol: true })) {
       setError("Please enter a valid URL");
       toast.error("Please enter a valid URL");
       return;
@@ -52,26 +54,40 @@ export function ShortenUrlForm() {
       setIsLoading(true);
       setError(null);
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      if (!apiUrl) {
-        throw new Error("API URL not configured");
-      }
-
       const response = await shortenUrl(trimmedURL);
-      toast.success("URL Shortened Sucessfully.");
 
       if (response.data?.short_url) {
         updateShortenedUrl(response.data.short_url);
+        toast.success("URL Shortened Sucessfully.");
       } else {
         throw new Error("Invalid response from server");
       }
     } catch (e) {
-      const error = e as Error;
-      setError(error.message || "An error occurred");
-      toast.error(error.message);
-      console.error("Error: ", error);
+      if (e instanceof Error) {
+        setError(e.message);
+        toast.error(e.message);
+      } else {
+        setError("An unknown error occurred");
+        toast.error("An unknown error occurred");
+      }
+      console.error("Error: ", e);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const copyClipboard = (url: string) => {
+    if (!navigator.clipboard) {
+      toast.error("Clipboard API is not supported in your browser");
+      return;
+    }
+
+    try {
+      navigator.clipboard.writeText(url);
+      toast.success("Copied to clipboard");
+    } catch (e) {
+      toast.error("Failed to copy to clipboard");
+      console.error("Failed to copy to clipboard", e);
     }
   };
 
@@ -123,7 +139,16 @@ export function ShortenUrlForm() {
           )}
         </Button>
 
-        {error && <div className="text-sm text-red-500 mt-2">{error}</div>}
+        {error && (
+          <div
+            id="url-error"
+            className="text-sm text-red-500 mt-2"
+            role="alert"
+            aria-live="assertive"
+          >
+            {error}
+          </div>
+        )}
       </form>
 
       {shortenedUrl && (
@@ -140,10 +165,7 @@ export function ShortenUrlForm() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => {
-                navigator.clipboard.writeText(shortenedUrl);
-                toast.success("Copied to clipboard");
-              }}
+              onClick={() => copyClipboard(shortenedUrl)}
             >
               Copy
             </Button>

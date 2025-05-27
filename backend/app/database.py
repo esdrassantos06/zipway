@@ -162,3 +162,26 @@ def get_url_stats(limit=10):
     except Error as e:
         print(f"Error trying to search statistics")
         return []
+
+def delete_url(short_id: str) -> bool:
+    """
+    Delete a URL by its short_id
+
+    Args:
+        short_id (str): The short ID of the URL to delete
+
+    Returns:
+        bool: True if deletion was successful, False otherwise
+    """
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "DELETE FROM urls WHERE id = ?",
+                (short_id,)
+            )
+            conn.commit()
+            return cursor.rowcount > 0
+    except Error as e:
+        print(f"Error deleting URL: {e}")
+        return False
