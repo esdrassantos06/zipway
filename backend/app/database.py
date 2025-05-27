@@ -2,7 +2,10 @@ import sqlite3
 from sqlite3 import Error
 import os
 from contextlib import contextmanager
+import logging
 
+logger = logging.getLogger(__name__
+                           )
 DATABASE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'shortener.db')
 
 def createTable():
@@ -21,9 +24,9 @@ def createTable():
         ''')
         
         conn.commit()
-        print("Tables Created Successfully!")
+        logger.info("Tables Created Successfully!")
     except Error as e: 
-        print("Error trying to create tables: {e}")
+        logger.error("Error trying to create tables: {e}")
     finally: 
         if conn:
             conn.close()
@@ -39,7 +42,7 @@ def get_db_connection():
         conn.row_factory = sqlite3.Row
         yield conn
     except Error as e: 
-        print("Error on connection to database: {e}")
+        logger.error("Error on connection to database: {e}")
         raise
     finally:
         if conn:
@@ -66,7 +69,7 @@ def insert_url(short_id, target_url):
             conn.commit()
             return True
     except Error as e:
-        print(f"Error inserting URL: {e}")
+        logger.error(f"Error inserting URL: {e}")
         return False
 
 
@@ -92,7 +95,7 @@ def get_url_by_id(short_id):
             return dict(result) if result else None
         
     except Error as e:
-        print(f"Error searching url: {e}")
+        logger.error(f"Error searching url: {e}")
         return None
     
 def increment_clicks(short_id):
@@ -111,7 +114,7 @@ def increment_clicks(short_id):
             )
             conn.commit()
     except Error as e:
-        print("Error updating click counter")
+        logger.error("Error updating click counter")
         
 def check_id_exists(short_id):
     """
@@ -132,7 +135,7 @@ def check_id_exists(short_id):
             )
             return cursor.fetchone() is not None
     except Error as e:
-        print(f"Error trying to check ID: {e}")
+        logger.error(f"Error trying to check ID: {e}")
         return False
     
 def get_url_stats(limit=10):
@@ -160,7 +163,7 @@ def get_url_stats(limit=10):
             results = cursor.fetchall()
             return [dict(row) for row in results]
     except Error as e:
-        print(f"Error trying to search statistics")
+        logger.error(f"Error trying to search statistics")
         return []
 
 def delete_url(short_id: str) -> bool:
@@ -183,5 +186,5 @@ def delete_url(short_id: str) -> bool:
             conn.commit()
             return cursor.rowcount > 0
     except Error as e:
-        print(f"Error deleting URL: {e}")
+        logger.error(f"Error deleting URL: {e}")
         return False
