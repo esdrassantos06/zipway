@@ -20,18 +20,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="overflow-hidden">
-      <head>
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4813194510722281"
-          crossOrigin="anonymous"
-        />
-      </head>
-
       <body
         className={`${inter.className} antialiased`}
         suppressHydrationWarning
       >
+        <Script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
+          crossOrigin="anonymous"
+        />
         {children}
       </body>
     </html>
