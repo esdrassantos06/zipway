@@ -3,12 +3,11 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { ShortenUrlForm } from "@/components/ShortenUrlForm";
 
 jest.mock("@/utils/axios.ts", () => ({
-    __esModule: true,
-    shortenUrl: jest.fn(),
-  }));
+  __esModule: true,
+  shortenUrl: jest.fn(),
+}));
 
 import { shortenUrl } from "@/utils/axios";
-
 
 jest.mock("react-hot-toast", () => ({
   __esModule: true,
@@ -32,12 +31,12 @@ describe("ShortenUrlForm", () => {
   });
 
   it("should render the ShortenUrlForm component", () => {
-    expect(screen.getByText("Enter your URL")).toBeInTheDocument();
+    expect(screen.getByText("Shorten")).toBeInTheDocument();
   });
 
   it("should click and type in the input", () => {
     const input = screen.getByPlaceholderText(
-      "https://example.com/very/long/url"
+      "https://example.com/very/long/url",
     );
     fireEvent.change(input, { target: { value: "https://www.google.com" } });
     expect(input).toHaveValue("https://www.google.com");
@@ -46,7 +45,9 @@ describe("ShortenUrlForm", () => {
   it("should show an error message if the URL is invalid", async () => {
     (shortenUrl as jest.Mock).mockRejectedValue(new Error("Network Error"));
 
-    const input = screen.getByPlaceholderText("https://example.com/very/long/url");
+    const input = screen.getByPlaceholderText(
+      "https://example.com/very/long/url",
+    );
     fireEvent.change(input, { target: { value: "invalid-url" } });
 
     const button = screen.getByTestId("shorten-url-button");
@@ -65,7 +66,9 @@ describe("ShortenUrlForm", () => {
       data: { short_url: fakeShortUrl },
     });
 
-    const input = screen.getByPlaceholderText("https://example.com/very/long/url");
+    const input = screen.getByPlaceholderText(
+      "https://example.com/very/long/url",
+    );
     fireEvent.change(input, { target: { value: "https://valid-url.com" } });
 
     const button = screen.getByTestId("shorten-url-button");
@@ -74,7 +77,6 @@ describe("ShortenUrlForm", () => {
     await waitFor(() => {
       expect(screen.getByDisplayValue(fakeShortUrl)).toBeInTheDocument();
       expect(toast.success).toHaveBeenCalledWith("URL Shortened Sucessfully.");
-
     });
   });
 });

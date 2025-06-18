@@ -12,12 +12,11 @@ api.interceptors.response.use(
       toast.error("Rate limit exceeded. Please try again later.");
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export const shortenUrl = async (url: string) => {
   return await api.post("/shorten", { target_url: url });
 };
-
 
 export default api;

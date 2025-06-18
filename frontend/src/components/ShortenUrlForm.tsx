@@ -5,8 +5,7 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { shortenUrl } from "@/utils/axios";
 import validator from "validator";
 
@@ -16,7 +15,7 @@ let globalShortenedUrl: string | null = null;
 export function ShortenUrlForm() {
   const [url, setUrl] = useState(globalUrl);
   const [shortenedUrl, setShortenedUrl] = useState<string | null>(
-    globalShortenedUrl
+    globalShortenedUrl,
   );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -92,57 +91,48 @@ export function ShortenUrlForm() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex w-full flex-col items-center space-y-6">
       <form
         onSubmit={handleSubmit}
-        className="space-y-4"
+        className="flex w-full flex-col items-center justify-center space-y-4"
         data-testid="shorten-url-form"
       >
-        <div className="space-y-2">
-          <Label htmlFor="url">Enter your URL</Label>
-          <Input
-            id="url"
-            type="text"
-            value={url}
-            onChange={(e) => updateUrl(e.target.value)}
-            placeholder="https://example.com/very/long/url"
-            disabled={isLoading}
-          />
-          <Toaster
-            position="top-center"
-            reverseOrder={false}
-            gutter={8}
-            toastOptions={{
-              duration: 5000,
-              removeDelay: 1000,
-
-              success: {
-                duration: 3000,
-              },
-            }}
-          />
+        <div className="w-full max-w-md space-y-2">
+          <div className="flex gap-2">
+            <Input
+              value={url}
+              type="text"
+              name="url"
+              className="w-full flex-1"
+              onChange={(e) => updateUrl(e.target.value)}
+              placeholder="https://example.com/very/long/url"
+              disabled={isLoading}
+            />
+            <Button
+              type="submit"
+              className=""
+              disabled={isLoading}
+              data-testid="shorten-url-button"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  Shortening...
+                </>
+              ) : (
+                "Shorten"
+              )}
+            </Button>
+          </div>
+          <p className="text-xs text-gray-500">
+            Free forever • No sign-up required
+          </p>
         </div>
-
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={isLoading}
-          data-testid="shorten-url-button"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Shortening...
-            </>
-          ) : (
-            "Shorten URL"
-          )}
-        </Button>
 
         {error && (
           <div
             id="url-error"
-            className="text-sm text-red-500 mt-2"
+            className="mt-2 text-sm text-red-500"
             role="alert"
             aria-live="assertive"
           >
@@ -152,23 +142,25 @@ export function ShortenUrlForm() {
       </form>
 
       {shortenedUrl && (
-        <div className="p-4 bg-gray-50 rounded-md">
-          <p className="text-sm font-medium text-gray-700 mb-2">
-            Your shortened URL:
-          </p>
-          <div className="flex items-center gap-2">
-            <Input
-              value={shortenedUrl}
-              readOnly
-              onClick={(e) => (e.target as HTMLInputElement).select()}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => copyClipboard(shortenedUrl)}
-            >
-              Copy
-            </Button>
+        <div className="w-full max-w-md">
+          <div className="flex flex-col items-center justify-center rounded-md p-4">
+            <p className="mb-2 text-sm font-medium text-gray-700">
+              Your shortened URL:
+            </p>
+            <div className="flex w-full items-center gap-2">
+              <Input
+                value={shortenedUrl}
+                readOnly
+                onClick={(e) => (e.target as HTMLInputElement).select()}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => copyClipboard(shortenedUrl)}
+              >
+                Copy
+              </Button>
+            </div>
           </div>
         </div>
       )}

@@ -4,12 +4,12 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white px-4 text-center">
-      <h1 className="text-6xl font-bold text-gray-900 mb-4">404</h1>
-      <p className="text-xl text-gray-600 mb-6">Ops! Page not found.</p>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4 text-center">
+      <h1 className="mb-4 text-6xl font-bold text-gray-900">404</h1>
+      <p className="mb-6 text-xl text-gray-600">Ops! Page not found.</p>
       <Link href="/">
         <Button variant="outline" className="flex items-center gap-2">
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="h-4 w-4" />
           Go back to home page.
         </Button>
       </Link>

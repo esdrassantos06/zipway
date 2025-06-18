@@ -7,7 +7,9 @@ describe("UrlShortener", () => {
   });
 
   it("should render the Page component", () => {
-    expect(screen.getByText("Zipway - URL Shortener")).toBeInTheDocument();
+    expect(
+      screen.getByText("Free forever • No sign-up required"),
+    ).toBeInTheDocument();
   });
 
   it("should render the ShortenUrlForm component", () => {

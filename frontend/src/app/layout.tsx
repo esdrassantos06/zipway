@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
 import Head from "next/head";
+import { Toaster } from "react-hot-toast";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -20,9 +21,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="overflow-hidden">
+    <html lang="en">
       <Head>
-      <meta name="google-adsense-account" content={process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID} />
+        <meta
+          name="google-adsense-account"
+          content={process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}
+        />
       </Head>
       <body
         className={`${inter.className} antialiased`}
@@ -34,6 +38,19 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         {children}
+        <Toaster
+          position="top-center"
+          reverseOrder={false}
+          gutter={8}
+          toastOptions={{
+            duration: 5000,
+            removeDelay: 1000,
+
+            success: {
+              duration: 3000,
+            },
+          }}
+        />
       </body>
     </html>
   );

@@ -115,9 +115,6 @@ docker stop zipway-frontend-container
 docker start zipway-frontend-container
 ```
 
-
-
-
 ## 🔍 Key Components
 
 ### URL Shortening
@@ -131,7 +128,6 @@ The application uses a combination of Next.js rewrites and middleware to provide
 
 - **ShortenUrlForm**: Handles URL input, submission, and displays the shortened URL
 - **UI Components**: Reusable components like Button, Input, Card, etc.
-
 
 ### Configuring Middleware
 
