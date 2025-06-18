@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
+import Head from "next/head";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -20,6 +21,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="overflow-hidden">
+      <Head>
+      <meta name="google-adsense-account" content={process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID} />
+      </Head>
       <body
         className={`${inter.className} antialiased`}
         suppressHydrationWarning
