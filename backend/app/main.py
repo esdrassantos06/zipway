@@ -125,7 +125,8 @@ async def redirect_to_target(short_id: str, request: Request):
     url_data = get_url_by_id(short_id)
     
     if not url_data:
-        raise HTTPException(status_code=404, detail="URL not found")
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+        return RedirectResponse(url=f"{frontend_url}/404", status_code=307)
     
     increment_clicks(short_id)
     

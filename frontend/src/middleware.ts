@@ -8,6 +8,8 @@ const PROTECTED_ROUTES = [
   "favicon.ico",
   "robots.txt",
   "sitemap.xml",
+  "404",
+  "ads.txt"
 ];
 
 export function middleware(request: NextRequest) {
@@ -16,9 +18,7 @@ export function middleware(request: NextRequest) {
   const segments = pathname.split("/").filter(Boolean);
 
   if (segments.length === 1 && !PROTECTED_ROUTES.includes(segments[0])) {
-    return NextResponse.rewrite(
-      new URL(`${process.env.API_BASE_URL}${pathname}`, request.url)
-    );
+    return NextResponse.rewrite(new URL(`${process.env.NEXT_PUBLIC_API_URL}${pathname}`, request.url));
   }
 
   return NextResponse.next();
