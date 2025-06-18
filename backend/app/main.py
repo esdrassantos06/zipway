@@ -7,6 +7,9 @@ import os
 from dotenv import load_dotenv
 import validators
 import logging
+import re
+import unicodedata
+from typing import Optional
 
 logging.basicConfig(
     level=logging.INFO,
@@ -73,17 +76,110 @@ async def root():
 async def ping():
     return {"status": "ok"}
     
+def sanitize_alias(alias: str) -> str:
+    """
+    Sanitiza o alias removendo caracteres especiais e aplicando regras de segurança
+    """
+    if not alias:
+        return ""
+    
+    # Remove espaços no início e fim
+    alias = alias.strip()
+    
+    # Converte para minúsculas
+    alias = alias.lower()
+    
+    # Remove acentos e normaliza caracteres unicode
+    alias = unicodedata.normalize('NFD', alias)
+    alias = ''.join(char for char in alias if unicodedata.category(char) != 'Mn')
+    
+    # Remove caracteres não permitidos (mantém apenas letras, números, hífens e underscores)
+    alias = re.sub(r'[^a-zA-Z0-9\-_]', '', alias)
+    
+    # Remove múltiplos hífens/underscores consecutivos
+    alias = re.sub(r'[-_]{2,}', '-', alias)
+    
+    # Remove hífens/underscores no início e fim
+    alias = re.sub(r'^[-_]+|[-_]+$', '', alias)
+    
+    # Limita o tamanho (máximo 50 caracteres)
+    alias = alias[:50]
+    
+    return alias
+
+def validate_alias(alias: str) -> tuple[bool, Optional[str]]:
+    """
+    Valida o alias sanitizado
+    Returns: (is_valid, error_message)
+    """
+    sanitized = sanitize_alias(alias)
+    
+    if not sanitized:
+        return False, "Alias cannot be empty after sanitization"
+    
+    if len(sanitized) < 2:
+        return False, "Alias must have at least 2 characters"
+    
+    # Verifica se não é apenas números
+    if re.match(r'^\d+$', sanitized):
+        return False, "Alias cannot be only numbers"
+    
+    # Verifica padrões suspeitos
+    suspicious_patterns = [
+        r'^(admin|root|api|www|mail)$',  # Nomes de sistema
+        r'^\d+$',  # Apenas números
+        r'^[_-]+$',  # Apenas símbolos
+    ]
+    
+    for pattern in suspicious_patterns:
+        if re.match(pattern, sanitized):
+            return False, "This alias pattern is not allowed"
+    
+    return True, None
+
+# Versão atualizada da rota /shorten
 @app.post("/shorten", response_model=URLInfo, tags=["URLs"])
 @limiter.limit(DEFAULT_LIMITS["shorten"])
 async def create_short_url(url: URLBase, request: Request):
     if not validators.url(url.target_url):
         raise HTTPException(status_code=400, detail="Invalid URL format. Please provide a valid URL.")
         
-    reserved_paths= ["", "shorten", "stats", "docs", "ping"]
-    
+    reserved_paths = [
+        "", "shorten", "stats", "docs", "ping",
+        # Autenticação
+        "login", "register", "auth", "signin", "signup", "logout",
+        # API e Next.js
+        "api", "_next", "_vercel", "vercel",
+        # Recursos estáticos
+        "favicon", "favicon.ico", "robots", "robots.txt", "sitemap", "sitemap.xml",
+        # Páginas principais do usuário
+        "home", "dashboard", "profile", "settings", "admin", "user", "account",
+        # Páginas institucionais
+        "about", "contact", "help", "support", "terms", "privacy", "policy",
+        # Recursos do sistema
+        "public", "static", "assets", "images", "img", "css", "js", "fonts",
+        # Páginas de erro
+        "404", "500", "error", "not-found",
+        # Webhooks e integrações
+        "webhook", "webhooks", "callback", "oauth",
+        # Monitoramento e sistema
+        "health", "status", "metrics", "monitoring", "ping",
+        # Outros caminhos comuns
+        "www", "mail", "email", "ftp", "blog", "news", "shop", "store",
+        # Área administrativa
+        "administrator", "manage", "management", "console",
+        # Recursos adicionais
+        "download", "upload", "file", "files", "media"
+    ]    
     
     if url.custom_id:
-        short_id = url.custom_id
+        sanitized_alias = sanitize_alias(url.custom_id)
+        
+        is_valid, error_message = validate_alias(sanitized_alias)
+        if not is_valid:
+            raise HTTPException(status_code=400, detail=error_message)
+        
+        short_id = sanitized_alias
         
         if short_id in reserved_paths:
             raise HTTPException(status_code=400, detail="This custom ID is reserved for system use. Please choose another one.")
