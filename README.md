@@ -83,10 +83,10 @@ This will start both the backend and frontend services. The application will be 
 5. Configure your custom domain (zipway-shortener.me)
 
 #### Keep Backend Alive
-1. Create an account on UptimeRobot
+1. Create an account on BetterStack
 2. Add a new HTTP(s) monitor
 3. Set the URL to your backend ping endpoint (https://your-backend.onrender.com/ping)
-4. Set the monitoring interval to 5 minutes
+4. Set the monitoring interval to 3 minutes
 
 ## 📁 Project Structure
 
