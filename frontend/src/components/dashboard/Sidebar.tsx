@@ -19,12 +19,12 @@ interface SidebarProps {
 const menuItems = [
   {
     id: "overview",
-    label: "Visão Geral",
+    label: "Overview",
     icon: LayoutDashboard,
   },
   {
     id: "links",
-    label: "Meus Links",
+    label: "My Links",
     icon: LayoutDashboard,
   },
   {
@@ -34,7 +34,7 @@ const menuItems = [
   },
   {
     id: "settings",
-    label: "Configurações",
+    label: "Settings",
     icon: Settings,
   },
 ];
@@ -71,7 +71,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
       <div className="absolute right-4 bottom-4 left-4">
         <Button variant="ghost" className="w-full justify-start">
           <HelpCircle className="mr-2 size-4" />
-          Ajuda & Suporte
+          Help and Support
         </Button>
       </div>
     </div>

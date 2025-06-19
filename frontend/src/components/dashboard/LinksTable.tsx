@@ -24,7 +24,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Copy, ExternalLink, MoreHorizontal, Pause, Trash2 } from "lucide-react";
+import {
+  Copy,
+  ExternalLink,
+  MoreHorizontal,
+  Pause,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
 
@@ -54,19 +60,19 @@ export function LinksTable() {
 
   const copyToClipboard = (url: string) => {
     navigator.clipboard.writeText(url);
-    toast.success("Link copiado!");
+    toast.success("Link copied!");
   };
 
   const deleteLink = async (id: string) => {
-    const confirmed = confirm("Tem certeza que deseja excluir este link?");
+    const confirmed = confirm("Are you sure you want to delete this link?");
     if (!confirmed) return;
 
     try {
       await axios.delete(`/api/user-links/${id}`);
       setLinks((prev) => prev.filter((link) => link.id !== id));
-      toast.success("Link excluído com sucesso");
+      toast.success("Link deleted successfully");
     } catch (error) {
-      let message = "Erro ao excluir link";
+      let message = "Error deleting link";
 
       if (axios.isAxiosError(error)) {
         message = error.response?.data?.error || message;
@@ -92,13 +98,11 @@ export function LinksTable() {
       );
 
       toast.success(
-        `Link ${newStatus === "active" ? "ativado" : "pausado"} com sucesso`,
+        `Link ${newStatus === "active" ? "activated" : "paused"} successfully`,
       );
     } catch (error) {
-      let message = "Erro ao atualizar status";
-
+      let message = "Error updating status";
       if (axios.isAxiosError(error)) {
-        // AxiosError tem a propriedade response, que pode conter o erro do backend
         message = error.response?.data?.error || message;
       }
 
@@ -109,20 +113,18 @@ export function LinksTable() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Links Recentes</CardTitle>
-        <CardDescription>
-          Gerencie todos os seus links encurtados
-        </CardDescription>
+        <CardTitle>Recent Links</CardTitle>
+        <CardDescription>Manage all your shortened links</CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>URL Original</TableHead>
-              <TableHead>Link Curto</TableHead>
-              <TableHead>Cliques</TableHead>
+              <TableHead>Original URL</TableHead>
+              <TableHead>Short Link</TableHead>
+              <TableHead>Clicks</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Data</TableHead>
+              <TableHead>Date</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
@@ -156,7 +158,7 @@ export function LinksTable() {
                   <Badge
                     variant={link.status === "active" ? "default" : "secondary"}
                   >
-                    {link.status === "active" ? "Ativo" : "Pausado"}
+                    {link.status === "active" ? "Active" : "Paused"}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -186,7 +188,7 @@ export function LinksTable() {
                         onClick={() => toggleLinkStatus(link.id, link.status)}
                       >
                         <Pause className="mr-2 size-4" />
-                        {link.status === "active" ? "Pausar" : "Ativar"}
+                        {link.status === "active" ? "Pause" : "Activate"}
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-red-600"

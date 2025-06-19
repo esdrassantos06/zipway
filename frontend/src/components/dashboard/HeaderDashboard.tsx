@@ -21,16 +21,16 @@ interface Session {
   };
 }
 
-function getIniciais(nome: string) {
-  if (!nome) return "";
-  return nome
+function getInitials(name: string) {
+  if (!name) return "";
+  return name
     .split(" ")
-    .map((palavra) => palavra[0].toUpperCase())
+    .map((word) => word[0].toUpperCase())
     .join("");
 }
 
 export function Header({ session }: { session: Session }) {
-  const iniciais = getIniciais(session.user.name);
+  const initials = getInitials(session.user.name);
 
   return (
     <header className="bg-background border-b px-6 py-4">
@@ -57,7 +57,7 @@ export function Header({ session }: { session: Session }) {
                     }
                     alt="Avatar"
                   />
-                  <AvatarFallback>{iniciais}</AvatarFallback>
+                  <AvatarFallback>{initials}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
@@ -74,10 +74,10 @@ export function Header({ session }: { session: Session }) {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <Link href={"/profile"}>
-                <DropdownMenuItem>Perfil</DropdownMenuItem>
+                <DropdownMenuItem>Profile</DropdownMenuItem>
               </Link>
-              <DropdownMenuItem>Configurações</DropdownMenuItem>
-              <DropdownMenuItem>Suporte</DropdownMenuItem>
+              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem>Support</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <SignOutButton
