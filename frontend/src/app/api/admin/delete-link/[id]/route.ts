@@ -11,7 +11,7 @@ import { UserRole } from "@/generated/prisma";
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const rateLimiter = createRateLimiter(DEFAULT_LIMITS.admin);
   const identifier = getClientIdentifier(req);
@@ -20,7 +20,7 @@ export async function DELETE(
   if (!isAllowed) {
     return NextResponse.json(
       { error: "Limite de taxa excedido" },
-      { status: 429 }
+      { status: 429 },
     );
   }
 
@@ -56,7 +56,7 @@ export async function DELETE(
     if (!link) {
       return NextResponse.json(
         { error: "Link não encontrado" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -69,14 +69,17 @@ export async function DELETE(
       where: whereClause,
     });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       message: "Link deletado com sucesso",
-      id: link.id 
+      id: link.id,
     });
   } catch (error) {
     console.error("Erro ao deletar link:", error);
-    return NextResponse.json({ 
-      error: "Erro interno do servidor" 
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: "Erro interno do servidor",
+      },
+      { status: 500 },
+    );
   }
 }
