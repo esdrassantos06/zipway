@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 import {
   Table,
   TableBody,
@@ -33,46 +33,52 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
+import { LinkStatus } from "@/generated/prisma";
 
 type Link = {
   id: string;
+  shortId: string;
   originalUrl: string;
   shortUrl: string;
   clicks: number;
-  status: "active" | "paused";
+  status: "ACTIVE" | "PAUSED";
   createdAt: string;
 };
 
-export function LinksTable() {
-  const [links, setLinks] = useState<Link[]>([]);
+type LinksTableProps = {
+  links: Link[];
+  setLinks: Dispatch<SetStateAction<Link[]>>;
+  isLoading?: boolean;
+  limit?: number;
+};
 
-  useEffect(() => {
-    const fetchLinks = async () => {
-      const res = await fetch("/api/user-links");
-      const data = await res.json();
-      if (res.ok) {
-        setLinks(data.links);
-      }
-    };
-
-    fetchLinks();
-  }, []);
+export function LinksTable({
+  links,
+  setLinks,
+  isLoading = false,
+  limit,
+}: LinksTableProps) {
+  const displayedLinks = limit ? links.slice(0, limit) : links;
 
   const copyToClipboard = (url: string) => {
     navigator.clipboard.writeText(url);
     toast.success("Link copied!");
   };
 
-  const deleteLink = async (id: string) => {
+  const deleteLink = async (link: Link) => {
     const confirmed = confirm("Are you sure you want to delete this link?");
     if (!confirmed) return;
 
     try {
-      await axios.delete(`/api/user-links/${id}`);
-      setLinks((prev) => prev.filter((link) => link.id !== id));
+      const identifier =
+        link.shortId && link.shortId.trim() ? link.shortId : link.id;
+
+      await axios.delete(`/api/user-links/${identifier}`);
+      setLinks((prev) => prev.filter((l) => l.id !== link.id));
       toast.success("Link deleted successfully");
     } catch (error) {
       let message = "Error deleting link";
+      console.error("Delete error:", error);
 
       if (axios.isAxiosError(error)) {
         message = error.response?.data?.error || message;
@@ -82,26 +88,29 @@ export function LinksTable() {
     }
   };
 
-  const toggleLinkStatus = async (
-    id: string,
-    currentStatus: "active" | "paused",
-  ) => {
-    const newStatus = currentStatus === "active" ? "paused" : "active";
+  const toggleLinkStatus = async (link: Link) => {
+    const newStatus: Link["status"] =
+      link.status === LinkStatus.ACTIVE ? LinkStatus.PAUSED : LinkStatus.ACTIVE;
 
     try {
-      await axios.patch(`/api/user-links/${id}/status`, { status: newStatus });
+      const identifier =
+        link.shortId && link.shortId.trim() ? link.shortId : link.id;
+
+      await axios.patch(`/api/user-links/${identifier}/status`, {
+        status: newStatus,
+      });
 
       setLinks((prev) =>
-        prev.map((link) =>
-          link.id === id ? { ...link, status: newStatus } : link,
-        ),
+        prev.map((l) => (l.id === link.id ? { ...l, status: newStatus } : l)),
       );
 
       toast.success(
-        `Link ${newStatus === "active" ? "activated" : "paused"} successfully`,
+        `Link ${newStatus === "ACTIVE" ? "activated" : "paused"} successfully`,
       );
     } catch (error) {
       let message = "Error updating status";
+      console.error("Toggle status error:", error);
+
       if (axios.isAxiosError(error)) {
         message = error.response?.data?.error || message;
       }
@@ -109,6 +118,22 @@ export function LinksTable() {
       toast.error(message);
     }
   };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Links</CardTitle>
+          <CardDescription>Manage all your shortened links</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center p-8">
+            <div className="text-muted-foreground">Loading...</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -129,7 +154,7 @@ export function LinksTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {links.map((link) => (
+            {displayedLinks.map((link) => (
               <TableRow key={link.id}>
                 <TableCell className="max-w-[300px]">
                   <div
@@ -162,9 +187,9 @@ export function LinksTable() {
                 </TableCell>
                 <TableCell>
                   <Badge
-                    variant={link.status === "active" ? "default" : "secondary"}
+                    variant={link.status === "ACTIVE" ? "default" : "secondary"}
                   >
-                    {link.status === "active" ? "Active" : "Paused"}
+                    {link.status === "ACTIVE" ? "Active" : "Paused"}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -190,15 +215,13 @@ export function LinksTable() {
                         <Copy className="mr-2 size-4" />
                         Copiar Link
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => toggleLinkStatus(link.id, link.status)}
-                      >
+                      <DropdownMenuItem onClick={() => toggleLinkStatus(link)}>
                         <Pause className="mr-2 size-4" />
-                        {link.status === "active" ? "Pause" : "Activate"}
+                        {link.status === "ACTIVE" ? "Pause" : "Activate"}
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-red-600"
-                        onClick={() => deleteLink(link.id)}
+                        onClick={() => deleteLink(link)}
                       >
                         <Trash2 className="mr-2 size-4" />
                         Excluir

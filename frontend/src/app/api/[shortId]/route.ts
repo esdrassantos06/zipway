@@ -6,11 +6,9 @@ import {
   getClientIdentifier,
 } from "@/utils/rateLimiter";
 
-
-
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ shortId: string }> }
+  { params }: { params: Promise<{ shortId: string }> },
 ) {
   const { shortId } = await params;
 
@@ -28,7 +26,6 @@ export async function GET(
   if (!url) {
     return NextResponse.json({ error: "URL não encontrada" }, { status: 404 });
   }
-
 
   await prisma.link.update({
     where: { shortId },

@@ -24,7 +24,7 @@ export const auth = betterAuth({
       prompt: "select_account+consent",
       clientId: process.env.GITHUB_CLIENT_ID as string,
       clientSecret: process.env.GITHUB_SECRET as string,
-      scopes: [`read:user`, `user:email`]
+      scopes: [`read:user`, `user:email`],
     },
     google: {
       prompt: "select_account",

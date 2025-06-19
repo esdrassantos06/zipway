@@ -14,20 +14,38 @@ export async function DELETE(
 
   const { shortId } = await params;
 
+  if (!shortId || shortId === "undefined" || shortId.trim() === "") {
+    return NextResponse.json({ error: "ID do link inválido" }, { status: 400 });
+  }
+
   try {
-    const link = await prisma.link.findUnique({
-      where: { id: shortId },
+    let link = await prisma.link.findUnique({
+      where: { shortId },
     });
 
-    if (!link || link.userId !== session.user.id) {
+    if (!link) {
+      link = await prisma.link.findUnique({
+        where: { id: shortId },
+      });
+    }
+
+    if (!link) {
       return NextResponse.json(
-        { error: "Link não encontrado ou acesso negado" },
+        { error: "Link não encontrado" },
         { status: 404 },
       );
     }
 
+    if (link.userId !== session.user.id) {
+      return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+    }
+
+    const whereClause = link.shortId
+      ? { shortId: link.shortId }
+      : { id: link.id };
+
     await prisma.link.delete({
-      where: { id: shortId },
+      where: whereClause,
     });
 
     return NextResponse.json({ message: "Link deletado com sucesso" });

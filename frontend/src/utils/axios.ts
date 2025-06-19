@@ -37,9 +37,9 @@ api.interceptors.response.use(
     } else {
       toast.error("Request setup error");
     }
-    
+
     return Promise.reject(error);
-  }
+  },
 );
 
 interface ShortenUrlPayload {
@@ -51,16 +51,14 @@ interface ShortenUrlPayload {
 export const shortenUrl = async (payload: ShortenUrlPayload | string) => {
   try {
     const requestPayload =
-      typeof payload === "string" 
-        ? { target_url: payload } 
-        : payload;
+      typeof payload === "string" ? { target_url: payload } : payload;
 
     const response = await api.post("/shorten", requestPayload);
-    
+
     if (!response.data?.short_url) {
       throw new Error("Invalid response format");
     }
-    
+
     return response.data;
   } catch (error) {
     console.error("Error shortening URL:", error);
@@ -70,11 +68,11 @@ export const shortenUrl = async (payload: ShortenUrlPayload | string) => {
 
 export const redirectToUrl = async (shortId: string) => {
   try {
-    const cleanShortId = shortId.replace(/^\//, '');
-    
+    const cleanShortId = shortId.replace(/^\//, "");
+
     const response = await api.get(`/${cleanShortId}`, {
       maxRedirects: 0,
-      validateStatus: (status) => status >= 200 && status < 400
+      validateStatus: (status) => status >= 200 && status < 400,
     });
 
     if (response.data?.target_url) {

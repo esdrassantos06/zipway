@@ -6,10 +6,12 @@ import {
   Settings,
   HelpCircle,
   Link2,
+  ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 interface SidebarProps {
   activeTab: string;
@@ -40,6 +42,24 @@ const menuItems = [
 ];
 
 export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const fetchSession = async () => {
+      try {
+        const res = await fetch("/api/session");
+        const data = await res.json();
+        if (data.role === "ADMIN") {
+          setIsAdmin(true);
+        }
+      } catch (err) {
+        console.error("Erro ao buscar sessão", err);
+      }
+    };
+
+    fetchSession();
+  }, []);
+
   return (
     <div className="bg-background relative w-64 border-r">
       <div className="p-6">
@@ -67,6 +87,15 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
             {item.label}
           </Button>
         ))}
+
+        {isAdmin && (
+          <Link href="/admin/dashboard">
+            <Button variant="destructive" className="mt-2 w-full justify-start">
+              <ShieldCheck className="mr-2 size-4" />
+              Admin
+            </Button>
+          </Link>
+        )}
       </nav>
       <div className="absolute right-4 bottom-4 left-4">
         <Button variant="ghost" className="w-full justify-start">

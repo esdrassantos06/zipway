@@ -7,9 +7,7 @@ describe("UrlShortener", () => {
   });
 
   it("should render the Page component", () => {
-    expect(
-      screen.getByText("Login"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Login")).toBeInTheDocument();
   });
 
   it("should render the ShortenUrlForm component", () => {

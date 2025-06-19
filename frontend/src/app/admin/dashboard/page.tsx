@@ -1,28 +1,44 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import {
-  DeleteUserButton,
-  PlaceholderButton,
-} from "@/components/admin/DeleteUserButton";
+import axios from "axios";
+import { getSessionFromHeaders } from "@/utils/getSession";
+import AdminDashboardClient from "@/components/admin/AdminDashboardClient";
+
+interface UserWithRole {
+  id: string;
+  name: string;
+  email: string;
+  role?: string | "USER" | "ADMIN";
+}
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: "USER" | "ADMIN";
+}
 
 const AdminDashboard = async () => {
   const headersList = await headers();
-
-  const session = await auth.api.getSession({
-    headers: headersList,
-  });
+  const session = await getSessionFromHeaders(headersList);
 
   if (!session) redirect("/auth/login");
-
   if (session.user.role !== "ADMIN") redirect("/");
 
-  const { users } = await auth.api.listUsers({
+  const { users: rawUsers } = await auth.api.listUsers({
     headers: headersList,
     query: {
       sortBy: "name",
     },
   });
+
+  const users: User[] = (rawUsers as UserWithRole[]).map((user) => ({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: (user.role || "USER") as "USER" | "ADMIN",
+  }));
 
   const sortedUsers = users.sort((a, b) => {
     if (a.role === "ADMIN" && b.role !== "ADMIN") return -1;
@@ -30,52 +46,27 @@ const AdminDashboard = async () => {
     return 0;
   });
 
-  return (
-    <div>
-      <h1>Admin Dashboard</h1>
-      Olá! {session.user.name}
-      <h3 className="mt-4">Aqui tem todos os usuários:</h3>
-      <table className="mt-4 w-full max-w-4xl table-auto border-collapse border border-gray-400">
-        <thead className="bg-slate-200">
-          <tr>
-            <th className="border border-gray-400 px-4 py-2">ID</th>
-            <th className="border border-gray-400 px-4 py-2">Nome</th>
-            <th className="border border-gray-400 px-4 py-2">Função</th>
-            <th className="border border-gray-400 px-4 py-2">Email</th>
-            <th className="border border-gray-400 px-4 py-2">Ação</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sortedUsers.map((user, i) => {
-            if (user.id === session.user.id) return null;
+  let links = [];
 
-            return (
-              <tr key={i} className="bg-slate-100">
-                <td className="border border-gray-400 px-4 py-2">
-                  {user.id.slice(0, 8)}...
-                </td>
-                <td className="border border-gray-400 px-4 py-2">
-                  {user.name}
-                </td>
-                <td className="border border-gray-400 px-4 py-2">
-                  {user.role}
-                </td>
-                <td className="border border-gray-400 px-4 py-2">
-                  {user.email}
-                </td>
-                <td className="border border-gray-400 px-4 py-2 text-center">
-                  {user.role === "ADMIN" || user.id === session.user.id ? (
-                    <PlaceholderButton />
-                  ) : (
-                    <DeleteUserButton userId={user.id} />
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+  try {
+    const res = await axios.get(
+      `${process.env.NEXT_PUBLIC_URL}/api/admin/all-links`,
+      {
+        headers: {
+          Cookie: headersList.get("cookie") || "",
+        },
+        withCredentials: true,
+      },
+    );
+
+    links = res.data.links;
+  } catch (error) {
+    console.error("Erro ao buscar links:", error);
+    throw new Error("Erro ao buscar links");
+  }
+
+  return (
+    <AdminDashboardClient session={session} users={sortedUsers} links={links} />
   );
 };
 

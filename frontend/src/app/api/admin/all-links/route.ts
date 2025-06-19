@@ -1,17 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import {
+  createRateLimiter,
+  DEFAULT_LIMITS,
+  getClientIdentifier,
+} from "@/utils/rateLimiter";
 import { getSessionFromHeaders } from "@/utils/getSession";
+import { headers } from "next/headers";
+import { UserRole } from "@/generated/prisma";
 
 export async function GET(req: NextRequest) {
-  const session = await getSessionFromHeaders(req.headers);
+  const rateLimiter = createRateLimiter(DEFAULT_LIMITS.admin);
+  const identifier = getClientIdentifier(req);
+  const isAllowed = await rateLimiter(identifier);
 
-  if (!session) {
-    return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+  const headersList = await headers();
+
+  const session = await getSessionFromHeaders(headersList);
+
+  if (!session) throw new Error("Unauthorized");
+
+  if (session.user.role !== UserRole.ADMIN) {
+    throw new Error("Forbidden");
+  }
+
+  if (!isAllowed) {
+    return NextResponse.json(
+      { error: "Limite de taxa excedido" },
+      { status: 429 },
+    );
   }
 
   try {
     const links = await prisma.link.findMany({
-      where: { userId: session.user.id },
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -28,7 +49,7 @@ export async function GET(req: NextRequest) {
       originalUrl: link.targetUrl,
       shortUrl: `${process.env.NEXT_PUBLIC_URL}/${link.shortId}`,
       clicks: link.clicks,
-      status: link.status, // "active" | "paused"
+      status: link.status.toLowerCase(), // "active" | "paused"
       createdAt: link.createdAt.toISOString(),
     }));
 

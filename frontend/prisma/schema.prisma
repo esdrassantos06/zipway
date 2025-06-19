@@ -11,7 +11,7 @@ datasource db {
 model User {
   id            String    @id
   createdAt     DateTime  @default(now())
-  updatedAt     DateTime
+  updatedAt     DateTime  @updatedAt
   name          String
   email         String    @unique
   emailVerified Boolean
@@ -45,7 +45,7 @@ model Session {
   expiresAt      DateTime
   token          String   @unique
   createdAt      DateTime
-  updatedAt      DateTime
+  updatedAt      DateTime @updatedAt
   ipAddress      String?
   userAgent      String?
   userId         String
@@ -58,7 +58,7 @@ model Session {
 model Account {
   id                    String    @id
   createdAt             DateTime
-  updatedAt             DateTime
+  updatedAt             DateTime  @updatedAt
   accountId             String
   providerId            String
   accessToken           String?
@@ -77,7 +77,7 @@ model Account {
 model Verification {
   id         String    @id
   createdAt  DateTime?
-  updatedAt  DateTime?
+  updatedAt  DateTime? @updatedAt
   identifier String
   value      String
   expiresAt  DateTime

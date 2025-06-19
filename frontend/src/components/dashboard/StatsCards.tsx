@@ -1,6 +1,3 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, MousePointer } from "lucide-react";
 
@@ -17,36 +14,17 @@ type Link = {
   originalUrl: string;
   shortUrl: string;
   clicks: number;
-  status: "active" | "paused";
+  status: "ACTIVE" | "PAUSED";
   createdAt: string;
 };
 
-export function StatsCards() {
-  const [totalLinks, setTotalLinks] = useState(0);
-  const [totalClicks, setTotalClicks] = useState(0);
+type StatsCardsProps = {
+  links: Link[];
+};
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await fetch("/api/user-links");
-        const data = await res.json();
-
-        if (res.ok) {
-          const links = data.links;
-          setTotalLinks(links.length);
-          const clicksSum = links.reduce(
-            (acc: number, link: Link) => acc + link.clicks,
-            0,
-          );
-          setTotalClicks(clicksSum);
-        }
-      } catch (error) {
-        console.error("Erro ao buscar stats:", error);
-      }
-    };
-
-    fetchStats();
-  }, []);
+export function StatsCards({ links }: StatsCardsProps) {
+  const totalLinks = links.length;
+  const totalClicks = links.reduce((acc, link) => acc + link.clicks, 0);
 
   const stats: Stats[] = [
     {

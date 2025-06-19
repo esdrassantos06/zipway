@@ -1,4 +1,3 @@
-// app/api/shorten/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sanitizeAlias, validateAlias, reservedPaths } from "@/utils/sanitize";
