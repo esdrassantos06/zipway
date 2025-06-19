@@ -132,8 +132,14 @@ export function LinksTable() {
             {links.map((link) => (
               <TableRow key={link.id}>
                 <TableCell className="max-w-[300px]">
-                  <div className="truncate" title={link.originalUrl}>
-                    {link.originalUrl}
+                  <div
+                    className="truncate"
+                    title={link.originalUrl}
+                    aria-label={link.originalUrl}
+                  >
+                    {link.originalUrl.length > 40
+                      ? `${link.originalUrl.slice(0, 40)}...`
+                      : link.originalUrl}
                   </div>
                 </TableCell>
                 <TableCell>
