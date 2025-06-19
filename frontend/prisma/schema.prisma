@@ -8,16 +8,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  USER
-  ADMIN
-}
-
 model User {
-  id        String   @id
-  createdAt DateTime
-  updatedAt DateTime
-
+  id            String    @id
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime
   name          String
   email         String    @unique
   emailVerified Boolean
@@ -26,35 +20,45 @@ model User {
   banned        Boolean?
   banReason     String?
   banExpires    DateTime?
-
-  sessions Session[]
-  accounts Account[]
+  accounts      Account[]
+  sessions      Session[]
+  links         Link[]
 
   @@map("users")
 }
 
-model Session {
-  id        String   @id
-  createdAt DateTime
-  updatedAt DateTime
+model Link {
+  id        String     @id
+  shortId   String     @unique
+  clicks    Int        @default(0)
+  createdAt DateTime   @default(now())
+  userId    String?
+  targetUrl String     @map("target_url")
+  status    LinkStatus @default(ACTIVE)
+  user      User?      @relation(fields: [userId], references: [id])
 
+  @@map("urls")
+}
+
+model Session {
+  id             String   @id
   expiresAt      DateTime
   token          String   @unique
+  createdAt      DateTime
+  updatedAt      DateTime
   ipAddress      String?
   userAgent      String?
+  userId         String
   impersonatedBy String?
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("session")
 }
 
 model Account {
-  id        String   @id
-  createdAt DateTime
-  updatedAt DateTime
-
+  id                    String    @id
+  createdAt             DateTime
+  updatedAt             DateTime
   accountId             String
   providerId            String
   accessToken           String?
@@ -64,21 +68,29 @@ model Account {
   refreshTokenExpiresAt DateTime?
   scope                 String?
   password              String?
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("accounts")
 }
 
 model Verification {
-  id        String    @id
-  createdAt DateTime?
-  updatedAt DateTime?
-
+  id         String    @id
+  createdAt  DateTime?
+  updatedAt  DateTime?
   identifier String
   value      String
   expiresAt  DateTime
 
   @@map("verifications")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum LinkStatus {
+  ACTIVE
+  PAUSED
 }

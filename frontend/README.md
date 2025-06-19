@@ -18,7 +18,6 @@ This is the frontend application for the Zipway URL shortener, built with Next.j
 - [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
 - [shadcn/ui](https://ui.shadcn.com/) - Reusable UI components
 - [Axios](https://axios-http.com/) - HTTP client
-- [React Hot Toast](https://react-hot-toast.com/) - Toast notifications
 - [Jest](https://jestjs.io/) - Testing Framework
 - [React Testing Library](https://testing-library.com/) - Testing Library
 

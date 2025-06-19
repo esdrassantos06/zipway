@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader, Mail } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import AuthButtons from "./AuthButtons";
 import ReturnButton from "../ReturnButton";
@@ -128,7 +128,7 @@ export const RegisterForm = () => {
                 </>
               ) : (
                 <>
-                  <Mail className="mr-2 h-4 w-4" />
+                  <Mail className="mr-2 size-4" />
                   Criar Conta
                 </>
               )}

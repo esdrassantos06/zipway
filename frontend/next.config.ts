@@ -2,11 +2,11 @@ import type { NextConfig } from "next";
 
 const cspHeader = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval';
+  script-src 'self' https://pagead2.googlesyndication.com 'unsafe-inline';
   style-src 'self' 'unsafe-inline' 'unsafe-eval';
-  img-src 'self' blob: data:;
+  img-src 'self' data: https://lh3.googleusercontent.com https://*.googlesyndication.com https://avatars.githubusercontent.com https://github.com;
   font-src 'self';
-  connect-src 'self' https://api.iconify.design;
+  connect-src 'self' https://api.iconify.design https://api.github.com;
   object-src 'none';
   base-uri 'self';
   form-action 'self';
@@ -54,15 +54,6 @@ const nextConfig: NextConfig = {
       {
         source: "/(.*)",
         headers: securityHeaders,
-      },
-    ];
-  },
-  async rewrites() {
-    const apiUrl = process.env.API_BASE_URL || "";
-    return [
-      {
-        source: "/backend/:path*",
-        destination: `${apiUrl}/:path*`,
       },
     ];
   },

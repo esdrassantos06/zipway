@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import { authClient } from "@/lib/auth-client";
 import { Loader } from "lucide-react";
 import { useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { Icon } from "@iconify/react";
 
 interface SignInOauthButtonProps {

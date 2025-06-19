@@ -8,7 +8,7 @@ describe("UrlShortener", () => {
 
   it("should render the Page component", () => {
     expect(
-      screen.getByText("Free forever • No sign-up required"),
+      screen.getByText("Login"),
     ).toBeInTheDocument();
   });
 

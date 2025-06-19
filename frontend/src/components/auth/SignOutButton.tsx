@@ -3,9 +3,22 @@
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 import { authClient } from "@/lib/auth-client";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
-export const SignOutButton = () => {
+type ButtonProps = {
+  size?: "sm" | "default" | "icon" | "lg";
+  variant?: "default" | "destructive" | "outline" | "ghost" | "secondary";
+  className?: string;
+};
+
+type SignOutButtonProps = Partial<
+  Pick<ButtonProps, "size" | "variant" | "className">
+>;
+export const SignOutButton = ({
+  size = "sm",
+  variant = "destructive",
+  className,
+}: SignOutButtonProps) => {
   const router = useRouter();
 
   async function handleClick() {
@@ -20,8 +33,14 @@ export const SignOutButton = () => {
       },
     });
   }
+
   return (
-    <Button onClick={handleClick} size={"sm"} variant={"destructive"}>
+    <Button
+      onClick={handleClick}
+      size={size}
+      variant={variant}
+      className={className}
+    >
       Sign Out
     </Button>
   );

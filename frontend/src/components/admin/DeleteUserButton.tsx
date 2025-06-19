@@ -3,7 +3,7 @@ import { Trash } from "lucide-react";
 import { Button, buttonVariants } from "../ui/button";
 import { useState } from "react";
 import { deleteUserAction } from "@/actions/delete-user-action";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,

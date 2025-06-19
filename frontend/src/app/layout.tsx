@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
 import Head from "next/head";
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -38,19 +38,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         {children}
-        <Toaster
-          position="top-center"
-          reverseOrder={false}
-          gutter={8}
-          toastOptions={{
-            duration: 5000,
-            removeDelay: 1000,
-
-            success: {
-              duration: 3000,
-            },
-          }}
-        />
+        <Toaster position="top-center" richColors closeButton />
       </body>
     </html>
   );

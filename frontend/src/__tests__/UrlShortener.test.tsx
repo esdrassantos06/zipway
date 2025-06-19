@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { ShortenUrlForm } from "@/components/ShortenUrlForm";
+import { LinkForm } from "@/components/dashboard/LinkForm";
 
 jest.mock("@/utils/axios.ts", () => ({
   __esModule: true,
@@ -9,7 +9,7 @@ jest.mock("@/utils/axios.ts", () => ({
 
 import { shortenUrl } from "@/utils/axios";
 
-jest.mock("react-hot-toast", () => ({
+jest.mock("sonner", () => ({
   __esModule: true,
   default: {
     error: jest.fn(),
@@ -22,12 +22,12 @@ jest.mock("react-hot-toast", () => ({
   Toaster: () => <div />,
 }));
 
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 describe("ShortenUrlForm", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    render(<ShortenUrlForm />);
+    render(<LinkForm />);
   });
 
   it("should render the ShortenUrlForm component", () => {

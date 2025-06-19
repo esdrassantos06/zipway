@@ -9,7 +9,7 @@ export default function NotFound() {
       <p className="mb-6 text-xl text-gray-600">Ops! Page not found.</p>
       <Link href="/">
         <Button variant="outline" className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="size-4" />
           Go back to home page.
         </Button>
       </Link>

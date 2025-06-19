@@ -4,12 +4,11 @@ import { headers } from "next/headers";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { getSessionFromHeaders } from "@/utils/getSession";
 
 export default async function ProfilePage() {
   const headersList = await headers();
-  const session = await auth.api.getSession({
-    headers: headersList,
-  });
+  const session = await getSessionFromHeaders(headersList);
 
   if (!session) {
     console.error("No session Found, redirecting to login...");
