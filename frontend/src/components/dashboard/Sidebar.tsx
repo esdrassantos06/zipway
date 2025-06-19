@@ -34,11 +34,6 @@ const menuItems = [
     label: "Analytics",
     icon: BarChart3,
   },
-  {
-    id: "settings",
-    label: "Settings",
-    icon: Settings,
-  },
 ];
 
 export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
@@ -87,6 +82,13 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
             {item.label}
           </Button>
         ))}
+
+        <Link href="/settings">
+          <Button variant={"ghost"} className="w-full justify-start">
+            <Settings className="mr-2 size-4" />
+            Settings
+          </Button>
+        </Link>
 
         {isAdmin && (
           <Link href="/admin/dashboard">

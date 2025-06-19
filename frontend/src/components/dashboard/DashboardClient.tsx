@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SidebarClient } from "./SidebarClient";
+import { Sidebar } from "./Sidebar";
 import { Content } from "./DashboardContent";
 import { Header } from "./HeaderDashboard";
 
@@ -22,7 +22,7 @@ export default function DashboardClient({ session }: DashboardClientProps) {
 
   return (
     <>
-      <SidebarClient activeTab={activeTab} onTabChange={setActiveTab} />
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <div className="flex flex-1 flex-col">
         <Header session={session} />
         <main className="flex-1 overflow-auto">
