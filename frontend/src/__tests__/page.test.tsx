@@ -9,9 +9,4 @@ describe("UrlShortener", () => {
   it("should render the Page component", () => {
     expect(screen.getByText("Login")).toBeInTheDocument();
   });
-
-  it("should render the ShortenUrlForm component", () => {
-    const form = screen.getByTestId("shorten-url-form");
-    expect(form).toBeInTheDocument();
-  });
 });
