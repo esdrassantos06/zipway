@@ -28,7 +28,21 @@ let globalUrl = "";
 let globalShortenedUrl: string | null = null;
 let globalCustomAlias = "";
 
-export function LinkForm() {
+interface LinkType {
+  id: string;
+  shortId: string;
+  originalUrl: string;
+  shortUrl: string;
+  clicks: number;
+  status: "ACTIVE" | "PAUSED";
+  createdAt: string;
+}
+
+interface LinkFormProps {
+  onLinkCreated?: (link: LinkType) => void;
+}
+
+export function LinkForm({ onLinkCreated }: LinkFormProps) {
   const [url, setUrl] = useState(globalUrl);
   const [customAlias, setCustomAlias] = useState(globalCustomAlias);
   const [shortenedUrl, setShortenedUrl] = useState<string | null>(
@@ -125,6 +139,19 @@ export function LinkForm() {
       if (response?.short_url) {
         updateShortenedUrl(response.short_url);
         toast.success("URL Shortened Successfully.");
+
+        if (onLinkCreated) {
+          const newLink: LinkType = {
+            id: response.id || Date.now().toString(),
+            shortId: response.short_id || "",
+            originalUrl: trimmedURL,
+            shortUrl: response.short_url,
+            clicks: 0,
+            status: "ACTIVE",
+            createdAt: new Date().toISOString(),
+          };
+          onLinkCreated(newLink);
+        }
       } else {
         throw new Error(response?.error || "Invalid response from server");
       }

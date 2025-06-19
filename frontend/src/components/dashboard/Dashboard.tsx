@@ -1,21 +1,40 @@
-import DashboardClient from "./DashboardClient";
+"use client";
+import { Content } from "./DashboardContent";
+import { Header } from "./HeaderDashboard";
+import Sidebar from "./Sidebar/Sidebar";
+import { useState } from "react";
 
-interface Session {
-  user: {
-    name: string;
-    email: string;
-    image?: string | null;
-  };
+
+type Link = {
+  id: string;
+  shortId: string;
+  originalUrl: string;
+  shortUrl: string;
+  clicks: number;
+  status: "ACTIVE" | "PAUSED";
+  createdAt: string;
+};
+
+interface DashboardContentProps {
+  initialLinks: Link[];
 }
 
-interface DashboardProps {
-  session: Session;
-}
+export function Dashboard({
+  initialLinks,
+}: DashboardContentProps) {
+  const [activeTab, setActiveTab] = useState("overview");
+  const [links, setLinks] = useState<Link[]>(initialLinks);
 
-export default function Dashboard({ session }: DashboardProps) {
+
   return (
-    <div className="bg-background flex h-screen">
-      <DashboardClient session={session} />
+    <div className="bg-background h-screen flex">
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <div className="flex flex-1 flex-col">
+        <Header />
+        <main className="flex-1 overflow-auto">
+          <Content activeTab={activeTab} links={links} setLinks={setLinks} />
+        </main>
+      </div>
     </div>
   );
 }

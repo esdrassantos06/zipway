@@ -33,7 +33,13 @@ export const getStatusLabel = (status: string) => {
 };
 
 export const truncateUrl = (url: string, maxLength: number = 35) => {
-  return url.length > maxLength
-    ? `${url.slice(0, maxLength)}...`
-    : url;
+  return url.length > maxLength ? `${url.slice(0, maxLength)}...` : url;
+};
+
+export const getInitials = (name: string) => {
+  if (!name) return "";
+  return name
+    .split(" ")
+    .map((word) => word[0].toUpperCase())
+    .join("");
 };

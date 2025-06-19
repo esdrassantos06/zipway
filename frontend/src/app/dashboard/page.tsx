@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
-import Dashboard from "@/components/dashboard/Dashboard";
+import { Dashboard } from "@/components/dashboard/Dashboard";
+
 import { headers } from "next/headers";
 import { getSessionFromHeaders } from "@/utils/getSession";
+import { getUserLinks } from "@/utils/getUserLinks";
 
 export default async function DashboardPage() {
   const headersList = await headers();
@@ -12,5 +14,7 @@ export default async function DashboardPage() {
     return redirect("/auth/login");
   }
 
-  return <Dashboard session={session} />;
+  const links = await getUserLinks(session.user.id);
+
+  return <Dashboard initialLinks={links} />;
 }

@@ -1,13 +1,11 @@
 "use client";
-
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { StatsCards } from "./StatsCards";
 import { LinkForm } from "./LinkForm";
 import { LinksTable } from "./LinksTable";
-import { toast } from "sonner";
 import { AnalyticsTab } from "../AnalyticsTab";
 
-type Link = {
+type LinkType = {
   id: string;
   shortId: string;
   originalUrl: string;
@@ -19,34 +17,11 @@ type Link = {
 
 interface ContentProps {
   activeTab: string;
+  links: LinkType[];
+  setLinks: Dispatch<SetStateAction<LinkType[]>>;
 }
 
-export function Content({ activeTab }: ContentProps) {
-  const [links, setLinks] = useState<Link[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchLinks = async () => {
-      try {
-        setIsLoading(true);
-        const res = await fetch("/api/user-links");
-        const data = await res.json();
-        if (res.ok) {
-          setLinks(data.links);
-        } else {
-          console.error("Failed to fetch links:", data);
-          toast.error("Failed to load links");
-        }
-      } catch (error) {
-        console.error("Error fetching links:", error);
-        toast.error("Error loading links");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchLinks();
-  }, []);
+export function Content({ activeTab, links, setLinks }: ContentProps) {
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
@@ -62,12 +37,16 @@ export function Content({ activeTab }: ContentProps) {
               </div>
               <StatsCards links={links} />
               <div className="flex w-full">
-                <LinkForm />
+                <LinkForm
+                  onLinkCreated={(newLink) =>
+                    setLinks((prev) => [newLink, ...prev])
+                  }
+                />
               </div>
               <LinksTable
                 links={links}
                 setLinks={setLinks}
-                isLoading={isLoading}
+                isLoading={false}
                 limit={5}
               />
             </>
@@ -80,11 +59,11 @@ export function Content({ activeTab }: ContentProps) {
                   View and manage all your recent shortened links
                 </p>
               </div>
-              <LinkForm />
+              <LinkForm onLinkCreated={(newLink) => setLinks(prev => [newLink, ...prev])} />
               <LinksTable
                 links={links}
                 setLinks={setLinks}
-                isLoading={isLoading}
+                isLoading={false}
               />
             </>
           )}

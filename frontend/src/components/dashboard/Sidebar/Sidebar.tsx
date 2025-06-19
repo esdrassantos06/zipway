@@ -3,7 +3,6 @@
 import {
   BarChart3,
   LayoutDashboard,
-  Settings,
   HelpCircle,
   Link2,
   ShieldCheck,
@@ -11,49 +10,45 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { authClient } from "@/lib/auth-client";
+import { Skeleton } from "@/components/ui/skeleton";
 
-interface SidebarProps {
+interface SidebarClientProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }
 
 const menuItems = [
-  {
-    id: "overview",
-    label: "Overview",
-    icon: LayoutDashboard,
-  },
-  {
-    id: "links",
-    label: "My Links",
-    icon: LayoutDashboard,
-  },
-  {
-    id: "analytics",
-    label: "Analytics",
-    icon: BarChart3,
-  },
+  { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "links", label: "My Links", icon: LayoutDashboard },
+  { id: "analytics", label: "Analytics", icon: BarChart3 },
 ];
 
-export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
-  const [isAdmin, setIsAdmin] = useState(false);
+export default function Sidebar({
+  activeTab,
+  setActiveTab,
+}: SidebarClientProps) {
+    const { data: session, isPending } = authClient.useSession();
 
-  useEffect(() => {
-    const fetchSession = async () => {
-      try {
-        const res = await fetch("/api/session");
-        const data = await res.json();
-        if (data.role === "ADMIN") {
-          setIsAdmin(true);
-        }
-      } catch (err) {
-        console.error("Erro ao buscar sessão", err);
-      }
-    };
+    if (isPending)
+      return (
+        <div className="bg-background relative w-64 border-r p-6 space-y-4">
+          <Skeleton className="h-8 w-32 rounded-md" />
+          <div className="space-y-2">
+            <Skeleton className="h-10 w-full rounded-md" />
+            <Skeleton className="h-10 w-full rounded-md" />
+            <Skeleton className="h-10 w-full rounded-md" />
+          </div>
+          <div className="absolute right-4 bottom-4 left-4">
+            <Skeleton className="h-10 w-full rounded-md" />
+          </div>
+        </div>
+      );
+    
 
-    fetchSession();
-  }, []);
+
+    const isAdmin = session?.user.role === "ADMIN";
+
 
   return (
     <div className="bg-background relative w-64 border-r">
@@ -82,13 +77,6 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
             {item.label}
           </Button>
         ))}
-
-        <Link href="/settings">
-          <Button variant={"ghost"} className="w-full justify-start">
-            <Settings className="mr-2 size-4" />
-            Settings
-          </Button>
-        </Link>
 
         {isAdmin && (
           <Link href="/admin/dashboard">
