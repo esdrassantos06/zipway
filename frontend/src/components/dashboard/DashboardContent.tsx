@@ -5,6 +5,7 @@ import { StatsCards } from "./StatsCards";
 import { LinkForm } from "./LinkForm";
 import { LinksTable } from "./LinksTable";
 import { toast } from "sonner";
+import { AnalyticsTab } from "../AnalyticsTab";
 
 type Link = {
   id: string;
@@ -96,6 +97,7 @@ export function Content({ activeTab }: ContentProps) {
                 </p>
               </div>
               <StatsCards links={links} />
+              <AnalyticsTab links={links} />
             </>
           )}
         </div>

@@ -16,7 +16,7 @@ import { StatsCards } from "@/components/dashboard/StatsCards";
 import { CreateLinkDialog } from "./CreateLinkDialog";
 import { EditLinkDialog } from "./EditLinkDialog";
 import { LinksTab } from "./LinksTab";
-import { AnalyticsTab } from "./AnalyticsTab";
+import { AnalyticsTab } from "../AnalyticsTab";
 import { UsersTab } from "./UsersTab";
 import Header from "../Header";
 
