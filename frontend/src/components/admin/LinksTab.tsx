@@ -22,14 +22,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Copy, Edit, Trash2, MoreHorizontal, ExternalLink } from "lucide-react";
 import {
-  Copy,
-  Edit,
-  Trash2,
-  MoreHorizontal,
-  ExternalLink,
-} from "lucide-react";
-import { toast } from "sonner";
+  copyToClipboard,
+  openLink,
+  getStatusDisplay,
+  getStatusLabel,
+  truncateUrl
+} from "@/utils/AppUtils";
 
 interface Link {
   id: string;
@@ -48,38 +48,6 @@ interface LinksTabProps {
 }
 
 export function LinksTab({ links, onEdit, onDelete }: LinksTabProps) {
-  const copyToClipboard = (text: string) => {
-    if (!navigator.clipboard) {
-      toast.error("Clipboard API not supported in your browser");
-      return;
-    }
-
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        toast.success("Copied to clipboard!");
-      })
-      .catch(() => {
-        toast.error("Failed to copy to clipboard");
-      });
-  };
-
-  const openLink = (url: string) => {
-    window.open(url, "_blank", "noopener,noreferrer");
-  };
-
-  const getStatusDisplay = (status: string) => {
-    return status.toLowerCase() === "active" || status === "ACTIVE"
-      ? "active"
-      : "paused";
-  };
-
-  const getStatusLabel = (status: string) => {
-    return status.toLowerCase() === "active" || status === "ACTIVE"
-      ? "Active"
-      : "Inactive";
-  };
-
   return (
     <Card>
       <CardHeader>
@@ -114,20 +82,13 @@ export function LinksTab({ links, onEdit, onDelete }: LinksTabProps) {
               links.map((link) => (
                 <TableRow key={link.id}>
                   <TableCell className="max-w-xs">
-                    <div
-                      className="truncate"
-                      title={link.originalUrl}
-                    >
-                      {link.originalUrl.length > 35
-                        ? `${link.originalUrl.slice(0, 35)}...`
-                        : link.originalUrl}
+                    <div className="truncate" title={link.originalUrl}>
+                      {truncateUrl(link.originalUrl, 35)}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
-                      <span className="font-mono text-sm">
-                        {link.shortUrl}
-                      </span>
+                      <span className="font-mono text-sm">{link.shortUrl}</span>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -168,9 +129,7 @@ export function LinksTab({ links, onEdit, onDelete }: LinksTabProps) {
                           <ExternalLink className="mr-2 h-4 w-4" />
                           Visit
                         </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => onEdit(link)}
-                        >
+                        <DropdownMenuItem onClick={() => onEdit(link)}>
                           <Edit className="mr-2 h-4 w-4" />
                           Edit
                         </DropdownMenuItem>

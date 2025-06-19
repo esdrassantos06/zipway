@@ -34,6 +34,7 @@ import {
 import { toast } from "sonner";
 import axios from "axios";
 import { LinkStatus } from "@/generated/prisma";
+import { truncateUrl, copyToClipboard } from "@/utils/AppUtils";
 
 type Link = {
   id: string;
@@ -59,11 +60,6 @@ export function LinksTable({
   limit,
 }: LinksTableProps) {
   const displayedLinks = limit ? links.slice(0, limit) : links;
-
-  const copyToClipboard = (url: string) => {
-    navigator.clipboard.writeText(url);
-    toast.success("Link copied!");
-  };
 
   const deleteLink = async (link: Link) => {
     const confirmed = confirm("Are you sure you want to delete this link?");
@@ -162,9 +158,7 @@ export function LinksTable({
                     title={link.originalUrl}
                     aria-label={link.originalUrl}
                   >
-                    {link.originalUrl.length > 40
-                      ? `${link.originalUrl.slice(0, 40)}...`
-                      : link.originalUrl}
+                    {truncateUrl(link.originalUrl, 40)}
                   </div>
                 </TableCell>
                 <TableCell>

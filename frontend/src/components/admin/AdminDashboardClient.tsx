@@ -18,6 +18,7 @@ import { EditLinkDialog } from "./EditLinkDialog";
 import { LinksTab } from "./LinksTab";
 import { AnalyticsTab } from "./AnalyticsTab";
 import { UsersTab } from "./UsersTab";
+import Header from "../Header";
 
 interface Link {
   id: string;
@@ -242,6 +243,7 @@ export default function AdminDashboardClient({
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Header />
       <div className="p-6">
         <div className="mx-auto max-w-7xl space-y-6">
           {/* Header */}

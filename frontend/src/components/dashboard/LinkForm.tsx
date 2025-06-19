@@ -22,6 +22,7 @@ import {
   validateAlias,
   isReservedAlias,
 } from "@/utils/sanitize";
+import { copyToClipboard } from "@/utils/AppUtils";
 
 let globalUrl = "";
 let globalShortenedUrl: string | null = null;
@@ -141,21 +142,6 @@ export function LinkForm() {
     }
   };
 
-  const copyToClipboard = () => {
-    if (!navigator.clipboard) {
-      toast.error("Clipboard API is not supported in your browser");
-      return;
-    }
-
-    try {
-      navigator.clipboard.writeText(shortenedUrl as string);
-      toast.success("Copied to clipboard!");
-    } catch (e) {
-      toast.error("Failed to copy to clipboard");
-      console.error("Failed to copy to clipboard", e);
-    }
-  };
-
   return (
     <Card className="w-full">
       <CardHeader>
@@ -233,7 +219,11 @@ export function LinkForm() {
                 readOnly
                 onClick={(e) => (e.target as HTMLInputElement).select()}
               />
-              <Button size="icon" variant="outline" onClick={copyToClipboard}>
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => copyToClipboard(shortenedUrl)}
+              >
                 <Copy className="size-4" />
               </Button>
             </div>
