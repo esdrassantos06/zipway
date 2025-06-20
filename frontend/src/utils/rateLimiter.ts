@@ -1,16 +1,16 @@
 import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
+import { redis } from "./redis";
 
 export const DEFAULT_LIMITS = {
   general: 100,
   shorten: 20,
   redirect: 200,
-  admin: 10,
+  admin: 50,
 };
 
 export const createRateLimiter = (limit: number) => {
   const ratelimit = new Ratelimit({
-    redis: Redis.fromEnv(),
+    redis: redis,
     limiter: Ratelimit.slidingWindow(limit, "1 m"),
   });
 

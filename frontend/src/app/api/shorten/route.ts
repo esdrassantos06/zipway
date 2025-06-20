@@ -30,25 +30,19 @@ export async function POST(req: NextRequest) {
 
   if (!session) {
     return NextResponse.json(
-      { error: "Usuário não autenticado" },
+      { error: "User not authenticated" },
       { status: 401 },
     );
   }
 
   if (!isAllowed) {
-    return NextResponse.json(
-      { error: "Limite de taxa excedido" },
-      { status: 429 },
-    );
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
 
   const { targetUrl, custom_id } = (await req.json()) as RequestBody;
 
   if (!validator.isURL(targetUrl)) {
-    return NextResponse.json(
-      { error: "Formato de URL inválido" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Invalid URL format" }, { status: 400 });
   }
 
   let shortId = "";
@@ -63,7 +57,7 @@ export async function POST(req: NextRequest) {
 
     if (reservedPaths.includes(sanitized)) {
       return NextResponse.json(
-        { error: "Este alias é reservado" },
+        { error: "This alias is reserved by the system" },
         { status: 400 },
       );
     }
@@ -72,7 +66,10 @@ export async function POST(req: NextRequest) {
       where: { shortId: sanitized },
     });
     if (exists) {
-      return NextResponse.json({ error: "Alias já existe" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Alias ​​already exists" },
+        { status: 400 },
+      );
     }
 
     shortId = sanitized;
@@ -87,7 +84,7 @@ export async function POST(req: NextRequest) {
 
   if (!shortId) {
     return NextResponse.json(
-      { error: "Falha ao gerar o ID curto" },
+      { error: "Failed to generate short ID" },
       { status: 500 },
     );
   }
@@ -113,9 +110,9 @@ export async function POST(req: NextRequest) {
       short_url,
     });
   } catch (error) {
-    console.error("Erro ao criar URL:", error);
+    console.error("Error creating URL:", error);
     return NextResponse.json(
-      { error: "Erro interno do servidor" },
+      { error: "Internal Server Error" },
       { status: 500 },
     );
   }

@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSessionFromHeaders } from "@/utils/getSession";
+import {
+  createRateLimiter,
+  DEFAULT_LIMITS,
+  getClientIdentifier,
+} from "@/utils/rateLimiter";
 
 export async function PATCH(
   req: NextRequest,
@@ -9,18 +14,26 @@ export async function PATCH(
   const session = await getSessionFromHeaders(req.headers);
 
   if (!session) {
-    return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
+  const rateLimiter = createRateLimiter(DEFAULT_LIMITS.general);
+  const identifier = getClientIdentifier(req);
+  const isAllowed = await rateLimiter(identifier);
+
+  if (!isAllowed) {
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
 
   const { shortId } = await params;
 
   if (!shortId || shortId === "undefined" || shortId.trim() === "") {
-    return NextResponse.json({ error: "ID do link inválido" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid link ID" }, { status: 400 });
   }
 
   const { status } = await req.json();
   if (!["ACTIVE", "PAUSED"].includes(status)) {
-    return NextResponse.json({ error: "Status inválido" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid status" }, { status: 400 });
   }
 
   try {
@@ -51,17 +64,13 @@ export async function PATCH(
     }
 
     if (!link) {
-      return NextResponse.json(
-        { error: "Link não encontrado" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "Link not found" }, { status: 404 });
     }
 
     if (link.userId !== session.user.id) {
-      return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    // Update using the correct identifier (shortId if it exists, otherwise id)
     const whereClause = link.shortId
       ? { shortId: link.shortId }
       : { id: link.id };
@@ -72,11 +81,14 @@ export async function PATCH(
     });
 
     return NextResponse.json({
-      message: "Status atualizado",
+      message: "Status updated",
       status: updated.status.toLowerCase(),
     });
   } catch (error) {
-    console.error("Erro ao atualizar status:", error);
-    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+    console.error("Error updating status:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }

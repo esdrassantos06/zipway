@@ -10,7 +10,7 @@ export async function SignUpEmailActions(formData: FormData) {
     email: formData.get("email"),
     password: formData.get("password"),
     confirmPassword: formData.get("confirmPassword"),
-    acceptTerms: formData.get("acceptTerms"),
+    acceptTerms: formData.get("acceptTerms") === "true",
   };
 
   const parsed = signUpSchema.safeParse(rawData);

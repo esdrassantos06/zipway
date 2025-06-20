@@ -31,10 +31,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-// Schema de validação
 const loginFormSchema = z.object({
-  email: z.string().email("Email inválido"),
-  password: z.string().min(1, "Senha é obrigatória"),
+  email: z.string().email("Invalid email"),
+  password: z.string().min(1, "Password is required"),
 });
 
 type LoginFormValues = z.infer<typeof loginFormSchema>;
@@ -64,26 +63,23 @@ export const LoginForm = () => {
       if (error) {
         toast.error(error);
 
-        // Definir erros específicos baseados na resposta
         if (error.toLowerCase().includes("email")) {
           form.setError("email", { message: error });
-        } else if (
-          error.toLowerCase().includes("password") ||
-          error.toLowerCase().includes("senha")
-        ) {
+        } else if (error.toLowerCase().includes("password")) {
           form.setError("password", { message: error });
         } else {
-          // Erro geral - pode ser mostrado no toast ou como erro do form
           form.setError("root", { message: error });
         }
       } else {
-        toast.success("Login realizado com sucesso! Bem-vindo de volta!");
+        toast.success("Login successful! Welcome back!");
         router.push("/profile");
         window.location.reload();
       }
     } catch {
-      toast.error("Erro interno. Tente novamente.");
-      form.setError("root", { message: "Erro interno. Tente novamente." });
+      toast.error("Internal Server Error. Try again later.");
+      form.setError("root", {
+        message: "Internal Server Error. Try again later.",
+      });
     } finally {
       setIsPending(false);
     }
@@ -93,16 +89,15 @@ export const LoginForm = () => {
     <div className="flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <ReturnButton href="/" label="Voltar" />
+          <ReturnButton href="/" label="Go back" />
           <CardTitle className="text-center text-2xl font-bold">
-            Entrar
+            Log in
           </CardTitle>
           <CardDescription className="text-center">
-            Entre na sua conta para continuar
+            Log in to your account to continue
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Login Social */}
           <AuthButtons provider="github" />
           <AuthButtons provider="google" />
 
@@ -112,12 +107,11 @@ export const LoginForm = () => {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="text-muted-foreground px-2">
-                Ou continue com
+                Or continue with
               </span>
             </div>
           </div>
 
-          {/* Login com Email */}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -130,7 +124,7 @@ export const LoginForm = () => {
                       <Input
                         {...field}
                         type="email"
-                        placeholder="seu@email.com"
+                        placeholder="your@email.com"
                         disabled={isPending}
                         autoComplete="email"
                       />
@@ -145,7 +139,7 @@ export const LoginForm = () => {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Senha</FormLabel>
+                    <FormLabel>Password</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -162,14 +156,13 @@ export const LoginForm = () => {
 
               <div className="flex items-center justify-between">
                 <Link
-                  href="/forgot-password"
+                  href="/auth/forgot-password"
                   className="text-sm text-blue-600 hover:underline"
                 >
-                  Esqueceu a senha?
+                  Forgot your password?
                 </Link>
               </div>
 
-              {/* Exibir erro geral do formulário */}
               {form.formState.errors.root && (
                 <div className="text-center text-sm text-red-600">
                   {form.formState.errors.root.message}
@@ -180,12 +173,12 @@ export const LoginForm = () => {
                 {isPending ? (
                   <>
                     <Loader size={12} className="mr-2 animate-spin" />
-                    Entrando...
+                    Loging in...
                   </>
                 ) : (
                   <>
                     <Mail className="mr-2 size-4" />
-                    Entrar com Email
+                    Login with Email
                   </>
                 )}
               </Button>
@@ -193,12 +186,12 @@ export const LoginForm = () => {
           </Form>
 
           <div className="text-center text-sm">
-            Não tem uma conta?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               href="/auth/register"
               className="font-medium text-blue-600 hover:underline"
             >
-              Criar conta
+              Register
             </Link>
           </div>
         </CardContent>

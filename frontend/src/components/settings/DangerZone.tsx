@@ -55,7 +55,7 @@ export const DangerZone = () => {
         </div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive">Excluir Conta</Button>
+            <Button variant="destructive">Delete Account</Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -72,7 +72,7 @@ export const DangerZone = () => {
                 className={cn(buttonVariants({ variant: "destructive" }))}
                 onClick={handleDeleteAccount}
               >
-                {loading ? "Excluindo..." : "Excluir Conta"}
+                {loading ? "Deleting..." : "Delete Account"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

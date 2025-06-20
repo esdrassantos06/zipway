@@ -18,16 +18,18 @@ export const validateAlias = (
 ): { valid: boolean; error?: string } => {
   const sanitized = sanitizeAlias(alias);
 
-  if (!sanitized) return { valid: false, error: "Alias não pode ser vazio" };
+  if (!sanitized) return { valid: false, error: "Alias ​​cannot be empty" };
   if (sanitized.length < 2)
-    return { valid: false, error: "Alias precisa ter pelo menos 2 caracteres" };
+    return {
+      valid: false,
+      error: "Alias ​​must be at least 2 characters long",
+    };
   if (/^\d+$/.test(sanitized))
-    return { valid: false, error: "Alias não pode ser apenas números" };
-
+    return { valid: false, error: "Alias ​​cannot be just numbers" };
   const forbiddenPatterns = [/^(admin|root|api|www|mail)$/i, /^[_-]+$/];
 
   if (forbiddenPatterns.some((pattern) => pattern.test(sanitized))) {
-    return { valid: false, error: "Padrão de alias não permitido" };
+    return { valid: false, error: "Alias ​​pattern not allowed" };
   }
 
   return { valid: true };
@@ -42,6 +44,8 @@ export const reservedPaths = [
   "login",
   "register",
   "auth",
+  "forgot-password",
+  "reset-password",
   "signin",
   "signup",
   "logout",

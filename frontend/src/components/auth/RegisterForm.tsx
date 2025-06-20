@@ -31,29 +31,28 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-// Schema de validação
 const registerFormSchema = z
   .object({
     name: z
       .string()
-      .min(2, "Nome deve ter pelo menos 2 caracteres")
-      .max(50, "Nome deve ter no máximo 50 caracteres")
-      .regex(/^[a-zA-ZÀ-ÿ\s]+$/, "Nome deve conter apenas letras e espaços"),
-    email: z.string().email("Email inválido"),
+      .min(2, "Name must be at least 2 characters")
+      .max(50, "Name must be at most 50 characters")
+      .regex(/^[a-zA-ZÀ-ÿ\s]+$/, "Name must contain only letters and spaces"),
+    email: z.string().email("Invalid email"),
     password: z
       .string()
-      .min(8, "Senha deve ter pelo menos 8 caracteres")
+      .min(8, "Password must be at least 8 characters long")
       .regex(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-        "Senha deve conter pelo menos uma letra minúscula, uma maiúscula e um número",
+        "Password must contain at least one lowercase letter, one uppercase letter and one number",
       ),
-    confirmPassword: z.string().min(1, "Confirmação de senha é obrigatória"),
+    confirmPassword: z.string().min(1, "Password confirmation is required"),
     acceptTerms: z.boolean().refine((val) => val === true, {
-      message: "Você deve aceitar os termos de uso",
+      message: "You must accept the terms of use",
     }),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "As senhas não coincidem",
+    message: "Passwords do not match",
     path: ["confirmPassword"],
   });
 
@@ -83,38 +82,32 @@ export const RegisterForm = () => {
       formData.append("email", data.email);
       formData.append("password", data.password);
       formData.append("confirmPassword", data.confirmPassword);
-      formData.append("acceptTerms", data.acceptTerms.toString());
+      formData.append("acceptTerms", data.acceptTerms ? "true" : "false");
 
       const { error } = await SignUpEmailActions(formData);
 
       if (error) {
         toast.error(error);
 
-        // Definir erros específicos baseados na resposta
         if (error.toLowerCase().includes("email")) {
           form.setError("email", { message: error });
-        } else if (
-          error.toLowerCase().includes("nome") ||
-          error.toLowerCase().includes("name")
-        ) {
+        } else if (error.toLowerCase().includes("name")) {
           form.setError("name", { message: error });
-        } else if (
-          error.toLowerCase().includes("password") ||
-          error.toLowerCase().includes("senha")
-        ) {
+        } else if (error.toLowerCase().includes("password")) {
           form.setError("password", { message: error });
         } else {
-          // Erro geral
           form.setError("root", { message: error });
         }
       } else {
-        toast.success("Usuário registrado com sucesso!");
+        toast.success("User registered successfully!");
         router.push("/");
         window.location.reload();
       }
     } catch {
-      toast.error("Erro interno. Tente novamente.");
-      form.setError("root", { message: "Erro interno. Tente novamente." });
+      toast.error("Internal Server Error.Try again later.");
+      form.setError("root", {
+        message: "Internal Server Error.Try again later.",
+      });
     } finally {
       setIsPending(false);
     }
@@ -124,16 +117,16 @@ export const RegisterForm = () => {
     <div className="flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <ReturnButton href="/" label="Voltar" />
+          <ReturnButton href="/" label="Go back" />
           <CardTitle className="text-center text-2xl font-bold">
-            Criar Conta
+            Create Account
           </CardTitle>
           <CardDescription className="text-center">
-            Crie sua conta para começar
+            Create your account to get started
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Registro Social */}
+          {/* Social Buttons */}
           <AuthButtons signUp provider="github" />
           <AuthButtons signUp provider="google" />
 
@@ -143,7 +136,7 @@ export const RegisterForm = () => {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="text-muted-foreground px-2">
-                Ou registre-se com
+                Or register with
               </span>
             </div>
           </div>
@@ -156,11 +149,11 @@ export const RegisterForm = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nome</FormLabel>
+                    <FormLabel>Name</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder="João Silva"
+                        placeholder="John Doe"
                         disabled={isPending}
                         autoComplete="name"
                       />
@@ -180,7 +173,7 @@ export const RegisterForm = () => {
                       <Input
                         {...field}
                         type="email"
-                        placeholder="seu@email.com"
+                        placeholder="your@email.com"
                         disabled={isPending}
                         autoComplete="email"
                       />
@@ -207,8 +200,8 @@ export const RegisterForm = () => {
                     </FormControl>
                     <FormMessage />
                     <p className="text-muted-foreground text-xs">
-                      Mínimo 8 caracteres, incluindo maiúscula, minúscula e
-                      número
+                      Minimum 8 characters, including uppercase, lowercase and
+                      number
                     </p>
                   </FormItem>
                 )}
@@ -219,7 +212,7 @@ export const RegisterForm = () => {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Confirmar Senha</FormLabel>
+                    <FormLabel>Confirm Password</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -238,29 +231,35 @@ export const RegisterForm = () => {
                 control={form.control}
                 name="acceptTerms"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-y-0 space-x-3">
+                  <FormItem className="flex flex-row items-center space-y-0 space-x-1">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
-                        onCheckedChange={field.onChange}
+                        onCheckedChange={(checked) => {
+                          if (typeof checked === "boolean") {
+                            field.onChange(checked);
+                          } else {
+                            field.onChange(false);
+                          }
+                        }}
                         disabled={isPending}
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel className="text-sm">
-                        Aceito os{" "}
+                        I accept the
                         <Link
                           href="/terms"
                           className="text-blue-600 hover:underline"
                         >
-                          termos de uso
+                          Terms of Use
                         </Link>{" "}
-                        e{" "}
+                        and
                         <Link
                           href="/privacy"
                           className="text-blue-600 hover:underline"
                         >
-                          política de privacidade
+                          Privacy Policy
                         </Link>
                       </FormLabel>
                       <FormMessage />
@@ -269,7 +268,6 @@ export const RegisterForm = () => {
                 )}
               />
 
-              {/* Exibir erro geral do formulário */}
               {form.formState.errors.root && (
                 <div className="text-center text-sm text-red-600">
                   {form.formState.errors.root.message}
@@ -284,12 +282,12 @@ export const RegisterForm = () => {
                 {isPending ? (
                   <>
                     <Loader size={12} className="mr-2 animate-spin" />
-                    Criando conta...
+                    Creating account...
                   </>
                 ) : (
                   <>
                     <Mail className="mr-2 size-4" />
-                    Criar Conta
+                    Create account
                   </>
                 )}
               </Button>
@@ -297,12 +295,12 @@ export const RegisterForm = () => {
           </Form>
 
           <div className="text-center text-sm">
-            Já tem uma conta?{" "}
+            Already have an account?{" "}
             <Link
               href="/auth/login"
               className="font-medium text-blue-600 hover:underline"
             >
-              Fazer login
+              Log in
             </Link>
           </div>
         </CardContent>

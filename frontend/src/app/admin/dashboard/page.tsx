@@ -61,8 +61,8 @@ const AdminDashboard = async () => {
 
     links = res.data.links;
   } catch (error) {
-    console.error("Erro ao buscar links:", error);
-    throw new Error("Erro ao buscar links");
+    console.error("Error fetching links:", error);
+    throw new Error("Erro fetching links");
   }
 
   return (

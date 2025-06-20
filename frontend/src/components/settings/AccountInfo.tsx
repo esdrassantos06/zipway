@@ -5,7 +5,6 @@ import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { Input } from "../ui/input";
-import { auth } from "@/lib/auth";
 import { getInitials } from "@/utils/AppUtils";
 import {
   updateUserProfileAction,
@@ -25,19 +24,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
-type SessionType = Awaited<ReturnType<typeof auth.api.getSession>>;
+import { Session } from "@/lib/auth-client";
 
 type Props = {
-  session: SessionType;
+  session: Session;
 };
 
 const accountFormSchema = z.object({
   name: z
     .string()
-    .min(2, "Nome deve ter pelo menos 2 caracteres")
-    .max(50, "Nome deve ter no máximo 50 caracteres"),
-  email: z.string().email("Email inválido"),
+    .min(2, "Name must be at least 2 characters")
+    .max(50, "Name must be at most 50 characters"),
+  email: z.string().email("Invalid email"),
   password: z.string().optional(),
 });
 
@@ -68,12 +66,12 @@ export const AccountInfo = ({ session }: Props) => {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      toast.error("Por favor, selecione apenas arquivos de imagem.");
+      toast.error("Please select image files only.");
       return;
     }
 
     if (file.size > 1 * 1024 * 1024) {
-      toast.error("A imagem deve ter no máximo 1MB.");
+      toast.error("Image must be max 1MB.");
       return;
     }
 
@@ -85,7 +83,7 @@ export const AccountInfo = ({ session }: Props) => {
 
     setImageFile(file);
     setImageDeleted(false);
-    toast.success("Imagem selecionada! Clique em 'Save Changes' para salvar.");
+    toast.success("Image selected! Save Changes to save.");
   };
 
   const handleDeleteImage = async () => {
@@ -98,12 +96,12 @@ export const AccountInfo = ({ session }: Props) => {
         return;
       }
 
-      toast.success("Imagem deletada com sucesso!");
+      toast.success("Image deleted successfully!");
       setImageDeleted(true);
       setImageFile(null);
       setImagePreview(null);
     } catch {
-      toast.error("Erro ao deletar imagem.");
+      toast.error("Error deleting image.");
     } finally {
       setIsDeleting(false);
     }
@@ -117,7 +115,7 @@ export const AccountInfo = ({ session }: Props) => {
     if (emailChanged && !data.password) {
       form.setError("password", {
         type: "required",
-        message: "Digite sua senha para alterar o email.",
+        message: "Enter your password to change your email.",
       });
       return;
     }
@@ -147,14 +145,13 @@ export const AccountInfo = ({ session }: Props) => {
         }
       }
 
-      toast.success("Perfil atualizado com sucesso!");
-
+      toast.success("Profile updated successfully!");
       form.setValue("password", "");
       setEmailChanged(false);
       setImageFile(null);
       setImagePreview(null);
     } catch {
-      toast.error("Erro ao atualizar perfil.");
+      toast.error("Error updating profile.");
     } finally {
       setIsLoading(false);
     }
@@ -187,7 +184,7 @@ export const AccountInfo = ({ session }: Props) => {
 
               <div className="flex flex-col items-center gap-2">
                 <Label className="inline-block cursor-pointer text-sm font-medium text-blue-600 hover:underline">
-                  {imageFile ? "Trocar imagem selecionada" : "Trocar imagem"}
+                  {imageFile ? "Swap selected image" : "Swap image"}
                   <Input
                     ref={fileInputRef}
                     type="file"
@@ -208,14 +205,14 @@ export const AccountInfo = ({ session }: Props) => {
                     className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
                   >
                     <Trash2 className="mr-1 size-4" />
-                    {isDeleting ? "Deletando..." : "Deletar imagem"}
+                    {isDeleting ? "Deleting..." : "Delete image"}
                   </Button>
                 )}
               </div>
 
               {imageFile && (
                 <p className="text-xs text-green-600">
-                  Nova imagem selecionada: {imageFile.name}
+                  New image selected: {imageFile.name}
                 </p>
               )}
             </div>
@@ -231,7 +228,7 @@ export const AccountInfo = ({ session }: Props) => {
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder={session?.user.name || "Digite seu nome"}
+                        placeholder={session?.user.name || "Enter your name"}
                         disabled={isLoading || isDeleting}
                       />
                     </FormControl>
@@ -250,7 +247,7 @@ export const AccountInfo = ({ session }: Props) => {
                       <Input
                         {...field}
                         type="email"
-                        placeholder={session?.user.email || "Digite seu email"}
+                        placeholder={session?.user.email || "Enter your email"}
                         disabled={isLoading || isDeleting}
                         onChange={(e) => {
                           field.onChange(e);
@@ -270,13 +267,13 @@ export const AccountInfo = ({ session }: Props) => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Senha Atual (obrigatória para alterar email)
+                        Current Password (required to change email)
                       </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
                           type="password"
-                          placeholder="Digite sua senha atual"
+                          placeholder="Enter your current password"
                           disabled={isLoading || isDeleting}
                         />
                       </FormControl>
@@ -291,7 +288,7 @@ export const AccountInfo = ({ session }: Props) => {
                 disabled={isLoading || isDeleting}
                 className="w-full"
               >
-                {isLoading ? "Salvando..." : "Save Changes"}
+                {isLoading ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </form>

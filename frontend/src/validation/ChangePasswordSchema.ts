@@ -6,19 +6,19 @@ export const changePasswordSchema = z
   .object({
     currentPassword: z
       .string()
-      .min(1, { message: "Senha atual é obrigatória" }),
+      .min(1, { message: "Current password is required" }),
     newPassword: z
       .string()
-      .min(8, { message: "A nova senha deve ter pelo menos 8 caracteres" })
+      .min(8, { message: "New password must be at least 8 characters long" })
       .regex(pwdRegex, {
         message:
-          "Deve conter maiúscula, minúscula, número e caractere especial",
+          "Must contain uppercase, lowercase, number and special character",
       }),
     confirmPassword: z
       .string()
-      .min(1, { message: "Confirmação de senha é obrigatória" }),
+      .min(1, { message: "Password confirmation is required" }),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "As senhas não conferem",
+    message: "The passwords do not match",
     path: ["confirmPassword"],
   });

@@ -2,17 +2,17 @@ import { toast } from "sonner";
 
 export const copyToClipboard = (text: string) => {
   if (!navigator.clipboard) {
-    toast.error("API de clipboard não suportada no seu navegador");
+    toast.error("Clipboard API not supported in your browser");
     return;
   }
 
   navigator.clipboard
     .writeText(text)
     .then(() => {
-      toast.success("Copiado para a área de transferência!");
+      toast.success("Copied to clipboard!");
     })
     .catch(() => {
-      toast.error("Erro ao copiar para a área de transferência");
+      toast.error("Error copying to clipboard");
     });
 };
 
@@ -28,8 +28,8 @@ export const getStatusDisplay = (status: string) => {
 
 export const getStatusLabel = (status: string) => {
   return status.toLowerCase() === "active" || status === "ACTIVE"
-    ? "Ativo"
-    : "Inativo";
+    ? "Active"
+    : "Paused";
 };
 
 export const truncateUrl = (url: string, maxLength: number = 35) => {

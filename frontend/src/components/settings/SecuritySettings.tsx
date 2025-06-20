@@ -17,20 +17,20 @@ const changePasswordSchema = z
   .object({
     currentPassword: z
       .string()
-      .min(1, { message: "Senha atual é obrigatória" }),
+      .min(1, { message: "Current password is required" }),
     newPassword: z
       .string()
-      .min(8, { message: "A nova senha deve ter pelo menos 8 caracteres" })
+      .min(8, { message: "New password must be at least 8 characters long" })
       .regex(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[#?!@$%^&*-]).{8,}$/, {
         message:
-          "A nova senha deve conter pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial",
+          "The new password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
       }),
     confirmPassword: z
       .string()
-      .min(1, { message: "Confirmação de senha é obrigatória" }),
+      .min(1, { message: "Password confirmation is required" }),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "As senhas não conferem",
+    message: "The passwords do not match",
     path: ["confirmPassword"],
   });
 
@@ -60,7 +60,7 @@ export const SecuritySettings = () => {
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success("Senha alterada com sucesso!");
+        toast.success("Password changed successfully!");
         reset();
       }
     });
@@ -71,13 +71,13 @@ export const SecuritySettings = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Shield className="size-5 text-blue-600" />
-          Segurança
+          Security
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="currentPassword">Senha Atual</Label>
+            <Label htmlFor="currentPassword">Current Password</Label>
             <Input
               id="currentPassword"
               type="password"
@@ -92,7 +92,7 @@ export const SecuritySettings = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="newPassword">Nova Senha</Label>
+            <Label htmlFor="newPassword">New Password</Label>
             <Input
               id="newPassword"
               type="password"
@@ -107,7 +107,7 @@ export const SecuritySettings = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
+            <Label htmlFor="confirmPassword">Repeat New Password</Label>
             <Input
               id="confirmPassword"
               type="password"
@@ -122,7 +122,7 @@ export const SecuritySettings = () => {
           </div>
 
           <Button type="submit" disabled={isPending}>
-            {isPending ? "Alterando..." : "Alterar Senha"}
+            {isPending ? "Changing..." : "Change Password"}
           </Button>
         </form>
       </CardContent>

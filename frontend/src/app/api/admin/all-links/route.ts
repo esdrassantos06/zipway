@@ -25,10 +25,7 @@ export async function GET(req: NextRequest) {
   }
 
   if (!isAllowed) {
-    return NextResponse.json(
-      { error: "Limite de taxa excedido" },
-      { status: 429 },
-    );
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
 
   try {
@@ -55,9 +52,9 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ links: mapped });
   } catch (error) {
-    console.error("Erro ao buscar links:", error);
+    console.error("Error fetching links:", error);
     return NextResponse.json(
-      { error: "Erro ao buscar links" },
+      { error: "Error fetching links" },
       { status: 500 },
     );
   }

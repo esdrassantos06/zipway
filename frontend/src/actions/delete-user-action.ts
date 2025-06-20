@@ -11,7 +11,6 @@ import { redirect } from "next/navigation";
 
 export async function deleteUserAction({ userId }: { userId: string }) {
   const headersList = await headers();
-
   const session = await getSessionFromHeaders(headersList);
 
   if (!session) throw new Error("Unauthorized");
@@ -45,6 +44,6 @@ export async function deleteUserAction({ userId }: { userId: string }) {
     if (e instanceof Error) {
       return { error: e.message };
     }
-    return { error: "Internal server error" };
+    return { error: "Internal Server Error" };
   }
 }

@@ -23,42 +23,38 @@ export async function PATCH(
   const isAllowed = await rateLimiter(identifier);
 
   if (!isAllowed) {
-    return NextResponse.json(
-      { error: "Limite de taxa excedido" },
-      { status: 429 },
-    );
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
 
   const session = await getSessionFromHeaders(req.headers);
 
   if (!session) {
-    return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
   if (session.user.role !== UserRole.ADMIN) {
-    return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+    return NextResponse.json({ error: "Access denied" }, { status: 403 });
   }
 
   const { id } = await params;
 
   if (!id || id === "undefined" || id.trim() === "") {
-    return NextResponse.json({ error: "ID do link inválido" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid link ID" }, { status: 400 });
   }
 
   try {
     const body = await req.json();
     const { targetUrl, shortId, status } = body;
 
-    // Validações
     if (targetUrl && !validator.isURL(targetUrl, { require_protocol: true })) {
       return NextResponse.json(
-        { error: "URL de destino inválida" },
+        { error: "Invalid destination URL" },
         { status: 400 },
       );
     }
 
     if (status && !["active", "paused"].includes(status.toLowerCase())) {
-      return NextResponse.json({ error: "Status inválido" }, { status: 400 });
+      return NextResponse.json({ error: "Invalid status" }, { status: 400 });
     }
 
     if (shortId) {
@@ -66,7 +62,7 @@ export async function PATCH(
 
       if (isReservedAlias(sanitizedShortId)) {
         return NextResponse.json(
-          { error: "Este slug é reservado pelo sistema" },
+          { error: "This slug is reserved by the system" },
           { status: 400 },
         );
       }
@@ -74,12 +70,11 @@ export async function PATCH(
       const validation = validateAlias(sanitizedShortId);
       if (!validation.valid) {
         return NextResponse.json(
-          { error: validation.error || "Slug inválido" },
+          { error: validation.error || "Invalid Slug" },
           { status: 400 },
         );
       }
 
-      // Verificar se o shortId já existe (exceto para o link atual)
       const existingLink = await prisma.link.findUnique({
         where: { shortId: sanitizedShortId },
       });
@@ -92,7 +87,6 @@ export async function PATCH(
       }
     }
 
-    // Encontrar o link
     let link = await prisma.link.findUnique({
       where: { id },
     });
@@ -104,10 +98,7 @@ export async function PATCH(
     }
 
     if (!link) {
-      return NextResponse.json(
-        { error: "Link não encontrado" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "Link not found" }, { status: 404 });
     }
 
     const updateData: Partial<{
@@ -128,7 +119,6 @@ export async function PATCH(
       updateData.status = status.toUpperCase() as "ACTIVE" | "PAUSED";
     }
 
-    // Atualizar o link
     const whereClause = link.shortId
       ? { shortId: link.shortId }
       : { id: link.id };
@@ -149,13 +139,13 @@ export async function PATCH(
     };
 
     return NextResponse.json({
-      message: "Link atualizado com sucesso",
+      message: "Link updated successfully",
       link: response,
     });
   } catch (error) {
-    console.error("Erro ao editar link:", error);
+    console.error("Error editing link:", error);
     return NextResponse.json(
-      { error: "Erro interno do servidor" },
+      { error: "Internal Server Error" },
       { status: 500 },
     );
   }

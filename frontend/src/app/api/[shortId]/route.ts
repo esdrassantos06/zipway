@@ -24,7 +24,7 @@ export async function GET(
   const url = await prisma.link.findUnique({ where: { shortId } });
 
   if (!url) {
-    return NextResponse.json({ error: "URL não encontrada" }, { status: 404 });
+    return NextResponse.json({ error: "URL not found" }, { status: 404 });
   }
 
   await prisma.link.update({

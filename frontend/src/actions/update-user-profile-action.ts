@@ -100,7 +100,7 @@ export async function updateUserEmailAction({
     });
 
     if (existingUser && existingUser.id !== session.user.id) {
-      return { error: "Email já está em uso." };
+      return { error: "Email already exists." };
     }
 
     const currentAccount = await prisma.account.findFirst({
@@ -112,7 +112,7 @@ export async function updateUserEmailAction({
     });
 
     if (!currentAccount || !currentAccount.password) {
-      return { error: "Usuário não encontrado ou senha não definida." };
+      return { error: "User not found or password not set." };
     }
 
     const { verifyPassword } = await import("@/lib/argon2");
@@ -122,7 +122,7 @@ export async function updateUserEmailAction({
     });
 
     if (!isPasswordValid) {
-      return { error: "Senha incorreta." };
+      return { error: "Incorrect password." };
     }
 
     await prisma.user.update({
@@ -155,7 +155,7 @@ export async function deleteUserProfileImageAction() {
     });
 
     if (!currentUser?.image) {
-      return { error: "Nenhuma imagem encontrada para deletar." };
+      return { error: "No images found to delete." };
     }
 
     const urlParts = currentUser.image.split("/");
@@ -177,12 +177,13 @@ export async function deleteUserProfileImageAction() {
     });
 
     revalidatePath("/account");
+    revalidatePath("/settings");
     return { error: null };
   } catch (e) {
     console.error("Delete profile image error:", e);
     if (e instanceof Error) {
       return { error: e.message };
     }
-    return { error: "Erro ao deletar imagem do perfil." };
+    return { error: "Error deleting profile image." };
   }
 }

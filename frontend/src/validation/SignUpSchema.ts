@@ -10,10 +10,10 @@ export const signUpSchema = z
           "Name must contain only letters, spaces, apostrophes, or hyphens",
       }),
     email: z.string().email("Invalid email format"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string().min(1, "Please confirm your password"),
-    acceptTerms: z.literal("on", {
-      errorMap: () => ({ message: "You must accept the terms and conditions" }),
+    acceptTerms: z.boolean().refine((val) => val === true, {
+      message: "You must accept the terms and conditions",
     }),
   })
   .refine((data) => data.password === data.confirmPassword, {

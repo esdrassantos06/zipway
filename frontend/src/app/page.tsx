@@ -106,14 +106,14 @@ export default function Home() {
                 <div className="flex flex-col items-center space-y-4">
                   <Users className="size-12 text-blue-600" />
                   <div className="space-y-2 text-center">
-                    <h3 className="text-3xl font-bold">2+ (LOL)</h3>
+                    <h3 className="text-3xl font-bold">20+</h3>
                     <p className="text-gray-500">Active users</p>
                   </div>
                 </div>
                 <div className="flex flex-col items-center space-y-4">
                   <Link2 className="size-12 text-blue-600" />
                   <div className="space-y-2 text-center">
-                    <h3 className="text-3xl font-bold">20+</h3>
+                    <h3 className="text-3xl font-bold">300+</h3>
                     <p className="text-gray-500">Shortened links</p>
                   </div>
                 </div>
