@@ -242,17 +242,17 @@ export default function AdminDashboardClient({
   };
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen">
       <Header />
       <div className="p-6">
         <div className="mx-auto max-w-7xl space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold dark:text-white text-gray-900">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 Admin Dashboard
               </h1>
-              <p className="dark:text-gray-300 text-gray-600">
+              <p className="text-gray-600 dark:text-gray-300">
                 Hello, {session.user.name}! Manage all shortened links
               </p>
             </div>

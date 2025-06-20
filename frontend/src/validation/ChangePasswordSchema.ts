@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-const pwdRegex =
-  /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[#?!@$%^&*-]).{8,}$/;
+const pwdRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[#?!@$%^&*-]).{8,}$/;
 
 export const changePasswordSchema = z
   .object({

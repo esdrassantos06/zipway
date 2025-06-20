@@ -17,10 +17,16 @@ const Footer = () => {
           </Link>
         </div>
         <div className="flex gap-4">
-          <Link href="/terms" className="text-xs underline-offset-4 hover:underline">
+          <Link
+            href="/terms"
+            className="text-xs underline-offset-4 hover:underline"
+          >
             Terms of Use{" "}
           </Link>
-          <Link href="/privacy" className="text-xs underline-offset-4 hover:underline">
+          <Link
+            href="/privacy"
+            className="text-xs underline-offset-4 hover:underline"
+          >
             Privacy
           </Link>
         </div>

@@ -28,27 +28,24 @@ export default function Sidebar({
   activeTab,
   setActiveTab,
 }: SidebarClientProps) {
-    const { data: session, isPending } = authClient.useSession();
+  const { data: session, isPending } = authClient.useSession();
 
-    if (isPending)
-      return (
-        <div className="bg-background relative w-64 border-r p-6 space-y-4">
-          <Skeleton className="h-8 w-32 rounded-md" />
-          <div className="space-y-2">
-            <Skeleton className="h-10 w-full rounded-md" />
-            <Skeleton className="h-10 w-full rounded-md" />
-            <Skeleton className="h-10 w-full rounded-md" />
-          </div>
-          <div className="absolute right-4 bottom-4 left-4">
-            <Skeleton className="h-10 w-full rounded-md" />
-          </div>
+  if (isPending)
+    return (
+      <div className="bg-background relative w-64 space-y-4 border-r p-6">
+        <Skeleton className="h-8 w-32 rounded-md" />
+        <div className="space-y-2">
+          <Skeleton className="h-10 w-full rounded-md" />
+          <Skeleton className="h-10 w-full rounded-md" />
+          <Skeleton className="h-10 w-full rounded-md" />
         </div>
-      );
-    
+        <div className="absolute right-4 bottom-4 left-4">
+          <Skeleton className="h-10 w-full rounded-md" />
+        </div>
+      </div>
+    );
 
-
-    const isAdmin = session?.user.role === "ADMIN";
-
+  const isAdmin = session?.user.role === "ADMIN";
 
   return (
     <div className="bg-background relative w-64 border-r">
@@ -56,7 +53,7 @@ export default function Sidebar({
         <div className="flex items-center space-x-2">
           <Link href="/" className="flex items-center justify-center">
             <Link2 className="size-8 text-blue-600" />
-            <span className="ml-2 text-2xl font-bold dark:text-white text-gray-900">
+            <span className="ml-2 text-2xl font-bold text-gray-900 dark:text-white">
               Zipway
             </span>
           </Link>

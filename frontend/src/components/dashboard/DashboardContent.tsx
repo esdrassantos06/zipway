@@ -22,7 +22,6 @@ interface ContentProps {
 }
 
 export function Content({ activeTab, links, setLinks }: ContentProps) {
-
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <main className="bg-muted/40 flex-1 overflow-x-hidden overflow-y-auto p-6">
@@ -59,12 +58,12 @@ export function Content({ activeTab, links, setLinks }: ContentProps) {
                   View and manage all your recent shortened links
                 </p>
               </div>
-              <LinkForm onLinkCreated={(newLink) => setLinks(prev => [newLink, ...prev])} />
-              <LinksTable
-                links={links}
-                setLinks={setLinks}
-                isLoading={false}
+              <LinkForm
+                onLinkCreated={(newLink) =>
+                  setLinks((prev) => [newLink, ...prev])
+                }
               />
+              <LinksTable links={links} setLinks={setLinks} isLoading={false} />
             </>
           )}
           {activeTab === "analytics" && (

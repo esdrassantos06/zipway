@@ -28,7 +28,7 @@ import {
   openLink,
   getStatusDisplay,
   getStatusLabel,
-  truncateUrl
+  truncateUrl,
 } from "@/utils/AppUtils";
 
 interface Link {

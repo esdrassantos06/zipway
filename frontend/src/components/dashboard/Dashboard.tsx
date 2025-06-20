@@ -4,7 +4,6 @@ import { Header } from "./HeaderDashboard";
 import Sidebar from "./Sidebar/Sidebar";
 import { useState } from "react";
 
-
 type Link = {
   id: string;
   shortId: string;
@@ -19,15 +18,12 @@ interface DashboardContentProps {
   initialLinks: Link[];
 }
 
-export function Dashboard({
-  initialLinks,
-}: DashboardContentProps) {
+export function Dashboard({ initialLinks }: DashboardContentProps) {
   const [activeTab, setActiveTab] = useState("overview");
   const [links, setLinks] = useState<Link[]>(initialLinks);
 
-
   return (
-    <div className="bg-background h-screen flex">
+    <div className="bg-background flex h-screen">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <div className="flex flex-1 flex-col">
         <Header />
