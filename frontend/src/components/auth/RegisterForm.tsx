@@ -46,7 +46,7 @@ export const RegisterForm = () => {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <ReturnButton href="/" label="Voltar" />
@@ -67,7 +67,7 @@ export const RegisterForm = () => {
               <Separator className="w-full" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="text-muted-foreground bg-white px-2">
+              <span className="text-muted-foreground  px-2">
                 Ou registre-se com
               </span>
             </div>
