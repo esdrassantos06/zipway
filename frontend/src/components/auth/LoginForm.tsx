@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +11,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Loader, Mail } from "lucide-react";
 import { toast } from "sonner";
@@ -21,30 +19,75 @@ import ReturnButton from "../ReturnButton";
 import { useState } from "react";
 import { SignInEmailActions } from "@/actions/sign-in-email-actions";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+
+// Schema de validação
+const loginFormSchema = z.object({
+  email: z.string().email("Email inválido"),
+  password: z.string().min(1, "Senha é obrigatória"),
+});
+
+type LoginFormValues = z.infer<typeof loginFormSchema>;
 
 export const LoginForm = () => {
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
 
-  async function handleSubmit(evt: React.FormEvent<HTMLFormElement>) {
-    evt.preventDefault();
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginFormSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
+  const onSubmit = async (data: LoginFormValues) => {
     setIsPending(true);
 
-    const formData = new FormData(evt.target as HTMLFormElement);
-    const { error } = await SignInEmailActions(formData);
+    try {
+      const formData = new FormData();
+      formData.append("email", data.email);
+      formData.append("password", data.password);
 
-    if (error) {
-      toast.error(error);
+      const { error } = await SignInEmailActions(formData);
+
+      if (error) {
+        toast.error(error);
+
+        // Definir erros específicos baseados na resposta
+        if (error.toLowerCase().includes("email")) {
+          form.setError("email", { message: error });
+        } else if (
+          error.toLowerCase().includes("password") ||
+          error.toLowerCase().includes("senha")
+        ) {
+          form.setError("password", { message: error });
+        } else {
+          // Erro geral - pode ser mostrado no toast ou como erro do form
+          form.setError("root", { message: error });
+        }
+      } else {
+        toast.success("Login realizado com sucesso! Bem-vindo de volta!");
+        router.push("/profile");
+        window.location.reload();
+      }
+    } catch {
+      toast.error("Erro interno. Tente novamente.");
+      form.setError("root", { message: "Erro interno. Tente novamente." });
+    } finally {
       setIsPending(false);
-    } else {
-      toast.success("Login Successful. Good to have you back!");
-      router.push("/profile");
-      window.location.reload();
     }
-
-    setIsPending(false);
-  }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
@@ -75,47 +118,79 @@ export const LoginForm = () => {
           </div>
 
           {/* Login com Email */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
                 name="email"
-                type="email"
-                placeholder="seu@email.com"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="email"
+                        placeholder="seu@email.com"
+                        disabled={isPending}
+                        autoComplete="email"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
-              <Input
-                id="password"
+
+              <FormField
+                control={form.control}
                 name="password"
-                type="password"
-                placeholder="••••••••"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Senha</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="password"
+                        placeholder="••••••••"
+                        disabled={isPending}
+                        autoComplete="current-password"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="flex items-center justify-between">
-              <Link
-                href="/forgot-password"
-                className="text-sm text-blue-600 hover:underline"
-              >
-                Esqueceu a senha?
-              </Link>
-            </div>
-            <Button disabled={isPending} type="submit" className="w-full">
-              {isPending ? (
-                <>
-                  <Loader size={12} className="animate-spin" /> Loading...
-                </>
-              ) : (
-                <>
-                  {" "}
-                  <Mail className="mr-2 size-4" />
-                  Entrar com Email
-                </>
+
+              <div className="flex items-center justify-between">
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  Esqueceu a senha?
+                </Link>
+              </div>
+
+              {/* Exibir erro geral do formulário */}
+              {form.formState.errors.root && (
+                <div className="text-center text-sm text-red-600">
+                  {form.formState.errors.root.message}
+                </div>
               )}
-            </Button>
-          </form>
+
+              <Button disabled={isPending} type="submit" className="w-full">
+                {isPending ? (
+                  <>
+                    <Loader size={12} className="mr-2 animate-spin" />
+                    Entrando...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="mr-2 size-4" />
+                    Entrar com Email
+                  </>
+                )}
+              </Button>
+            </form>
+          </Form>
 
           <div className="text-center text-sm">
             Não tem uma conta?{" "}

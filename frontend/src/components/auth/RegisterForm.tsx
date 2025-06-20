@@ -11,7 +11,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader, Mail } from "lucide-react";
@@ -20,30 +19,95 @@ import { useRouter } from "next/navigation";
 import AuthButtons from "./AuthButtons";
 import ReturnButton from "../ReturnButton";
 import { SignUpEmailActions } from "@/actions/sign-up-email-actions";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+
+// Schema de validação
+const registerFormSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Nome deve ter pelo menos 2 caracteres")
+    .max(50, "Nome deve ter no máximo 50 caracteres")
+    .regex(/^[a-zA-ZÀ-ÿ\s]+$/, "Nome deve conter apenas letras e espaços"),
+  email: z.string().email("Email inválido"),
+  password: z
+    .string()
+    .min(8, "Senha deve ter pelo menos 8 caracteres")
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Senha deve conter pelo menos uma letra minúscula, uma maiúscula e um número"),
+  confirmPassword: z.string().min(1, "Confirmação de senha é obrigatória"),
+  acceptTerms: z.boolean().refine(val => val === true, {
+    message: "Você deve aceitar os termos de uso",
+  }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "As senhas não coincidem",
+  path: ["confirmPassword"],
+});
+
+type RegisterFormValues = z.infer<typeof registerFormSchema>;
 
 export const RegisterForm = () => {
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
 
-  async function handleSubmit(evt: React.FormEvent<HTMLFormElement>) {
-    evt.preventDefault();
+  const form = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerFormSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      acceptTerms: false,
+    },
+  });
 
+  const onSubmit = async (data: RegisterFormValues) => {
     setIsPending(true);
 
-    const formData = new FormData(evt.target as HTMLFormElement);
-    const { error } = await SignUpEmailActions(formData);
+    try {
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("email", data.email);
+      formData.append("password", data.password);
+      formData.append("confirmPassword", data.confirmPassword);
+      formData.append("acceptTerms", data.acceptTerms.toString());
 
-    if (error) {
-      toast.error(error);
+      const { error } = await SignUpEmailActions(formData);
+
+      if (error) {
+        toast.error(error);
+        
+        // Definir erros específicos baseados na resposta
+        if (error.toLowerCase().includes("email")) {
+          form.setError("email", { message: error });
+        } else if (error.toLowerCase().includes("nome") || error.toLowerCase().includes("name")) {
+          form.setError("name", { message: error });
+        } else if (error.toLowerCase().includes("password") || error.toLowerCase().includes("senha")) {
+          form.setError("password", { message: error });
+        } else {
+          // Erro geral
+          form.setError("root", { message: error });
+        }
+      } else {
+        toast.success("Usuário registrado com sucesso!");
+        router.push("/");
+        window.location.reload();
+      }
+    } catch {
+      toast.error("Erro interno. Tente novamente.");
+      form.setError("root", { message: "Erro interno. Tente novamente." });
+    } finally {
       setIsPending(false);
-    } else {
-      toast.success("User Registered Successfuly");
-      router.push("/");
-      window.location.reload();
     }
-
-    setIsPending(false);
-  }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
@@ -74,66 +138,145 @@ export const RegisterForm = () => {
           </div>
 
           {/* Registro com Email */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="w-full space-y-2">
-              <Label htmlFor="Name">Nome</Label>
-              <Input id="Name" name="name" placeholder="João Silva" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="João Silva"
+                        disabled={isPending}
+                        autoComplete="name"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="email"
-                type="email"
-                placeholder="seu@email.com"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="email"
+                        placeholder="seu@email.com"
+                        disabled={isPending}
+                        autoComplete="email"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
-              <Input
+
+              <FormField
+                control={form.control}
                 name="password"
-                id="password"
-                type="password"
-                placeholder="••••••••"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Senha</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="password"
+                        placeholder="••••••••"
+                        disabled={isPending}
+                        autoComplete="new-password"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                    <p className="text-xs text-muted-foreground">
+                      Mínimo 8 caracteres, incluindo maiúscula, minúscula e número
+                    </p>
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmar Senha</Label>
-              <Input
+
+              <FormField
+                control={form.control}
                 name="confirmPassword"
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirmar Senha</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="password"
+                        placeholder="••••••••"
+                        disabled={isPending}
+                        autoComplete="new-password"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <div className="flex items-center space-x-2">
-              <Checkbox id="terms" name="acceptTerms" />
-              <Label htmlFor="terms" className="text-sm">
-                Aceito os{" "}
-                <Link href="/terms" className="text-blue-600 hover:underline">
-                  termos de uso
-                </Link>{" "}
-                e{" "}
-                <Link href="/privacy" className="text-blue-600 hover:underline">
-                  política de privacidade
-                </Link>
-              </Label>
-            </div>
+              <FormField
+                control={form.control}
+                name="acceptTerms"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isPending}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-sm">
+                        Aceito os{" "}
+                        <Link href="/terms" className="text-blue-600 hover:underline">
+                          termos de uso
+                        </Link>{" "}
+                        e{" "}
+                        <Link href="/privacy" className="text-blue-600 hover:underline">
+                          política de privacidade
+                        </Link>
+                      </FormLabel>
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
 
-            <Button type="submit" disabled={isPending} className="w-full">
-              {isPending ? (
-                <>
-                  <Loader size={12} className="animate-spin" /> Loading...
-                </>
-              ) : (
-                <>
-                  <Mail className="mr-2 size-4" />
-                  Criar Conta
-                </>
+              {/* Exibir erro geral do formulário */}
+              {form.formState.errors.root && (
+                <div className="text-sm text-red-600 text-center">
+                  {form.formState.errors.root.message}
+                </div>
               )}
-            </Button>
-          </form>
+
+              <Button 
+                type="submit" 
+                disabled={isPending || !form.formState.isValid} 
+                className="w-full"
+              >
+                {isPending ? (
+                  <>
+                    <Loader size={12} className="animate-spin mr-2" />
+                    Criando conta...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="mr-2 size-4" />
+                    Criar Conta
+                  </>
+                )}
+              </Button>
+            </form>
+          </Form>
 
           <div className="text-center text-sm">
             Já tem uma conta?{" "}

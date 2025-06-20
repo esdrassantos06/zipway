@@ -28,12 +28,6 @@ export async function updateUserProfileAction({
       const fileName = `${session.user.id}-${Date.now()}.${fileExt}`;
       const filePath = fileName;
 
-      console.log("Uploading file:", {
-        fileName,
-        filePath,
-        userId: session.user.id,
-      });
-
       const arrayBuffer = await imageFile.arrayBuffer();
       const fileBuffer = new Uint8Array(arrayBuffer);
 
@@ -46,19 +40,16 @@ export async function updateUserProfileAction({
         const urlParts = currentUser.image.split("/");
         const currentImagePath = urlParts[urlParts.length - 1];
         if (currentImagePath && currentImagePath.includes(session.user.id)) {
-          console.log("Removing old image:", currentImagePath);
           await supabase.storage.from("avatars").remove([currentImagePath]);
         }
       }
 
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from("avatars")
         .upload(filePath, fileBuffer, {
           contentType: imageFile.type,
           upsert: true,
         });
-
-      console.log("Upload result:", { data: uploadData, error: uploadError });
 
       if (uploadError) {
         console.error("Upload error details:", uploadError);
@@ -70,7 +61,6 @@ export async function updateUserProfileAction({
         .getPublicUrl(filePath);
 
       imageUrl = urlData.publicUrl;
-      console.log("Generated URL:", imageUrl);
     }
 
     await prisma.user.update({
@@ -171,7 +161,6 @@ export async function deleteUserProfileImageAction() {
     const imagePath = urlParts[urlParts.length - 1];
 
     if (imagePath && imagePath.includes(session.user.id)) {
-      console.log("Removing image:", imagePath);
       const { error: deleteError } = await supabase.storage
         .from("avatars")
         .remove([imagePath]);
