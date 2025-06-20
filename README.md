@@ -1,122 +1,222 @@
 # Zipway URL Shortener
 
-Zipway is a modern, efficient URL shortening service that allows users to create compact links that redirect to original URLs. This project consists of a FastAPI backend and a Next.js frontend.
+This is the frontend application for the Zipway URL shortener, built with Next.js, React, and Tailwind CSS.
 
 ## 🚀 Features
 
-- Create shortened URLs from long URLs
-- Optional custom URL slugs
-- Click tracking and analytics
-- Rate limiting to prevent abuse
-- Responsive, modern UI
-- Single domain experience with middleware redirection
+- Clean, responsive user interface
+- URL shortening with copy-to-clipboard functionality
+- Error handling and user feedback
+- Tabs for URL shortening and information
+- Modern design using Tailwind CSS and shadcn/ui components
+- Middleware for handling short URL redirects through the same domain
 
-## 🏗️ Architecture
+## 🔧 Technology Stack
 
-The application is split into two main components:
-
-- **Backend**: FastAPI-based REST API with SQLite database (deployed on Render)
-- **Frontend**: Next.js application with React and Tailwind CSS (deployed on Vercel)
-
-The Next.js middleware enables all shortened URLs to be accessed directly from the main domain.
-
-## 🔧 Prerequisites
-
-- [Docker](https://www.docker.com/get-started) and Docker Compose (for local development)
-- [Node.js](https://nodejs.org/) (v18+) for frontend development
-- [Python](https://www.python.org/) (v3.9+) for backend development
-- [Vercel](https://vercel.com/) account for frontend deployment
-- [Render](https://render.com/) account for backend deployment
-- [Uptime BetterStack](https://uptime.betterstack.com/) for keeping the backend alive
-
-## 🛠️ Getting Started
-
-### Environment Setup
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/esdrassantos06/zipway.git
-   cd zipway
-   ```
-
-2. Create environment variables:
-
-   For backend (create `backend/.env`):
-   ```
-   ADMIN_API_TOKEN=your_secure_admin_token
-   HOST=0.0.0.0
-   PORT=8000
-   BASE_URL=yoursiteurl.com
-   ```
-
-   For frontend (create `frontend/.env`):
-   ```
-   NEXT_PUBLIC_API_URL=/backend
-   API_BASE_URL=http://localhost:8000 or your api Link
-   ```
-
-### Running with Docker Compose (Development)
-
-```bash
-docker-compose up
-```
-
-This will start both the backend and frontend services. The application will be available at:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8000
-
-### Deployment Setup
-
-#### Backend (Render)
-1. Push your code to a Git repository
-2. Create a new Web Service on Render connected to your repository
-3. Set the build command to `pip install -r requirements.txt`
-4. Set the start command to `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-5. Add the environment variables from the `.env` file
-6. Deploy the service
-
-#### Frontend (Vercel)
-1. Push your code to a Git repository
-2. Import the project into Vercel
-3. Set the environment variables
-4. Deploy the project
-5. Configure your custom domain (zipway-shortener.me)
-
-#### Keep Backend Alive
-1. Create an account on BetterStack
-2. Add a new HTTP(s) monitor
-3. Set the URL to your backend ping endpoint (https://your-backend.onrender.com/ping)
-4. Set the monitoring interval to 3 minutes
+- [Next.js](https://nextjs.org/) - React framework for building full-stack web applications
+- [React](https://reactjs.org/) - A JavaScript library for building user interfaces
+- [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework for rapid UI development
+- [shadcn/ui](https://ui.shadcn.com/) - A collection of reusable UI components for React
+- [Prisma](https://www.prisma.io/) - A next-generation ORM for Node.js and TypeScript
+- [Zod](https://zod.dev/) - A TypeScript-first schema declaration and validation library
+- [React Hook Form](https://react-hook-form.com/) - A library for building performant and flexible forms in React
+- [Supabase](https://supabase.io/) - An open-source Firebase alternative for building secure and scalable backends
+- [Upstash](https://upstash.com/) - A serverless data platform for Redis and Kafka
+- [Resend](https://resend.com/) - An email API for developers
+- [Recharts](https://recharts.org/) - A composable charting library built on React components
+- [Lucide React](https://lucide.dev/) - A library of simply designed, beautiful icons
+- [Better Auth](https://better-auth.dev/) - A simple, secure, and flexible authentication library
+- [Jest](https://jestjs.io/) - A delightful JavaScript testing framework with a focus on simplicity
+- [React Testing Library](https://testing-library.com/) - A library for testing React components in a user-centric way
 
 ## 📁 Project Structure
 
 ```
 zipway/
-├── backend/                # FastAPI backend
-│   ├── app/                # Application code
-│   ├── Dockerfile          # Backend container definition
-│   └── requirements.txt    # Python dependencies
-├── frontend/               # Next.js frontend
-│   ├── src/                # Source code
-│   │   ├── middleware.ts   # URL redirection logic
-│   ├── Dockerfile          # Frontend container definition
-│   └── package.json        # Node.js dependencies
-└── docker-compose.yml      # Service orchestration
+├── public/                   # Static files
+├── src/                      # Source code
+│   ├── __tests__/            # Jest/React Testing Library tests
+│   ├── actions/              # Server-side actions
+│   ├── app/                  # Next.js app directory with routes
+│   │   ├── api/              # API routes
+│   │   ├── admin/            # Admin dashboard
+│   │   ├── auth/             # Authentication pages
+│   │   ├── dashboard/        # User dashboard
+│   │   ├── [shortId]/        # Dynamic route for URL redirection
+│   │   ├── layout.tsx        # Root layout
+│   │   └── page.tsx          # Home page
+│   ├── components/           # React components
+│   │   ├── ui/               # UI components from shadcn/ui
+│   │   ├── auth/             # Authentication related components
+│   │   ├── dashboard/        # Dashboard components
+│   │   └── ...               # Other component directories
+│   ├── generated/            # Generated files (from Prisma)
+│   ├── lib/                  # Utility functions
+│   ├── utils/                # General utility scripts
+│   ├── validation/           # Zod schemas for validation
+│   └── middleware.ts         # URL redirection logic
+├── .env                      # Environment variables (create this)
+├── .gitignore                # Git ignore file
+├── Dockerfile                # Docker container definition
+├── next.config.ts            # Next.js configuration
+├── package.json              # Node.js dependencies
+├── postcss.config.mjs        # PostCSS configuration
+└── tsconfig.json             # TypeScript configuration
 ```
 
-## 🔍 Documentation
+## 🛠️ Environment Variables
 
-- Backend API documentation is available at https://your-backend.onrender.com/docs when the service is running
-- More detailed documentation for each component is available in their respective directories
+Create a `.env` file in the frontend directory with the following variables:
 
-## 👥 Contributing
+```bash
+NEXT_PUBLIC_API_URL=
+NEXT_PUBLIC_ADSENSE_CLIENT_ID=
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
-## 📄 License
+ADMIN_API_TOKEN=
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+NEXT_PUBLIC_URL=
+
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
+
+
+DATABASE_URL=
+
+BETTER_AUTH_SECRET=
+BETTER_AUTH_URL=
+
+GITHUB_CLIENT_ID=
+GITHUB_SECRET=
+
+GOOGLE_CLIENT_ID=
+GOOGLE_SECRET=
+
+
+ADMIN_EMAILS=
+
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+
+NEXT_PUBLIC_SUPABASE_URL=
+
+SUPABASE_SERVICE_ROLE_KEY=
+
+RESEND_API_KEY=
+```
+
+## 🚀 Running Locally
+
+### With Node.js
+
+1. Install dependencies:
+
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+2. Run the development server:
+
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
+
+3. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### With Docker
+
+```bash
+docker build -t zipway-frontend .
+docker run -d --name zipway-frontend-container -p 3000:3000 --env-file .env zipway-frontend
+```
+
+When you use docker run, Docker always creates a new container from the specified image (in this case, zipway-frontend). It does not reuse an existing container; instead, it creates a fresh instance of the image every time.
+
+### Why?
+
+- The image is a static blueprint.
+
+- The container is a running instance created from that image.
+
+- Running docker run multiple times will create multiple containers.
+
+To reuse the same container across runs, follow these steps:
+
+1. Create the container once and give it a name using --name.
+
+2. Use docker start and docker stop to manage that named container.
+
+Example of creating and naming the frontend container:
+
+```bash
+docker run -d --name zipway-frontend-container -p 3000:3000 --env-file .env zipway-frontend
+```
+
+Later, to stop and restart the same container:
+
+```bash
+docker stop zipway-frontend-container
+docker start zipway-frontend-container
+```
+
+## 🔍 Key Components
+
+### URL Shortening
+
+- The URL shortener backend is implemented as Next.js API Routes.
+
+- This provides a self-contained API with no external rewrites or proxies required.
+
+- The frontend interacts with these API routes directly via HTTP requests and server functions.
+
+### Main Components
+
+- **Dashboard**: The main user interface for creating and managing shortened URLs.
+- **UI Components**: Reusable components like Button, Input, Card, etc., from shadcn/ui.
+- **Authentication**: Components for user sign-up, login, and session management.
+
+### Configuring Middleware
+
+The middleware in `src/middleware.ts` is automatically detected and used by Vercel. It intercepts requests to your domain and redirects short URL requests to your backend API.
+
+## 🎨 UI Customization
+
+The project uses Tailwind CSS with custom theme variables. To modify the theme:
+
+1. Adjust color variables in `src/app/globals.css`
+2. Use Tailwind utility classes for component styling
+3. Modify shadcn/ui components in the `src/components/ui` directory
+
+## 📱 Responsive Design
+
+The UI is responsive by default, using Tailwind's responsive utility classes:
+
+- Mobile-first approach
+- Breakpoints for different screen sizes
+- Flexible layouts with proper spacing
+
+## 🧪 Testing
+
+The project includes automated tests with:
+
+- **Jest** for unit testing
+- **React Testing Library** for component testing
+
+Run tests with:
+
+```bash
+npm test
+# or
+npm run test:watch
+```
+
+Planned testing improvements:
+
+- Implement **Cypress** for end-to-end testing
+
+## 🚧 Future Improvements
+
+- Add internationalization (i18n) support
