@@ -67,7 +67,7 @@ export const RegisterForm = () => {
               <Separator className="w-full" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="text-muted-foreground  px-2">
+              <span className="text-muted-foreground px-2">
                 Ou registre-se com
               </span>
             </div>

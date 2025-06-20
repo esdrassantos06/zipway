@@ -4,7 +4,7 @@ import Link from "next/link";
 const Footer = () => {
   return (
     <footer className="flex h-40 w-full shrink-0 flex-col items-center gap-2 border-t px-4 py-6 sm:flex-row md:px-6">
-      <p className="text-xs dark:text-gray-300 text-gray-500">
+      <p className="text-xs text-gray-500 dark:text-gray-300">
         © {new Date().getFullYear()} Zipway. All rights reserved.
       </p>
       <nav className="flex flex-col gap-4 sm:ml-auto sm:gap-6">
