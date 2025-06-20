@@ -14,24 +14,37 @@ export default function Home() {
 
         <main className="flex-1">
           {/* Hero Section */}
-          <section className="w-full bg-gradient-to-br from-blue-50 to-indigo-100 py-12 md:py-24 lg:py-32 xl:py-48">
+          <section className="w-full bg-gradient-to-br from-blue-50 to-indigo-100 py-12 md:py-24 lg:py-32 xl:py-48 dark:bg-gradient-to-br dark:from-gray-900 dark:via-indigo-900 dark:to-blue-900">
             <div className="container mx-auto px-4 md:px-6">
               <div className="flex flex-col items-center space-y-4 text-center">
                 <div className="space-y-2">
-                  <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
+                  <h1 className="text-3xl font-bold tracking-tighter text-gray-900 sm:text-4xl md:text-5xl lg:text-6xl dark:text-white">
                     Shorten your links with
-                    <span className="text-blue-600"> Zipway</span>
+                    <span className="text-blue-600 dark:text-indigo-400">
+                      {" "}
+                      Zipway
+                    </span>
                   </h1>
-                  <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
+                  <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
                     Turn long URLs into short, elegant links. Track clicks,
                     analyze performance, and manage all your links in one place.
                   </p>
                   <div className="mt-6 space-x-4">
                     <Button size="lg" asChild>
-                      <Link href="/auth/register">Create Free Account </Link>
+                      <Link
+                        href="/auth/register"
+                        className="bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+                      >
+                        Create Free Account
+                      </Link>
                     </Button>
                     <Button variant="outline" asChild size="lg">
-                      <Link href="/auth/login">Login</Link>
+                      <Link
+                        href="/auth/login"
+                        className="border border-indigo-600 text-indigo-600 hover:bg-indigo-100 dark:border-indigo-400 dark:text-indigo-400 dark:hover:bg-indigo-900"
+                      >
+                        Login
+                      </Link>
                     </Button>
                   </div>
                 </div>
@@ -87,7 +100,7 @@ export default function Home() {
           </section>
 
           {/* Stats Section */}
-          <section className="w-full bg-gray-50 py-12 md:py-24 lg:py-32">
+          <section className="w-full bg-gray-50 py-12 md:py-24 lg:py-32 dark:bg-gray-900">
             <div className="container mx-auto px-4 md:px-6">
               <div className="grid gap-6 lg:grid-cols-3 lg:gap-12">
                 <div className="flex flex-col items-center space-y-4">

@@ -56,7 +56,7 @@ export default function Sidebar({
         <div className="flex items-center space-x-2">
           <Link href="/" className="flex items-center justify-center">
             <Link2 className="size-8 text-blue-600" />
-            <span className="ml-2 text-2xl font-bold text-gray-900">
+            <span className="ml-2 text-2xl font-bold dark:text-white text-gray-900">
               Zipway
             </span>
           </Link>

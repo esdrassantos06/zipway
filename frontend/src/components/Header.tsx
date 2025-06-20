@@ -20,8 +20,14 @@ const Btn = ({ session }: { session: unknown }) => {
   } else {
     return (
       <>
-        <Button size={"sm"} variant="ghost" asChild>
+        <Button size={"sm"} variant="link" asChild>
           <Link href={"/dashboard"}>Dashboard</Link>
+        </Button>
+        <Button size={"sm"} variant="link" asChild>
+          <Link href={"/profile"}>Profile</Link>
+        </Button>
+        <Button size={"sm"} variant="link" asChild>
+          <Link href={"/settings"}>Settings</Link>
         </Button>
         <SignOutButton />
       </>
@@ -36,7 +42,9 @@ export default function Header() {
     <header className="flex h-16 items-center border-b px-4 lg:px-6">
       <Link href="/" className="flex items-center justify-center">
         <Link2 className="size-8 text-blue-600" />
-        <span className="ml-2 text-2xl font-bold text-gray-900">Zipway</span>
+        <span className="ml-2 text-2xl font-bold text-gray-900 dark:text-white">
+          Zipway
+        </span>
       </Link>
       <nav className="ml-auto flex items-center gap-4">
         <Btn session={session} />

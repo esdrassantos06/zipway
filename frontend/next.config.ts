@@ -4,7 +4,7 @@ const cspHeader = `
   default-src 'self';
   script-src 'self' https://pagead2.googlesyndication.com 'unsafe-inline';
   style-src 'self' 'unsafe-inline' 'unsafe-eval';
-  img-src 'self' data: https://lh3.googleusercontent.com https://*.googlesyndication.com https://avatars.githubusercontent.com https://github.com;
+  img-src 'self' data: https://lh3.googleusercontent.com https://izxvhjdzwjklthewefqj.supabase.co https://pagead2.googlesyndication.com https://avatars.githubusercontent.com https://github.com;
   font-src 'self';
   connect-src 'self' https://api.iconify.design https://api.github.com;
   object-src 'none';
