@@ -120,3 +120,11 @@
     @apply bg-background text-foreground;
   }
 }
+
+:root {
+  --decline-bg: var(--destructive);
+}
+
+.dark {
+  --decline-bg: color-mix(in oklab, var(--destructive) 60%, transparent);
+}

@@ -5,7 +5,7 @@ import Script from "next/script";
 import Head from "next/head";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/ThemeProvider";
-
+import CookieConsentBanner from "@/components/CookieConsentBanner";
 const inter = Inter({
   subsets: ["latin"],
 });
@@ -46,6 +46,7 @@ export default function RootLayout({
         >
           {children}
           <Toaster position="top-center" richColors closeButton />
+          <CookieConsentBanner />
         </ThemeProvider>
       </body>
     </html>
