@@ -1,7 +1,5 @@
 # Zipway URL Shortener
 
-This is the frontend application for the Zipway URL shortener, built with Next.js, React, and Tailwind CSS.
-
 ## 🚀 Features
 
 - Clean, responsive user interface
@@ -33,6 +31,7 @@ This is the frontend application for the Zipway URL shortener, built with Next.j
 
 ```
 zipway/
+├── prisma/                   # Prisma Schema and migrations
 ├── public/                   # Static files
 ├── src/                      # Source code
 │   ├── __tests__/            # Jest/React Testing Library tests
