@@ -11,7 +11,7 @@ import {
   FormControl,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { ResetPasswordAction } from "@/actions/reset-password";
 import { toast } from "sonner";
 import {
@@ -24,25 +24,17 @@ import {
 } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
 import ReturnButton from "@/components/ReturnButton";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type FormValues = {
   newPassword: string;
   confirmPassword: string;
 };
 
-export default function ResetPasswordForm() {
+export default function ResetPasswordForm({ token }: { token: string }) {
   const [success, setSuccess] = useState(false);
 
   const router = useRouter();
-  const params = useSearchParams();
-  const token = params.get("token") || "";
-
-  useEffect(() => {
-    if (!token) {
-      router.push("/");
-    }
-  }, [token, router]);
 
   const form = useForm<FormValues>({
     defaultValues: { newPassword: "", confirmPassword: "" },
