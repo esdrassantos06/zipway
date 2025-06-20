@@ -32,25 +32,30 @@ import {
 } from "@/components/ui/form";
 
 // Schema de validação
-const registerFormSchema = z.object({
-  name: z
-    .string()
-    .min(2, "Nome deve ter pelo menos 2 caracteres")
-    .max(50, "Nome deve ter no máximo 50 caracteres")
-    .regex(/^[a-zA-ZÀ-ÿ\s]+$/, "Nome deve conter apenas letras e espaços"),
-  email: z.string().email("Email inválido"),
-  password: z
-    .string()
-    .min(8, "Senha deve ter pelo menos 8 caracteres")
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Senha deve conter pelo menos uma letra minúscula, uma maiúscula e um número"),
-  confirmPassword: z.string().min(1, "Confirmação de senha é obrigatória"),
-  acceptTerms: z.boolean().refine(val => val === true, {
-    message: "Você deve aceitar os termos de uso",
-  }),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "As senhas não coincidem",
-  path: ["confirmPassword"],
-});
+const registerFormSchema = z
+  .object({
+    name: z
+      .string()
+      .min(2, "Nome deve ter pelo menos 2 caracteres")
+      .max(50, "Nome deve ter no máximo 50 caracteres")
+      .regex(/^[a-zA-ZÀ-ÿ\s]+$/, "Nome deve conter apenas letras e espaços"),
+    email: z.string().email("Email inválido"),
+    password: z
+      .string()
+      .min(8, "Senha deve ter pelo menos 8 caracteres")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        "Senha deve conter pelo menos uma letra minúscula, uma maiúscula e um número",
+      ),
+    confirmPassword: z.string().min(1, "Confirmação de senha é obrigatória"),
+    acceptTerms: z.boolean().refine((val) => val === true, {
+      message: "Você deve aceitar os termos de uso",
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+  });
 
 type RegisterFormValues = z.infer<typeof registerFormSchema>;
 
@@ -84,13 +89,19 @@ export const RegisterForm = () => {
 
       if (error) {
         toast.error(error);
-        
+
         // Definir erros específicos baseados na resposta
         if (error.toLowerCase().includes("email")) {
           form.setError("email", { message: error });
-        } else if (error.toLowerCase().includes("nome") || error.toLowerCase().includes("name")) {
+        } else if (
+          error.toLowerCase().includes("nome") ||
+          error.toLowerCase().includes("name")
+        ) {
           form.setError("name", { message: error });
-        } else if (error.toLowerCase().includes("password") || error.toLowerCase().includes("senha")) {
+        } else if (
+          error.toLowerCase().includes("password") ||
+          error.toLowerCase().includes("senha")
+        ) {
           form.setError("password", { message: error });
         } else {
           // Erro geral
@@ -195,8 +206,9 @@ export const RegisterForm = () => {
                       />
                     </FormControl>
                     <FormMessage />
-                    <p className="text-xs text-muted-foreground">
-                      Mínimo 8 caracteres, incluindo maiúscula, minúscula e número
+                    <p className="text-muted-foreground text-xs">
+                      Mínimo 8 caracteres, incluindo maiúscula, minúscula e
+                      número
                     </p>
                   </FormItem>
                 )}
@@ -226,7 +238,7 @@ export const RegisterForm = () => {
                 control={form.control}
                 name="acceptTerms"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormItem className="flex flex-row items-start space-y-0 space-x-3">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
@@ -237,11 +249,17 @@ export const RegisterForm = () => {
                     <div className="space-y-1 leading-none">
                       <FormLabel className="text-sm">
                         Aceito os{" "}
-                        <Link href="/terms" className="text-blue-600 hover:underline">
+                        <Link
+                          href="/terms"
+                          className="text-blue-600 hover:underline"
+                        >
                           termos de uso
                         </Link>{" "}
                         e{" "}
-                        <Link href="/privacy" className="text-blue-600 hover:underline">
+                        <Link
+                          href="/privacy"
+                          className="text-blue-600 hover:underline"
+                        >
                           política de privacidade
                         </Link>
                       </FormLabel>
@@ -253,19 +271,19 @@ export const RegisterForm = () => {
 
               {/* Exibir erro geral do formulário */}
               {form.formState.errors.root && (
-                <div className="text-sm text-red-600 text-center">
+                <div className="text-center text-sm text-red-600">
                   {form.formState.errors.root.message}
                 </div>
               )}
 
-              <Button 
-                type="submit" 
-                disabled={isPending || !form.formState.isValid} 
+              <Button
+                type="submit"
+                disabled={isPending || !form.formState.isValid}
                 className="w-full"
               >
                 {isPending ? (
                   <>
-                    <Loader size={12} className="animate-spin mr-2" />
+                    <Loader size={12} className="mr-2 animate-spin" />
                     Criando conta...
                   </>
                 ) : (

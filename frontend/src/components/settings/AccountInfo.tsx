@@ -102,7 +102,6 @@ export const AccountInfo = ({ session }: Props) => {
       setImageDeleted(true);
       setImageFile(null);
       setImagePreview(null);
-
     } catch {
       toast.error("Erro ao deletar imagem.");
     } finally {
@@ -154,7 +153,6 @@ export const AccountInfo = ({ session }: Props) => {
       setEmailChanged(false);
       setImageFile(null);
       setImagePreview(null);
-
     } catch {
       toast.error("Erro ao atualizar perfil.");
     } finally {
@@ -163,7 +161,8 @@ export const AccountInfo = ({ session }: Props) => {
   };
 
   const currentImageSrc =
-    imagePreview || (imageDeleted ? undefined : session?.user.image || undefined);
+    imagePreview ||
+    (imageDeleted ? undefined : session?.user.image || undefined);
   const hasImage = !imageDeleted && (imagePreview || session?.user.image);
 
   return (
