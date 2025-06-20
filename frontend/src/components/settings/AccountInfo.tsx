@@ -32,7 +32,6 @@ type Props = {
   session: SessionType;
 };
 
-// Schema de validação
 const accountFormSchema = z.object({
   name: z
     .string()
@@ -104,7 +103,6 @@ export const AccountInfo = ({ session }: Props) => {
       setImageFile(null);
       setImagePreview(null);
 
-      window.location.reload();
     } catch {
       toast.error("Erro ao deletar imagem.");
     } finally {
@@ -157,7 +155,6 @@ export const AccountInfo = ({ session }: Props) => {
       setImageFile(null);
       setImagePreview(null);
 
-      window.location.reload();
     } catch {
       toast.error("Erro ao atualizar perfil.");
     } finally {
@@ -166,7 +163,7 @@ export const AccountInfo = ({ session }: Props) => {
   };
 
   const currentImageSrc =
-    imagePreview || (imageDeleted ? "" : session?.user.image || "");
+    imagePreview || (imageDeleted ? undefined : session?.user.image || undefined);
   const hasImage = !imageDeleted && (imagePreview || session?.user.image);
 
   return (

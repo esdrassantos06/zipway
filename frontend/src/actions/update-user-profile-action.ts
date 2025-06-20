@@ -131,6 +131,7 @@ export async function updateUserEmailAction({
     });
 
     revalidatePath("/account");
+    revalidatePath("/settings");
     return { error: null };
   } catch (e) {
     console.error("Email update error:", e);
