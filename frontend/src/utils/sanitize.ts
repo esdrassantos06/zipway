@@ -107,6 +107,11 @@ export const reservedPaths = [
   "file",
   "files",
   "media",
+  "pt",
+  "en",
+  "es",
+  "fr",
+  "de",
 ];
 
 export const isReservedAlias = (alias: string): boolean => {
