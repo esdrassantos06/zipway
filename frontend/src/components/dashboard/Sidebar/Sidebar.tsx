@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  BarChart3,
-  LayoutDashboard,
-  HelpCircle,
-  Link2,
-  ShieldCheck,
-} from "lucide-react";
+import { BarChart3, LayoutDashboard, Link2, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -37,9 +31,6 @@ export default function Sidebar({
         <div className="space-y-2">
           <Skeleton className="h-10 w-full rounded-md" />
           <Skeleton className="h-10 w-full rounded-md" />
-          <Skeleton className="h-10 w-full rounded-md" />
-        </div>
-        <div className="absolute right-4 bottom-4 left-4">
           <Skeleton className="h-10 w-full rounded-md" />
         </div>
       </div>
@@ -84,12 +75,6 @@ export default function Sidebar({
           </Link>
         )}
       </nav>
-      <div className="absolute right-4 bottom-4 left-4">
-        <Button variant="ghost" className="w-full justify-start">
-          <HelpCircle className="mr-2 size-4" />
-          Help and Support
-        </Button>
-      </div>
     </div>
   );
 }

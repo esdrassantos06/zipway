@@ -84,7 +84,6 @@ export function Header() {
               <Link href={"/settings"}>
                 <DropdownMenuItem>Settings</DropdownMenuItem>
               </Link>
-              <DropdownMenuItem>Support</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <SignOutButton
