@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import {
   Table,
   TableBody,
@@ -35,6 +35,15 @@ import { toast } from "sonner";
 import axios from "axios";
 import { LinkStatus } from "@/generated/prisma";
 import { truncateUrl, copyToClipboard } from "@/utils/AppUtils";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
 
 type Link = {
   id: string;
@@ -59,12 +68,11 @@ export function LinksTable({
   isLoading = false,
   limit,
 }: LinksTableProps) {
+  const [confirmLink, setConfirmLink] = useState<Link | null>(null);
+
   const displayedLinks = limit ? links.slice(0, limit) : links;
 
   const deleteLink = async (link: Link) => {
-    const confirmed = confirm("Are you sure you want to delete this link?");
-    if (!confirmed) return;
-
     try {
       const identifier =
         link.shortId && link.shortId.trim() ? link.shortId : link.id;
@@ -132,102 +140,141 @@ export function LinksTable({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Recent Links</CardTitle>
-        <CardDescription>Manage all your shortened links</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Original URL</TableHead>
-              <TableHead>Short Link</TableHead>
-              <TableHead>Clicks</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {displayedLinks.map((link) => (
-              <TableRow key={link.id}>
-                <TableCell className="max-w-[300px]">
-                  <div
-                    className="truncate"
-                    title={link.originalUrl}
-                    aria-label={link.originalUrl}
-                  >
-                    {truncateUrl(link.originalUrl, 40)}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-sm">{link.shortUrl}</span>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="size-6"
-                      onClick={() => copyToClipboard(link.shortUrl)}
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Links</CardTitle>
+          <CardDescription>Manage all your shortened links</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Original URL</TableHead>
+                <TableHead>Short Link</TableHead>
+                <TableHead>Clicks</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead className="w-[50px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {displayedLinks.map((link) => (
+                <TableRow key={link.id}>
+                  <TableCell className="max-w-[300px]">
+                    <div
+                      className="truncate"
+                      title={link.originalUrl}
+                      aria-label={link.originalUrl}
                     >
-                      <Copy className="size-3" />
-                    </Button>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <span className="font-medium">
-                    {link.clicks.toLocaleString()}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant={link.status === "ACTIVE" ? "default" : "secondary"}
-                  >
-                    {link.status === "ACTIVE" ? "Active" : "Paused"}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  {new Date(link.createdAt).toLocaleDateString()}
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="size-6">
-                        <MoreHorizontal className="size-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={() => window.open(link.originalUrl, "_blank")}
-                      >
-                        <ExternalLink className="mr-2 size-4" />
-                        Abrir Original
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
+                      {truncateUrl(link.originalUrl, 40)}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-sm">{link.shortUrl}</span>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="size-6"
                         onClick={() => copyToClipboard(link.shortUrl)}
                       >
-                        <Copy className="mr-2 size-4" />
-                        Copiar Link
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => toggleLinkStatus(link)}>
-                        <Pause className="mr-2 size-4" />
-                        {link.status === "ACTIVE" ? "Pause" : "Activate"}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-red-600"
-                        onClick={() => deleteLink(link)}
-                      >
-                        <Trash2 className="mr-2 size-4" />
-                        Excluir
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+                        <Copy className="size-3" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className="font-medium">
+                      {link.clicks.toLocaleString()}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        link.status === "ACTIVE" ? "default" : "secondary"
+                      }
+                    >
+                      {link.status === "ACTIVE" ? "Active" : "Paused"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {new Date(link.createdAt).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="size-6">
+                          <MoreHorizontal className="size-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() =>
+                            window.open(link.originalUrl, "_blank")
+                          }
+                        >
+                          <ExternalLink className="mr-2 size-4" />
+                          Abrir Original
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => copyToClipboard(link.shortUrl)}
+                        >
+                          <Copy className="mr-2 size-4" />
+                          Copiar Link
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => toggleLinkStatus(link)}
+                        >
+                          <Pause className="mr-2 size-4" />
+                          {link.status === "ACTIVE" ? "Pause" : "Activate"}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => setConfirmLink(link)}
+                        >
+                          <Trash2 className="mr-2" /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* AlertDialog fora */}
+      <AlertDialog
+        open={!!confirmLink}
+        onOpenChange={(open) => !open && setConfirmLink(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this link? This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel asChild>
+              <Button variant="outline">Cancel</Button>
+            </AlertDialogCancel>
+            <Button
+              className="bg-red-600 hover:bg-red-700"
+              onClick={() => {
+                if (confirmLink) {
+                  deleteLink(confirmLink);
+                  setConfirmLink(null);
+                }
+              }}
+            >
+              Delete
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
