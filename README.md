@@ -215,5 +215,5 @@ npm run test:watch
 ## 🚧 Future Improvements
 
 - Implement **Cypress** for end-to-end testing
-- Add internationalization (i18n) support
+- Add internationalization (next-intl) support
 - Add caching in components and api routes
