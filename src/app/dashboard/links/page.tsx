@@ -2,13 +2,12 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { getSessionFromHeaders } from "@/utils/getSession";
 import { getUserLinks } from "@/utils/getUserLinks";
-import Sidebar from "@/components/dashboard/Sidebar";
-import { Header } from "@/app/dashboard/HeaderDashboard";
-import { StatsCards } from "@/components/dashboard/StatsCards";
 import { LinkForm } from "@/components/dashboard/LinkForm";
 import { LinksTable } from "@/components/dashboard/LinksTable";
+import { Header } from "../HeaderDashboard";
+import Sidebar from "@/components/dashboard/Sidebar";
 
-export default async function DashboardPage() {
+export default async function LinksPage() {
   const headersList = await headers();
   const session = await getSessionFromHeaders(headersList);
 
@@ -30,21 +29,17 @@ export default async function DashboardPage() {
               <div className="mx-auto max-w-7xl space-y-6">
                 <div>
                   <h1 className="text-3xl font-bold tracking-tight">
-                    Dashboard
+                    My Links
                   </h1>
                   <p className="text-muted-foreground">
-                    Manage your shortened links and track statistics
+                    View and manage all your recent shortened links
                   </p>
                 </div>
-                <StatsCards links={links} />
-                <div className="flex w-full">
-                  <LinkForm />
-                </div>
+                <LinkForm />
                 <LinksTable
                   links={links}
-                  isLoading={false}
                   userId={session.user.id}
-                  limit={5}
+                  isLoading={false}
                 />
               </div>
             </main>

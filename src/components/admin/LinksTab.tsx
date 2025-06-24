@@ -29,17 +29,9 @@ import {
   getStatusDisplay,
   getStatusLabel,
   truncateUrl,
+  getShortUrl,
 } from "@/utils/AppUtils";
-
-interface Link {
-  id: string;
-  originalUrl: string;
-  shortUrl: string;
-  slug?: string;
-  clicks: number;
-  status: "ACTIVE" | "PAUSED";
-  createdAt: string;
-}
+import { Link } from "@/generated/prisma";
 
 interface LinksTabProps {
   links: Link[];
@@ -82,17 +74,21 @@ export function LinksTab({ links, onEdit, onDelete }: LinksTabProps) {
               links.map((link) => (
                 <TableRow key={link.id}>
                   <TableCell className="max-w-xs">
-                    <div className="truncate" title={link.originalUrl}>
-                      {truncateUrl(link.originalUrl, 35)}
+                    <div className="truncate" title={link.targetUrl}>
+                      {truncateUrl(link.targetUrl, 35)}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
-                      <span className="font-mono text-sm">{link.shortUrl}</span>
+                      <span className="font-mono text-sm">{getShortUrl(link.shortId)}</span>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => copyToClipboard(link.shortUrl)}
+                        onClick={() =>
+                          copyToClipboard(
+                            getShortUrl(link.shortId),
+                          )
+                        }
                       >
                         <Copy className="h-3 w-3" />
                       </Button>
@@ -114,7 +110,9 @@ export function LinksTab({ links, onEdit, onDelete }: LinksTabProps) {
                       {getStatusLabel(link.status)}
                     </Badge>
                   </TableCell>
-                  <TableCell>{link.createdAt}</TableCell>
+                  <TableCell>
+                    {new Date(link.createdAt).toLocaleDateString()}
+                  </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -124,7 +122,11 @@ export function LinksTab({ links, onEdit, onDelete }: LinksTabProps) {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
-                          onClick={() => openLink(link.shortUrl)}
+                          onClick={() =>
+                            openLink(
+                              getShortUrl(link.shortId),
+                            )
+                          }
                         >
                           <ExternalLink className="mr-2 h-4 w-4" />
                           Visit

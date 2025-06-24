@@ -41,16 +41,7 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    const mapped = links.map((link) => ({
-      id: link.id,
-      originalUrl: link.targetUrl,
-      shortUrl: `${process.env.NEXT_PUBLIC_URL}/${link.shortId}`,
-      clicks: link.clicks,
-      status: link.status.toLowerCase(), // "active" | "paused"
-      createdAt: link.createdAt.toISOString(),
-    }));
-
-    return NextResponse.json({ links: mapped });
+    return NextResponse.json({ links });
   } catch (error) {
     console.error("Error fetching links:", error);
     return NextResponse.json(

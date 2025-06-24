@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link2, BarChart3, ExternalLink, Edit } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { getInitials } from "@/utils/AppUtils";
+import { getInitials, getShortUrl } from "@/utils/AppUtils";
 import { getUserLinks } from "@/utils/getUserLinks";
 
 export default async function ProfilePage() {
@@ -99,9 +99,9 @@ export default async function ProfilePage() {
                           className="flex items-center justify-between rounded-lg border p-3"
                         >
                           <div className="space-y-1">
-                            <div className="font-medium">{link.shortUrl}</div>
+                            <div className="font-medium">{getShortUrl(link.shortId)}</div>
                             <div className="text-sm text-gray-500">
-                              {link.originalUrl}
+                              {link.targetUrl}
                             </div>
                             <div className="flex items-center gap-2 text-xs text-gray-400">
                               <span>{link.clicks} clicks</span>
@@ -112,7 +112,7 @@ export default async function ProfilePage() {
                             </div>
                           </div>
                           <Button variant="ghost" size="sm" asChild>
-                            <a href={link.shortUrl} target="_blank">
+                            <a href={getShortUrl(link.shortId)} target="_blank">
                               <ExternalLink className="size-4" />
                             </a>
                           </Button>

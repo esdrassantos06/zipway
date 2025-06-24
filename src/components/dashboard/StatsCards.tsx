@@ -1,22 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link, MousePointer } from "lucide-react";
-
-type Stats = {
-  title: string;
-  value: string;
-  change?: string;
-  icon: React.ComponentType<{ className?: string }>;
-  color: string;
-};
-
-type Link = {
-  id: string;
-  originalUrl: string;
-  shortUrl: string;
-  clicks: number;
-  status: "ACTIVE" | "PAUSED";
-  createdAt: string;
-};
+import { Link } from "@/generated/prisma";
+import { Stats } from "@/types/types";
+import { Link2Icon, MousePointer } from "lucide-react";
 
 type StatsCardsProps = {
   links: Link[];
@@ -30,7 +15,7 @@ export function StatsCards({ links }: StatsCardsProps) {
     {
       title: "Total Links",
       value: totalLinks.toLocaleString(),
-      icon: Link,
+      icon: Link2Icon,
       color: "text-blue-600",
     },
     {

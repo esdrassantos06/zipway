@@ -128,19 +128,9 @@ export async function PATCH(
       data: updateData,
     });
 
-    const response = {
-      id: updatedLink.id,
-      originalUrl: updatedLink.targetUrl,
-      shortUrl: `${process.env.NEXT_PUBLIC_URL}/${updatedLink.shortId}`,
-      slug: updatedLink.shortId,
-      clicks: updatedLink.clicks,
-      status: updatedLink.status,
-      createdAt: updatedLink.createdAt.toISOString(),
-    };
-
     return NextResponse.json({
       message: "Link updated successfully",
-      link: response,
+      link: updatedLink,
     });
   } catch (error) {
     console.error("Error editing link:", error);

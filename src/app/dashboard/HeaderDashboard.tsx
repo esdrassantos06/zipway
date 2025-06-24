@@ -1,6 +1,4 @@
-import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,45 +9,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
-import { SignOutButton } from "../auth/SignOutButton";
+import { SignOutButton } from "../../components/auth/SignOutButton";
 import { getInitials } from "@/utils/AppUtils";
-import { authClient } from "@/lib/auth-client";
-import { Skeleton } from "../ui/skeleton";
+import { getSessionFromHeaders } from "@/utils/getSession";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
-export function Header() {
-  const { data: session, isPending } = authClient.useSession();
+export async function Header() {
+  const session = await getSessionFromHeaders(await headers());
 
-  if (isPending)
-    return (
-      <header className="bg-background border-b px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Skeleton className="h-10 w-[300px] rounded-md" />
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Skeleton className="h-8 w-8 rounded-full" />
-          </div>
-        </div>
-      </header>
-    );
+  if (!session) {
+    redirect("auth/login");
+  }
 
   const initials = getInitials(session?.user?.name || "");
 
   return (
     <header className="bg-background border-b px-6 py-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <div className="relative">
-            <Search className="text-muted-foreground absolute top-2.5 left-2.5 size-4" />
-            <Input
-              type="search"
-              placeholder="Search links..."
-              className="w-[300px] pl-8"
-            />
-          </div>
-        </div>
+      <div className="flex w-full items-center justify-end">
         <div className="flex items-center space-x-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

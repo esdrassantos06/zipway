@@ -13,10 +13,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Copy, Link, Loader2, AlertCircle } from "lucide-react";
+import { Copy, Link2Icon, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import validator from "validator";
-import { shortenUrl } from "@/utils/axios";
 import {
   sanitizeAlias,
   validateAlias,
@@ -28,21 +27,13 @@ let globalUrl = "";
 let globalShortenedUrl: string | null = null;
 let globalCustomAlias = "";
 
-interface LinkType {
-  id: string;
-  shortId: string;
-  originalUrl: string;
-  shortUrl: string;
-  clicks: number;
-  status: "ACTIVE" | "PAUSED";
-  createdAt: string;
+interface ShortenUrlPayload {
+  targetUrl: string;
+  custom_id?: string;
+  userId?: string;
 }
 
-interface LinkFormProps {
-  onLinkCreated?: (link: LinkType) => void;
-}
-
-export function LinkForm({ onLinkCreated }: LinkFormProps) {
+export function LinkForm() {
   const [url, setUrl] = useState(globalUrl);
   const [customAlias, setCustomAlias] = useState(globalCustomAlias);
   const [shortenedUrl, setShortenedUrl] = useState<string | null>(
@@ -126,7 +117,7 @@ export function LinkForm({ onLinkCreated }: LinkFormProps) {
       setIsLoading(true);
       setError(null);
 
-      const payload: { targetUrl: string; custom_id?: string } = {
+      const payload: ShortenUrlPayload = {
         targetUrl: trimmedURL,
       };
 
@@ -134,26 +125,44 @@ export function LinkForm({ onLinkCreated }: LinkFormProps) {
         payload.custom_id = sanitizeAlias(customAlias.trim());
       }
 
-      const response = await shortenUrl(payload);
+      const response = await fetch(`/api/shorten`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
-      if (response?.short_url) {
-        updateShortenedUrl(response.short_url);
-        toast.success("URL Shortened Successfully.");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
 
-        if (onLinkCreated) {
-          const newLink: LinkType = {
-            id: response.id || Date.now().toString(),
-            shortId: response.short_id || "",
-            originalUrl: trimmedURL,
-            shortUrl: response.short_url,
-            clicks: 0,
-            status: "ACTIVE",
-            createdAt: new Date().toISOString(),
-          };
-          onLinkCreated(newLink);
+        switch (response.status) {
+          case 400:
+            throw new Error(errorData.error || "Invalid request");
+          case 401:
+            throw new Error("Unauthorized - Please login");
+          case 404:
+            throw new Error("Resource not found");
+          case 429:
+            throw new Error("Rate limit exceeded. Please try again later.");
+          case 500:
+            throw new Error("Server error - Please try again later");
+          default:
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
+      }
+
+      const data = await response.json();
+
+      if (!data?.short_url) {
+        throw new Error("Invalid response format");
+      }
+
+      if (data?.short_url) {
+        updateShortenedUrl(data.short_url);
+        toast.success("URL Shortened Successfully.");
       } else {
-        throw new Error(response?.error || "Invalid response from server");
+        throw new Error(data?.error || "Invalid response from server");
       }
     } catch (e) {
       if (e instanceof Error) {
@@ -173,7 +182,7 @@ export function LinkForm({ onLinkCreated }: LinkFormProps) {
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Link className="size-5" />
+          <Link2Icon className="size-5" />
           Shorten your link
         </CardTitle>
         <CardDescription>
@@ -215,7 +224,12 @@ export function LinkForm({ onLinkCreated }: LinkFormProps) {
               removed.
             </p>
           </div>
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button
+            data-testid="shorten-url-button"
+            type="submit"
+            className="w-full"
+            disabled={isLoading}
+          >
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 size-4 animate-spin" />

@@ -5,6 +5,7 @@ export const DEFAULT_LIMITS = {
   general: 100,
   shorten: 20,
   redirect: 200,
+  search: 150,
   admin: 50,
 };
 

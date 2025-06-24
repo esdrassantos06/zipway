@@ -32,8 +32,16 @@ export const getStatusLabel = (status: string) => {
     : "Paused";
 };
 
-export const truncateUrl = (url: string, maxLength: number = 35) => {
+export const truncateUrl = (
+  url: string | undefined,
+  maxLength: number = 35,
+) => {
+  if (!url) return "";
   return url.length > maxLength ? `${url.slice(0, maxLength)}...` : url;
+};
+
+export const getShortUrl = (shortId: string | undefined) => {
+  return `${process.env.NEXT_PUBLIC_URL}/${shortId}`;
 };
 
 export const getInitials = (name: string) => {

@@ -15,16 +15,7 @@ import {
   validateAlias,
   isReservedAlias,
 } from "@/utils/sanitize";
-
-interface Link {
-  id: string;
-  originalUrl: string;
-  shortUrl: string;
-  slug?: string;
-  clicks: number;
-  status: "ACTIVE" | "PAUSED";
-  createdAt: string;
-}
+import { Link } from "@/generated/prisma";
 
 interface EditLinkDialogProps {
   isOpen: boolean;
@@ -46,8 +37,8 @@ export function EditLinkDialog({
 
   useEffect(() => {
     if (editingLink) {
-      setEditUrl(editingLink.originalUrl);
-      setEditSlug(editingLink.slug || "");
+      setEditUrl(editingLink.targetUrl);
+      setEditSlug(editingLink.shortId);
       setEditAliasWarning(null);
     }
   }, [editingLink]);

@@ -19,31 +19,8 @@ import { LinksTab } from "./LinksTab";
 import { AnalyticsTab } from "../AnalyticsTab";
 import { UsersTab } from "./UsersTab";
 import Header from "../Header";
-
-interface Link {
-  id: string;
-  originalUrl: string;
-  shortUrl: string;
-  slug?: string;
-  clicks: number;
-  status: "ACTIVE" | "PAUSED";
-  createdAt: string;
-}
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: "USER" | "ADMIN";
-}
-
-interface Session {
-  user: {
-    name: string;
-    email: string;
-    id: string;
-  };
-}
+import { Link, User } from "@/generated/prisma";
+import { Session } from "@/lib/auth-client";
 
 interface AdminDashboardClientProps {
   session: Session;
@@ -108,12 +85,12 @@ export default function AdminDashboardClient({
       if (res.ok && data.short_url) {
         const newLink: Link = {
           id: data.id || Date.now().toString(),
-          originalUrl: url.trim(),
-          shortUrl: data.short_url,
-          slug: customSlug.trim() || data.short_url.split("/").pop() || "",
+          targetUrl: url.trim(),
+          shortId: customSlug.trim() || data.short_url.split("/").pop() || "",
           clicks: 0,
           status: "ACTIVE",
-          createdAt: new Date().toLocaleDateString("en-US"),
+          createdAt: new Date(),
+          userId: data.userId,
         };
 
         setLinks([newLink, ...links]);

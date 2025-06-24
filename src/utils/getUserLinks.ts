@@ -11,16 +11,9 @@ export async function getUserLinks(userId: string) {
       clicks: true,
       createdAt: true,
       status: true,
+      userId: true,
     },
   });
 
-  return links.map((link) => ({
-    id: link.id,
-    shortId: link.shortId,
-    originalUrl: link.targetUrl,
-    shortUrl: `${process.env.NEXT_PUBLIC_URL}/${link.shortId}`,
-    clicks: link.clicks,
-    status: link.status,
-    createdAt: link.createdAt.toISOString(),
-  }));
+  return links;
 }

@@ -1,4 +1,4 @@
-import React from "react";
+"use client"
 import {
   Card,
   CardContent,
@@ -15,16 +15,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-
-interface Link {
-  id: string;
-  originalUrl: string;
-  shortUrl: string;
-  slug?: string;
-  clicks: number;
-  status: "ACTIVE" | "PAUSED";
-  createdAt: string;
-}
+import { Link } from "@/generated/prisma";
 
 interface TopLinkData {
   name: string;
@@ -41,7 +32,7 @@ export function AnalyticsTab({ links }: AnalyticsTabProps) {
     .sort((a, b) => b.clicks - a.clicks)
     .slice(0, 5)
     .map((link) => ({
-      name: link.slug || link.shortUrl,
+      name: link.shortId,
       clicks: link.clicks,
     }));
 

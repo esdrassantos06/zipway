@@ -4,11 +4,10 @@ import { getSessionFromHeaders } from "@/utils/getSession";
 import { getUserLinks } from "@/utils/getUserLinks";
 import Sidebar from "@/components/dashboard/Sidebar";
 import { Header } from "@/app/dashboard/HeaderDashboard";
+import { AnalyticsTab } from "@/components/AnalyticsTab";
 import { StatsCards } from "@/components/dashboard/StatsCards";
-import { LinkForm } from "@/components/dashboard/LinkForm";
-import { LinksTable } from "@/components/dashboard/LinksTable";
 
-export default async function DashboardPage() {
+export default async function AnalyticsPage() {
   const headersList = await headers();
   const session = await getSessionFromHeaders(headersList);
 
@@ -30,22 +29,14 @@ export default async function DashboardPage() {
               <div className="mx-auto max-w-7xl space-y-6">
                 <div>
                   <h1 className="text-3xl font-bold tracking-tight">
-                    Dashboard
+                    Analytics
                   </h1>
                   <p className="text-muted-foreground">
-                    Manage your shortened links and track statistics
+                    Track the performance of your links
                   </p>
                 </div>
                 <StatsCards links={links} />
-                <div className="flex w-full">
-                  <LinkForm />
-                </div>
-                <LinksTable
-                  links={links}
-                  isLoading={false}
-                  userId={session.user.id}
-                  limit={5}
-                />
+                <AnalyticsTab links={links} />
               </div>
             </main>
           </div>

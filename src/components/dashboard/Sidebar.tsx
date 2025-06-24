@@ -4,25 +4,19 @@ import { BarChart3, LayoutDashboard, Link2, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { Skeleton } from "@/components/ui/skeleton";
 
-interface SidebarClientProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-}
-
 const menuItems = [
-  { id: "overview", label: "Overview", icon: LayoutDashboard },
-  { id: "links", label: "My Links", icon: LayoutDashboard },
-  { id: "analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/dashboard/links", label: "My Links", icon: Link2 },
+  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
 ];
 
-export default function Sidebar({
-  activeTab,
-  setActiveTab,
-}: SidebarClientProps) {
+export default function Sidebar() {
   const { data: session, isPending } = authClient.useSession();
+  const pathname = usePathname();
 
   if (isPending)
     return (
@@ -50,25 +44,28 @@ export default function Sidebar({
           </Link>
         </div>
       </div>
-      <nav className="space-y-2 px-4">
-        {menuItems.map((item) => (
-          <Button
-            key={item.id}
-            variant={activeTab === item.id ? "secondary" : "ghost"}
-            className={cn(
-              "w-full justify-start",
-              activeTab === item.id && "bg-secondary",
-            )}
-            onClick={() => setActiveTab(item.id)}
-          >
-            <item.icon className="mr-2 size-4" />
-            {item.label}
-          </Button>
-        ))}
+      <nav className="flex flex-col gap-1 px-2">
+        {menuItems.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link key={item.href} href={item.href}>
+              <Button
+                variant={isActive ? "secondary" : "ghost"}
+                className={cn(
+                  "w-full justify-start",
+                  isActive && "bg-secondary",
+                )}
+              >
+                <item.icon className="mr-2 size-4" />
+                {item.label}
+              </Button>
+            </Link>
+          );
+        })}
 
         {isAdmin && (
           <Link href="/admin/dashboard">
-            <Button variant="destructive" className="mt-2 w-full justify-start">
+            <Button variant="destructive" className="mt-1 w-full justify-start">
               <ShieldCheck className="mr-2 size-4" />
               Admin
             </Button>

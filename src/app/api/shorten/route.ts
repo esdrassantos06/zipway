@@ -9,6 +9,7 @@ import {
 import { customAlphabet } from "nanoid";
 import validator from "validator";
 import { getSessionFromHeaders } from "@/utils/getSession";
+import { revalidatePath } from "next/cache";
 
 const nanoid = customAlphabet(
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
@@ -104,10 +105,12 @@ export async function POST(req: NextRequest) {
     const baseUrl = process.env.NEXT_PUBLIC_URL;
     const short_url = `${baseUrl}/${newLink.shortId}`;
 
+    revalidatePath("/dashboard");
     return NextResponse.json({
       id: newLink.shortId,
       target_url: newLink.targetUrl,
       short_url,
+      userId: newLink.userId,
     });
   } catch (error) {
     console.error("Error creating URL:", error);
