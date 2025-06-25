@@ -99,7 +99,9 @@ export default async function ProfilePage() {
                           className="flex items-center justify-between rounded-lg border p-3"
                         >
                           <div className="space-y-1">
-                            <div className="font-medium">{getShortUrl(link.shortId)}</div>
+                            <div className="font-medium">
+                              {getShortUrl(link.shortId)}
+                            </div>
                             <div className="text-sm text-gray-500">
                               {link.targetUrl}
                             </div>

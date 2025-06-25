@@ -22,7 +22,7 @@ const mockFetch = global.fetch as jest.MockedFunction<typeof fetch>;
 describe("ShortenUrlForm", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, "error").mockImplementation(() => {});
     render(<LinkForm />);
   });
 

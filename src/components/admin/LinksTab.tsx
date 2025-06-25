@@ -80,14 +80,14 @@ export function LinksTab({ links, onEdit, onDelete }: LinksTabProps) {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
-                      <span className="font-mono text-sm">{getShortUrl(link.shortId)}</span>
+                      <span className="font-mono text-sm">
+                        {getShortUrl(link.shortId)}
+                      </span>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() =>
-                          copyToClipboard(
-                            getShortUrl(link.shortId),
-                          )
+                          copyToClipboard(getShortUrl(link.shortId))
                         }
                       >
                         <Copy className="h-3 w-3" />
@@ -122,11 +122,7 @@ export function LinksTab({ links, onEdit, onDelete }: LinksTabProps) {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
-                          onClick={() =>
-                            openLink(
-                              getShortUrl(link.shortId),
-                            )
-                          }
+                          onClick={() => openLink(getShortUrl(link.shortId))}
                         >
                           <ExternalLink className="mr-2 h-4 w-4" />
                           Visit
