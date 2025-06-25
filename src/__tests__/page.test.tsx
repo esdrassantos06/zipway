@@ -7,6 +7,6 @@ describe("UrlShortener", () => {
   });
 
   it("should render the Page component", () => {
-    expect(screen.getByText("Login")).toBeInTheDocument();
+    expect(screen.getByText("Shorten your links with")).toBeInTheDocument();
   });
 });

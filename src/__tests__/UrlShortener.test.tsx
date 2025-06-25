@@ -2,13 +2,6 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { LinkForm } from "@/components/dashboard/LinkForm";
 
-jest.mock("@/utils/axios.ts", () => ({
-  __esModule: true,
-  shortenUrl: jest.fn(),
-}));
-
-import { shortenUrl } from "@/utils/axios";
-
 jest.mock("sonner", () => ({
   __esModule: true,
   default: {
@@ -24,59 +17,97 @@ jest.mock("sonner", () => ({
 
 import { toast } from "sonner";
 
+const mockFetch = global.fetch as jest.MockedFunction<typeof fetch>;
+
 describe("ShortenUrlForm", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(console, 'error').mockImplementation(() => {});
     render(<LinkForm />);
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it("should render the ShortenUrlForm component", () => {
-    expect(screen.getByText("Shorten")).toBeInTheDocument();
+    expect(screen.getByText("Shorten Link")).toBeInTheDocument();
   });
 
   it("should click and type in the input", () => {
-    const input = screen.getByPlaceholderText(
-      "https://example.com/very/long/url",
-    );
+    const input = screen.getByLabelText("Original URL");
+
     fireEvent.change(input, { target: { value: "https://www.google.com" } });
     expect(input).toHaveValue("https://www.google.com");
   });
 
-  it("should show an error message if the URL is invalid", async () => {
-    (shortenUrl as jest.Mock).mockRejectedValue(new Error("Network Error"));
-
-    const input = screen.getByPlaceholderText(
-      "https://example.com/very/long/url",
-    );
-    fireEvent.change(input, { target: { value: "invalid-url" } });
-
-    const button = screen.getByTestId("shorten-url-button");
-    fireEvent.click(button);
-
-    await waitFor(() => {
-      expect(screen.getByText("Please enter a valid URL")).toBeInTheDocument();
-      expect(toast.error).toHaveBeenCalledWith("Please enter a valid URL");
-    });
-  });
-
   it("should show the shortened URL if the API call succeeds", async () => {
-    const fakeShortUrl = "http://short.ly/abc123";
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        short_url: "https://short.ly/abc123",
+        original_url: "https://valid-url.com",
+      }),
+    } as Response);
 
-    (shortenUrl as jest.Mock).mockResolvedValue({
-      data: { short_url: fakeShortUrl },
-    });
+    const input = screen.getByLabelText("Original URL");
 
-    const input = screen.getByPlaceholderText(
-      "https://example.com/very/long/url",
-    );
     fireEvent.change(input, { target: { value: "https://valid-url.com" } });
 
     const button = screen.getByTestId("shorten-url-button");
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(screen.getByDisplayValue(fakeShortUrl)).toBeInTheDocument();
-      expect(toast.success).toHaveBeenCalledWith("URL Shortened Sucessfully.");
+      expect(toast.success).toHaveBeenCalledWith("URL Shortened Successfully.");
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith("/api/shorten", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        targetUrl: "https://valid-url.com",
+      }),
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByDisplayValue("https://short.ly/abc123"),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("should handle API errors gracefully", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 400,
+      json: async () => ({ error: "Invalid request" }),
+    } as Response);
+
+    const input = screen.getByLabelText("Original URL");
+
+    fireEvent.change(input, { target: { value: "https://valid-url.com" } });
+
+    const button = screen.getByTestId("shorten-url-button");
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Invalid request");
+    });
+  });
+
+  it("should handle network errors", async () => {
+    mockFetch.mockRejectedValueOnce(new Error("Network error"));
+
+    const input = screen.getByLabelText("Original URL");
+    fireEvent.change(input, { target: { value: "https://valid-url.com" } });
+
+    const button = screen.getByTestId("shorten-url-button");
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Network error");
     });
   });
 });
