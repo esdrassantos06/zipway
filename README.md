@@ -68,7 +68,6 @@ zipway/
 Create a `.env` file in the frontend directory with the following variables:
 
 ```bash
-NEXT_PUBLIC_API_URL=
 NEXT_PUBLIC_ADSENSE_CLIENT_ID=
 
 
