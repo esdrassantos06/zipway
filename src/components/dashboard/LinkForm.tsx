@@ -1,7 +1,8 @@
 "use client";
 
-import type React from "react";
-
+import { useForm, SubmitHandler } from "react-hook-form";
+import { linkFormSchema } from "@/validation/LinkFormSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,164 +16,53 @@ import {
 } from "@/components/ui/card";
 import { Copy, Link2Icon, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import validator from "validator";
-import {
-  sanitizeAlias,
-  validateAlias,
-  isReservedAlias,
-} from "@/utils/sanitize";
 import { copyToClipboard } from "@/utils/AppUtils";
+import z from "zod";
 
-let globalUrl = "";
-let globalShortenedUrl: string | null = null;
-let globalCustomAlias = "";
-
-interface ShortenUrlPayload {
-  targetUrl: string;
-  custom_id?: string;
-  userId?: string;
-}
+type LinkFormSchema = z.infer<typeof linkFormSchema>;
 
 export function LinkForm() {
-  const [url, setUrl] = useState(globalUrl);
-  const [customAlias, setCustomAlias] = useState(globalCustomAlias);
-  const [shortenedUrl, setShortenedUrl] = useState<string | null>(
-    globalShortenedUrl,
-  );
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LinkFormSchema>({
+    resolver: zodResolver(linkFormSchema),
+  });
+
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [aliasWarning, setAliasWarning] = useState<string | null>(null);
+  const [shortenedUrl, setShortenedUrl] = useState<string | null>(null);
 
-  const updateUrl = (newUrl: string) => {
-    setUrl(newUrl);
+  const onSubmit: SubmitHandler<LinkFormSchema> = async (data) => {
+    setIsLoading(true);
     setShortenedUrl(null);
-    globalUrl = newUrl;
-    globalShortenedUrl = null;
-  };
-
-  const updateCustomAlias = (newAlias: string) => {
-    const sanitized = sanitizeAlias(newAlias);
-
-    setCustomAlias(sanitized);
-    globalCustomAlias = sanitized;
-
-    if (newAlias && newAlias !== sanitized) {
-      setAliasWarning(
-        "Alias ​​has been adjusted to contain only valid characters",
-      );
-    } else if (sanitized && isReservedAlias(sanitized)) {
-      setAliasWarning("This alias is reserved by the system");
-    } else if (sanitized) {
-      const validation = validateAlias(sanitized);
-      if (!validation.valid) {
-        setAliasWarning(validation.error || "Invalid Alias");
-      } else {
-        setAliasWarning(null);
-      }
-    } else {
-      setAliasWarning(null);
-    }
-  };
-
-  const updateShortenedUrl = (newShortenedUrl: string | null) => {
-    setShortenedUrl(newShortenedUrl);
-    globalShortenedUrl = newShortenedUrl;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const trimmedURL = url.trim();
-
-    if (!url || !trimmedURL) {
-      setError("Please enter a URL");
-      toast.error("Please, enter a URL.");
-      return;
-    }
-
-    if (!validator.isURL(trimmedURL, { require_protocol: true })) {
-      setError("Please enter a valid URL");
-      toast.error("Please enter a valid URL");
-      return;
-    }
-
-    if (customAlias) {
-      const sanitizedAlias = sanitizeAlias(customAlias);
-
-      if (isReservedAlias(sanitizedAlias)) {
-        setError("This alias is reserved by the system");
-        toast.error("This alias is reserved by the system");
-        return;
-      }
-
-      const validation = validateAlias(sanitizedAlias);
-      if (!validation.valid) {
-        setError(validation.error || "Invalid alias");
-        toast.error(validation.error || "Invalid alias");
-        return;
-      }
-    }
 
     try {
-      setIsLoading(true);
-      setError(null);
-
-      const payload: ShortenUrlPayload = {
-        targetUrl: trimmedURL,
-      };
-
-      if (customAlias.trim()) {
-        payload.custom_id = sanitizeAlias(customAlias.trim());
-      }
-
-      const response = await fetch(`/api/shorten`, {
+      const response = await fetch("/api/shorten", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          targetUrl: data.targetUrl,
+          custom_id: data.customAlias,
+        }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-
-        switch (response.status) {
-          case 400:
-            throw new Error(errorData.error || "Invalid request");
-          case 401:
-            throw new Error("Unauthorized - Please login");
-          case 404:
-            throw new Error("Resource not found");
-          case 429:
-            throw new Error("Rate limit exceeded. Please try again later.");
-          case 500:
-            throw new Error("Server error - Please try again later");
-          default:
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
+        const res = await response.json();
+        throw new Error(res.error || "Error shortening URL.");
       }
 
-      const data = await response.json();
-
-      if (!data?.short_url) {
-        throw new Error("Invalid response format");
-      }
-
-      if (data?.short_url) {
-        updateShortenedUrl(data.short_url);
-        toast.success("URL Shortened Successfully.");
+      const resData = await response.json();
+      setShortenedUrl(resData.short_url);
+      toast.success("URL Shortened successfuly!");
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
       } else {
-        throw new Error(data?.error || "Invalid response from server");
+        toast.error("Internal Server Error");
       }
-    } catch (e) {
-      if (e instanceof Error) {
-        setError(e.message);
-        toast.error(e.message);
-      } else {
-        setError("An unknown error occurred");
-        toast.error("An unknown error occurred");
-      }
-      console.error("Error: ", e);
     } finally {
       setIsLoading(false);
     }
@@ -181,7 +71,10 @@ export function LinkForm() {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle
+          data-testid="shorten-link-title"
+          className="flex items-center gap-2"
+        >
           <Link2Icon className="size-5" />
           Shorten your link
         </CardTitle>
@@ -190,15 +83,15 @@ export function LinkForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="original-url">Original URL</Label>
             <Input
               id="original-url"
+              data-testid="original-url-input"
               type="url"
               placeholder="https://example.com/my-long-url"
-              value={url}
-              onChange={(e) => updateUrl(e.target.value)}
+              {...register("targetUrl")}
               disabled={isLoading}
             />
           </div>
@@ -208,15 +101,12 @@ export function LinkForm() {
               id="custom-alias"
               type="text"
               placeholder="mylink"
-              value={customAlias}
-              onChange={(e) => updateCustomAlias(e.target.value)}
-              disabled={isLoading}
-              className={aliasWarning ? "border-yellow-500" : ""}
+              {...register("customAlias")}
             />
-            {aliasWarning && (
+            {errors.customAlias && (
               <div className="flex items-center gap-2 text-sm text-yellow-600">
                 <AlertCircle className="size-4" />
-                {aliasWarning}
+                {errors.customAlias.message}
               </div>
             )}
             <p className="text-xs text-gray-500">
@@ -240,16 +130,6 @@ export function LinkForm() {
             )}
           </Button>
         </form>
-
-        {error && (
-          <div
-            className="mt-4 text-sm text-red-500"
-            role="alert"
-            aria-live="assertive"
-          >
-            {error}
-          </div>
-        )}
 
         {shortenedUrl && (
           <div className="bg-muted mt-4 rounded-lg p-4">

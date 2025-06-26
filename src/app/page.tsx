@@ -18,7 +18,10 @@ export default function Home() {
             <div className="container mx-auto px-4 md:px-6">
               <div className="flex flex-col items-center space-y-4 text-center">
                 <div className="space-y-2">
-                  <h1 className="text-3xl font-bold tracking-tighter text-gray-900 sm:text-4xl md:text-5xl lg:text-6xl dark:text-white">
+                  <h1
+                    data-testid="hero-test-title"
+                    className="text-3xl font-bold tracking-tighter text-gray-900 sm:text-4xl md:text-5xl lg:text-6xl dark:text-white"
+                  >
                     Shorten your links with
                     <span className="text-blue-600 dark:text-indigo-400">
                       {" "}

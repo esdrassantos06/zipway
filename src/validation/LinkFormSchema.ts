@@ -14,13 +14,19 @@ export const linkFormSchema = z.object({
       message: "URL must contain the (http/https) protocol",
     }),
   customAlias: z
-    .string()
-    .trim()
-    .optional()
+    .union([z.string().trim(), z.literal("")])
     .transform((val) => sanitizeAlias(val || ""))
-    .refine((val) => !isReservedAlias(val), {
-      message: "This alias is reserved by system",
-    })
+    .refine(
+      (val) => {
+        // Permite aliases vazios (serão gerados automaticamente com nanoid)
+        if (!val) return true;
+        // Só verifica se é reservado quando há um valor
+        return !isReservedAlias(val);
+      },
+      {
+        message: "This alias is reserved by system",
+      },
+    )
     .refine(
       (val) => {
         if (!val) return true;

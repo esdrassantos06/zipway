@@ -7,6 +7,6 @@ describe("UrlShortener", () => {
   });
 
   it("should render the Page component", () => {
-    expect(screen.getByText("Shorten your links with")).toBeInTheDocument();
+    expect(screen.getByTestId("hero-test-title")).toBeInTheDocument();
   });
 });

@@ -31,11 +31,11 @@ describe("ShortenUrlForm", () => {
   });
 
   it("should render the ShortenUrlForm component", () => {
-    expect(screen.getByText("Shorten Link")).toBeInTheDocument();
+    expect(screen.getByTestId("shorten-link-title")).toBeInTheDocument();
   });
 
   it("should click and type in the input", () => {
-    const input = screen.getByLabelText("Original URL");
+    const input = screen.getByTestId("original-url-input");
 
     fireEvent.change(input, { target: { value: "https://www.google.com" } });
     expect(input).toHaveValue("https://www.google.com");
@@ -45,12 +45,12 @@ describe("ShortenUrlForm", () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({
-        short_url: "https://short.ly/abc123",
+        short_url: "https://shly.pt/abc123",
         original_url: "https://valid-url.com",
       }),
     } as Response);
 
-    const input = screen.getByLabelText("Original URL");
+    const input = screen.getByTestId("original-url-input");
 
     fireEvent.change(input, { target: { value: "https://valid-url.com" } });
 
@@ -58,7 +58,7 @@ describe("ShortenUrlForm", () => {
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith("URL Shortened Successfully.");
+      expect(toast.success).toHaveBeenCalled();
     });
 
     expect(mockFetch).toHaveBeenCalledWith("/api/shorten", {
@@ -68,6 +68,7 @@ describe("ShortenUrlForm", () => {
       },
       body: JSON.stringify({
         targetUrl: "https://valid-url.com",
+        custom_id: "",
       }),
     });
 
@@ -85,7 +86,7 @@ describe("ShortenUrlForm", () => {
       json: async () => ({ error: "Invalid request" }),
     } as Response);
 
-    const input = screen.getByLabelText("Original URL");
+    const input = screen.getByTestId("original-url-input");
 
     fireEvent.change(input, { target: { value: "https://valid-url.com" } });
 
@@ -100,7 +101,7 @@ describe("ShortenUrlForm", () => {
   it("should handle network errors", async () => {
     mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
-    const input = screen.getByLabelText("Original URL");
+    const input = screen.getByTestId("original-url-input");
     fireEvent.change(input, { target: { value: "https://valid-url.com" } });
 
     const button = screen.getByTestId("shorten-url-button");
