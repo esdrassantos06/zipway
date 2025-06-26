@@ -74,7 +74,7 @@ describe("ShortenUrlForm", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByDisplayValue("https://short.ly/abc123"),
+        screen.getByDisplayValue("https://shly.pt/abc123"),
       ).toBeInTheDocument();
     });
   });
