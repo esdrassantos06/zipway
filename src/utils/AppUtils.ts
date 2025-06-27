@@ -1,12 +1,12 @@
 import { toast } from "sonner";
 
-export const copyToClipboard = (text: string) => {
+export const copyToClipboard = async (text: string) => {
   if (!navigator.clipboard) {
     toast.error("Clipboard API not supported in your browser");
     return;
   }
 
-  navigator.clipboard
+  return navigator.clipboard
     .writeText(text)
     .then(() => {
       toast.success("Copied to clipboard!");
@@ -20,16 +20,15 @@ export const openLink = (url: string) => {
   window.open(url, "_blank", "noopener,noreferrer");
 };
 
-export const getStatusDisplay = (status: string) => {
-  return status.toLowerCase() === "active" || status === "ACTIVE"
-    ? "active"
-    : "paused";
+export const getStatusDisplay = (
+  status: string | undefined,
+): "active" | "paused" => {
+  return status?.toLowerCase() === "active" ? "active" : "paused";
 };
 
-export const getStatusLabel = (status: string) => {
-  return status.toLowerCase() === "active" || status === "ACTIVE"
-    ? "Active"
-    : "Paused";
+export const getStatusLabel = (status: string | undefined) => {
+  if (!status) return "Paused";
+  return status.toLowerCase() === "active" ? "Active" : "Paused";
 };
 
 export const truncateUrl = (

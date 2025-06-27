@@ -34,6 +34,13 @@ jest.mock("@/lib/auth-client", () => ({
   },
 }));
 
+jest.mock("sonner", () => ({
+  toast: {
+    success: jest.fn(),
+    error: jest.fn(),
+  },
+}));
+
 global.fetch = jest.fn();
 
 afterEach(() => {
