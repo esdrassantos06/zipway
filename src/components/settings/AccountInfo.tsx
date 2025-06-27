@@ -25,19 +25,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Session } from "@/lib/auth-client";
+import { accountFormSchema } from "@/validation/accountFormSchema";
 
 type Props = {
   session: Session;
 };
-
-const accountFormSchema = z.object({
-  name: z
-    .string()
-    .min(2, "Name must be at least 2 characters")
-    .max(50, "Name must be at most 50 characters"),
-  email: z.string().email("Invalid email"),
-  password: z.string().optional(),
-});
 
 type AccountFormValues = z.infer<typeof accountFormSchema>;
 

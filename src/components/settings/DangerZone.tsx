@@ -1,5 +1,3 @@
-// src/components/DangerZone.tsx
-
 "use client";
 
 import { useState } from "react";
@@ -29,9 +27,9 @@ export const DangerZone = () => {
 
     try {
       await deleteOwnAccountAction();
-      toast.success("Conta excluída com sucesso.");
+      toast.success("Account deleted successfully.");
     } catch {
-      toast.error("Erro ao excluir conta.");
+      toast.error("Error deleting account.");
     } finally {
       setLoading(false);
     }
