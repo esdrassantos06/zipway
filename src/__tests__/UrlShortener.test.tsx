@@ -2,19 +2,6 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { LinkForm } from "@/components/dashboard/LinkForm";
 
-jest.mock("sonner", () => ({
-  __esModule: true,
-  default: {
-    error: jest.fn(),
-    success: jest.fn(),
-  },
-  toast: {
-    error: jest.fn(),
-    success: jest.fn(),
-  },
-  Toaster: () => <div />,
-}));
-
 import { toast } from "sonner";
 
 const mockFetch = global.fetch as jest.MockedFunction<typeof fetch>;

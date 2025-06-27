@@ -35,9 +35,14 @@ jest.mock("@/lib/auth-client", () => ({
 }));
 
 jest.mock("sonner", () => ({
-  toast: {
-    success: jest.fn(),
+  __esModule: true,
+  default: {
     error: jest.fn(),
+    success: jest.fn(),
+  },
+  toast: {
+    error: jest.fn(),
+    success: jest.fn(),
   },
 }));
 
