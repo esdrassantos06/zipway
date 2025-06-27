@@ -29,7 +29,6 @@ import ReturnButton from "../ReturnButton";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 
-// Zod schema
 const forgotPasswordSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
 });

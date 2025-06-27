@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useTransition } from "react";
+import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -10,29 +10,8 @@ import { Label } from "../ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { Shield } from "lucide-react";
 import { toast } from "sonner";
-
+import { changePasswordSchema } from "@/validation/ChangePasswordSchema";
 import { updatePasswordAction } from "@/actions/update-password-action";
-
-const changePasswordSchema = z
-  .object({
-    currentPassword: z
-      .string()
-      .min(1, { message: "Current password is required" }),
-    newPassword: z
-      .string()
-      .min(8, { message: "New password must be at least 8 characters long" })
-      .regex(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[#?!@$%^&*-]).{8,}$/, {
-        message:
-          "The new password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
-      }),
-    confirmPassword: z
-      .string()
-      .min(1, { message: "Password confirmation is required" }),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "The passwords do not match",
-    path: ["confirmPassword"],
-  });
 
 type FormData = z.infer<typeof changePasswordSchema>;
 

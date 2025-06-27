@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, Palette } from "lucide-react";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Label } from "../ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { useTheme } from "next-themes";
