@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { redis } from "@/utils/redis";
 import {
   createRateLimiter,
@@ -27,30 +26,23 @@ export async function GET(req: NextRequest) {
   try {
     const startTime = Date.now();
 
-    const result = await prisma.$queryRaw`SELECT 1 as ping, NOW() as timestamp`;
+    const pong = await redis.ping();
 
     const duration = Date.now() - startTime;
 
-    const pong = await redis.ping();
-
     return NextResponse.json({
-      database: "OK",
       redis: pong === "PONG" ? "OK" : "FAIL",
-      query_result: result,
       duration_ms: duration,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
     return NextResponse.json(
       {
-        database: "FAIL",
         redis: "FAIL",
         error: (error as Error).message,
         timestamp: new Date().toISOString(),
       },
       { status: 500 },
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

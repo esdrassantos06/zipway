@@ -1,6 +1,6 @@
 {
   "name": "zipway",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "private": true,
   "scripts": {
     "dev": "prisma generate && next dev --turbopack",
@@ -16,7 +16,7 @@
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
     "@node-rs/argon2": "^2.0.2",
-    "@prisma/client": "^6.10.0",
+    "@prisma/client": "^6.12.0",
     "@prisma/extension-accelerate": "^2.0.1",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-avatar": "^1.1.10",
@@ -40,7 +40,7 @@
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.511.0",
     "nanoid": "^5.1.5",
-    "next": "15.3.2",
+    "next": "^15.4.2",
     "next-themes": "^0.4.6",
     "react": "^19.1.0",
     "react-cookie-consent": "^9.0.0",
@@ -72,7 +72,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.12",
-    "prisma": "^6.10.1",
+    "prisma": "^6.12.0",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.3",
