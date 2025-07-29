@@ -14,8 +14,11 @@ export async function SignInEmailActions(formData: FormData) {
   const parsed = signInSchema.safeParse(rawData);
 
   if (!parsed.success) {
-    const firstError = parsed.error.errors[0];
-    return { error: firstError.message };
+    const firstIssue = parsed.error.issues[0];
+    const errMsg = firstIssue
+      ? `${firstIssue.path.join(".")}: ${firstIssue.message}`
+      : "Unknown error";
+    return { error: errMsg };
   }
 
   const { email, password } = parsed.data;

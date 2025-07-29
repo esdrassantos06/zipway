@@ -14,7 +14,9 @@ export async function ResetPasswordAction(formData: FormData) {
 
   const parsed = resetPasswordSchema.safeParse(raw);
   if (!parsed.success) {
-    const err = parsed.error.errors[0].message;
+    const { issues } = parsed.error;
+    const first = issues[0];
+    const err = first?.message;
     return { error: err };
   }
 

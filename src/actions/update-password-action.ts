@@ -14,7 +14,11 @@ export async function updatePasswordAction(formData: FormData) {
 
   const parsed = changePasswordSchema.safeParse(raw);
   if (!parsed.success) {
-    return { error: parsed.error.errors[0].message };
+    const firstIssue = parsed.error.issues[0];
+    const errMsg = firstIssue
+      ? `${firstIssue.path.join(".")}: ${firstIssue.message}`
+      : "Unknown error";
+    return { error: errMsg };
   }
 
   const { currentPassword, newPassword } = parsed.data;
