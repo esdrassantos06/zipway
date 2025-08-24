@@ -11,6 +11,8 @@ export default async function Page({
   const resolvedParams = await params;
   const shortId = resolvedParams.shortId;
 
+  let targetUrl: string;
+
   try {
     const result = await prisma.$transaction(async (tx) => {
       const existingLink = await tx.link.findUnique({
@@ -21,11 +23,7 @@ export default async function Page({
         },
       });
 
-      if (!existingLink) {
-        return null;
-      }
-
-      if (existingLink.status !== LinkStatus.ACTIVE) {
+      if (!existingLink || existingLink.status !== LinkStatus.ACTIVE) {
         return null;
       }
 
@@ -45,9 +43,11 @@ export default async function Page({
       notFound();
     }
 
-    redirect(result);
+    targetUrl = result;
   } catch (error) {
     console.error("Error processing redirect:", error);
     notFound();
   }
+
+  redirect(targetUrl);
 }
