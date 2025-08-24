@@ -27,15 +27,15 @@ export function StatsCards({ links }: StatsCardsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
       {stats.map((stat) => (
         <Card key={stat.title}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 px-4 pb-2 sm:px-6">
             <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
             <stat.icon className={`size-4 ${stat.color}`} />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stat.value}</div>
+          <CardContent className="px-4 sm:px-6">
+            <div className="text-xl font-bold sm:text-2xl">{stat.value}</div>
           </CardContent>
         </Card>
       ))}

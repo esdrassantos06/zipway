@@ -30,7 +30,7 @@ export default function RootLayout({
         />
       </Head>
       <body
-        className={`${inter.className} antialiased`}
+        className={`${inter.className} min-h-screen w-full antialiased`}
         suppressHydrationWarning
       >
         <Script

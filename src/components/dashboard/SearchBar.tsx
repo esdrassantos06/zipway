@@ -65,12 +65,12 @@ export default function SearchBar({ userId, onSearchResults }: SearchBarProps) {
   if (pathname !== "/dashboard/links") return null;
 
   return (
-    <div className="relative mb-2 w-full">
-      <Search className="text-muted-foreground absolute top-2.5 left-2.5 size-4" />
+    <div className="relative mb-3 w-full sm:mb-4">
+      <Search className="text-muted-foreground absolute top-2.5 left-3 size-4" />
       <Input
         type="search"
         placeholder="Search links..."
-        className="w-full pl-8"
+        className="w-full pr-3 pl-10 text-sm sm:text-base"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />

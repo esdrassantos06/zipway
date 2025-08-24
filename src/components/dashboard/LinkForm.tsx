@@ -70,22 +70,27 @@ export function LinkForm() {
 
   return (
     <Card className="w-full">
-      <CardHeader>
+      <CardHeader className="px-4 sm:px-6">
         <CardTitle
           data-testid="shorten-link-title"
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 text-lg sm:text-xl"
         >
-          <Link2Icon className="size-5" />
+          <Link2Icon className="size-4 sm:size-5" />
           Shorten your link
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-sm sm:text-base">
           Paste your long URL and create a custom short link
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <CardContent className="px-4 sm:px-6">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-4 sm:space-y-6"
+        >
           <div className="space-y-2">
-            <Label htmlFor="original-url">Original URL</Label>
+            <Label htmlFor="original-url" className="text-sm sm:text-base">
+              Original URL
+            </Label>
             <Input
               id="original-url"
               data-testid="original-url-input"
@@ -93,19 +98,29 @@ export function LinkForm() {
               placeholder="https://example.com/my-long-url"
               {...register("targetUrl")}
               disabled={isLoading}
+              className="text-sm sm:text-base"
             />
+            {errors.targetUrl && (
+              <div className="flex items-center gap-2 text-xs text-red-600 sm:text-sm">
+                <AlertCircle className="size-3 sm:size-4" />
+                {errors.targetUrl.message}
+              </div>
+            )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="custom-alias">Custom Alias (optional)</Label>
+            <Label htmlFor="custom-alias" className="text-sm sm:text-base">
+              Custom Alias (optional)
+            </Label>
             <Input
               id="custom-alias"
               type="text"
               placeholder="mylink"
               {...register("customAlias")}
+              className="text-sm sm:text-base"
             />
             {errors.customAlias && (
-              <div className="flex items-center gap-2 text-sm text-yellow-600">
-                <AlertCircle className="size-4" />
+              <div className="flex items-center gap-2 text-xs text-yellow-600 sm:text-sm">
+                <AlertCircle className="size-3 sm:size-4" />
                 {errors.customAlias.message}
               </div>
             )}
@@ -117,7 +132,7 @@ export function LinkForm() {
           <Button
             data-testid="shorten-url-button"
             type="submit"
-            className="w-full"
+            className="w-full text-sm sm:text-base"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -126,23 +141,31 @@ export function LinkForm() {
                 Shortening...
               </>
             ) : (
-              "Shorten Link"
+              <>
+                <Link2Icon className="mr-2 size-4" />
+                Shorten URL
+              </>
             )}
           </Button>
         </form>
 
         {shortenedUrl && (
-          <div className="bg-muted mt-4 rounded-lg p-4">
-            <Label className="text-sm font-medium">Shortened Link:</Label>{" "}
-            <div className="mt-2 flex items-center gap-2">
+          <div className="mt-4 space-y-2 sm:mt-6">
+            <Label className="text-sm font-medium sm:text-base">
+              Your shortened URL:
+            </Label>
+            <div className="bg-muted flex items-center gap-2 rounded-md p-3">
               <Input
                 value={shortenedUrl}
                 readOnly
+                data-testid="shortened-url-display"
+                className="flex-1 border-0 bg-transparent font-mono text-sm focus-visible:ring-0 focus-visible:ring-offset-0 sm:text-base"
                 onClick={(e) => (e.target as HTMLInputElement).select()}
               />
               <Button
                 size="icon"
-                variant="outline"
+                variant="ghost"
+                className="size-8 flex-shrink-0 sm:size-9"
                 onClick={() => copyToClipboard(shortenedUrl)}
               >
                 <Copy className="size-4" />

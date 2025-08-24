@@ -59,10 +59,12 @@ describe("ShortenUrlForm", () => {
     });
 
     await waitFor(() => {
-      expect(
-        screen.getByDisplayValue("https://shly.pt/abc123"),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId("shortened-url-display")).toBeInTheDocument();
     });
+
+    expect(screen.getByTestId("shortened-url-display")).toHaveValue(
+      "https://shly.pt/abc123",
+    );
   });
 
   it("should handle API errors gracefully", async () => {

@@ -114,16 +114,18 @@ export default function Header() {
   const { data: session } = authClient.useSession();
 
   return (
-    <header className="flex h-16 items-center border-b px-4 lg:px-6">
-      <Link href="/" className="flex items-center justify-center">
-        <Link2 className="size-8 text-blue-600" />
-        <span className="ml-2 hidden text-xl font-bold text-gray-900 sm:block md:text-2xl dark:text-white">
-          Zipway
-        </span>
-      </Link>
-      <nav className="ml-auto flex items-center gap-4">
-        <Btn session={session} />
-      </nav>
+    <header className="bg-background w-full border-b px-3 py-2 sm:px-4 sm:py-3 lg:px-6 lg:py-4">
+      <div className="flex items-center justify-between">
+        <Link href="/" className="flex items-center">
+          <Link2 className="size-8 text-blue-600" />
+          <span className="ml-2 text-xl font-bold text-gray-900 sm:text-2xl dark:text-white">
+            Zipway
+          </span>
+        </Link>
+        <nav className="flex items-center gap-2 sm:gap-4">
+          <Btn session={session} />
+        </nav>
+      </div>
     </header>
   );
 }

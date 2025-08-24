@@ -25,13 +25,16 @@ export async function Header() {
   const initials = getInitials(session?.user?.name || "");
 
   return (
-    <header className="bg-background border-b px-6 py-4">
-      <div className="flex w-full items-center justify-end">
-        <div className="flex items-center space-x-4">
+    <header className="bg-background w-full border-b px-3 py-2 sm:px-4 sm:py-3 lg:px-6 lg:py-4">
+      <div className="flex items-center justify-end">
+        <div className="flex items-center space-x-2 sm:space-x-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative size-8 rounded-full">
-                <Avatar className="size-8">
+              <Button
+                variant="ghost"
+                className="relative size-7 rounded-full sm:size-8"
+              >
+                <Avatar className="size-7 sm:size-8">
                   <AvatarImage
                     src={
                       session?.user.image ||
@@ -39,11 +42,17 @@ export async function Header() {
                     }
                     alt="Avatar"
                   />
-                  <AvatarFallback>{initials}</AvatarFallback>
+                  <AvatarFallback className="text-xs sm:text-sm">
+                    {initials}
+                  </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
+            <DropdownMenuContent
+              className="w-48 sm:w-56"
+              align="end"
+              forceMount
+            >
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm leading-none font-medium">

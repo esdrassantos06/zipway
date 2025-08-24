@@ -9,7 +9,6 @@ import {
 import { customAlphabet } from "nanoid";
 import validator from "validator";
 import { getSessionFromHeaders } from "@/utils/getSession";
-import { revalidatePath } from "next/cache";
 
 const nanoid = customAlphabet(
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
@@ -21,6 +20,23 @@ interface RequestBody {
   custom_id?: string;
   userId?: string;
 }
+
+const generateUniqueShortId = async (maxRetries = 3): Promise<string> => {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const shortId = nanoid();
+
+    const existing = await prisma.link.findUnique({
+      where: { shortId },
+      select: { shortId: true },
+    });
+
+    if (!existing) {
+      return shortId;
+    }
+  }
+
+  throw new Error("Failed to generate unique short ID after multiple attempts");
+};
 
 export async function POST(req: NextRequest) {
   const rateLimiter = createRateLimiter(DEFAULT_LIMITS.shorten);
@@ -53,14 +69,11 @@ export async function POST(req: NextRequest) {
     const validation = validateAlias(sanitized);
 
     if (!validation.valid) {
-      return NextResponse.json({ error: validation.error }, { status: 400 });
+      throw new Error(validation.error);
     }
 
     if (reservedPaths.includes(sanitized)) {
-      return NextResponse.json(
-        { error: "This alias is reserved by the system" },
-        { status: 400 },
-      );
+      throw new Error("This alias is reserved by the system");
     }
 
     const exists = await prisma.link.findUnique({
@@ -75,48 +88,32 @@ export async function POST(req: NextRequest) {
 
     shortId = sanitized;
   } else {
-    let exists = true;
-    while (exists) {
-      shortId = nanoid();
-      const existingLink = await prisma.link.findUnique({ where: { shortId } });
-      exists = !!existingLink;
-    }
+    shortId = await generateUniqueShortId();
   }
 
-  if (!shortId) {
-    return NextResponse.json(
-      { error: "Failed to generate short ID" },
-      { status: 500 },
-    );
-  }
+  const newLink = await prisma.link.create({
+    data: {
+      id: nanoid(),
+      shortId,
+      targetUrl,
+      userId: session.user.id,
+      clicks: 0,
+      createdAt: new Date(),
+    },
+    select: {
+      shortId: true,
+      targetUrl: true,
+      userId: true,
+    },
+  });
 
-  try {
-    const newLink = await prisma.link.create({
-      data: {
-        id: nanoid(),
-        shortId,
-        targetUrl,
-        userId: session.user.id,
-        clicks: 0,
-        createdAt: new Date(),
-      },
-    });
+  const baseUrl = process.env.NEXT_PUBLIC_URL;
+  const short_url = `${baseUrl}/${newLink.shortId}`;
 
-    const baseUrl = process.env.NEXT_PUBLIC_URL;
-    const short_url = `${baseUrl}/${newLink.shortId}`;
-
-    revalidatePath("/dashboard");
-    return NextResponse.json({
-      id: newLink.shortId,
-      target_url: newLink.targetUrl,
-      short_url,
-      userId: newLink.userId,
-    });
-  } catch (error) {
-    console.error("Error creating URL:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 },
-    );
-  }
+  return NextResponse.json({
+    id: newLink.shortId,
+    target_url: newLink.targetUrl,
+    short_url,
+    userId: newLink.userId,
+  });
 }

@@ -22,17 +22,17 @@ export default async function DashboardPage() {
   return (
     <div className="bg-background flex h-screen">
       <Sidebar />
-      <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col lg:ml-0">
         <Header />
         <main className="flex-1 overflow-auto">
           <div className="flex flex-1 flex-col overflow-hidden">
-            <main className="bg-muted/40 flex-1 overflow-x-hidden overflow-y-auto p-6">
-              <div className="mx-auto max-w-7xl space-y-6">
-                <div>
-                  <h1 className="text-3xl font-bold tracking-tight">
+            <main className="bg-muted/40 flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6">
+              <div className="mx-auto max-w-7xl space-y-4 sm:space-y-6">
+                <div className="pt-8 lg:pt-0">
+                  <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
                     Dashboard
                   </h1>
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground text-sm sm:text-base">
                     Manage your shortened links and track statistics
                   </p>
                 </div>

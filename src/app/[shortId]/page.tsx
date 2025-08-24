@@ -11,26 +11,43 @@ export default async function Page({
   const resolvedParams = await params;
   const shortId = resolvedParams.shortId;
 
-  const existingLink = await prisma.link.findUnique({
-    where: { shortId },
-  });
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const existingLink = await tx.link.findUnique({
+        where: { shortId },
+        select: {
+          targetUrl: true,
+          status: true,
+        },
+      });
 
-  if (!existingLink) {
+      if (!existingLink) {
+        return null;
+      }
+
+      if (existingLink.status !== LinkStatus.ACTIVE) {
+        return null;
+      }
+
+      await tx.link.update({
+        where: { shortId },
+        data: {
+          clicks: {
+            increment: 1,
+          },
+        },
+      });
+
+      return existingLink.targetUrl;
+    });
+
+    if (!result) {
+      notFound();
+    }
+
+    redirect(result);
+  } catch (error) {
+    console.error("Error processing redirect:", error);
     notFound();
   }
-
-  if (existingLink.status !== LinkStatus.ACTIVE) {
-    notFound();
-  }
-
-  await prisma.link.update({
-    where: { shortId },
-    data: {
-      clicks: {
-        increment: 1,
-      },
-    },
-  });
-
-  redirect(existingLink.targetUrl);
 }

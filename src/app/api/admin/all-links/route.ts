@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const links = await prisma.link.findMany({
-      orderBy: { createdAt: "desc" },
+      orderBy: { clicks: "desc" },
       select: {
         id: true,
         shortId: true,
