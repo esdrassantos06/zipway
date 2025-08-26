@@ -6,25 +6,26 @@ import {
   getClientIdentifier,
 } from "@/utils/rateLimiter";
 import { getSessionFromHeaders } from "@/utils/getSession";
-import { headers } from "next/headers";
 import { UserRole } from "@/generated/prisma";
+
+const ADMIN_API_TOKEN = process.env.ADMIN_API_TOKEN;
 
 export async function GET(req: NextRequest) {
   const rateLimiter = createRateLimiter(DEFAULT_LIMITS.admin);
   const identifier = getClientIdentifier(req);
-  const isAllowed = await rateLimiter(identifier);
+  const isRateLimitExceed = await rateLimiter(identifier);
 
-  const headersList = await headers();
+  const session = await getSessionFromHeaders(req.headers);
+  const authHeader = req.headers.get("authorization");
 
-  const session = await getSessionFromHeaders(headersList);
+  const isAdmin = session?.user?.role === UserRole.ADMIN;
+  const hasValidToken = authHeader === `Bearer ${ADMIN_API_TOKEN}`;
 
-  if (!session) throw new Error("Unauthorized");
-
-  if (session.user.role !== UserRole.ADMIN) {
-    throw new Error("Forbidden");
+  if (!isAdmin && !hasValidToken) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!isAllowed) {
+  if (!isRateLimitExceed) {
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
 

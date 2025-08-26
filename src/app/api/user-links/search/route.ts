@@ -17,9 +17,9 @@ export async function GET(request: NextRequest) {
   const rateLimiter = createRateLimiter(DEFAULT_LIMITS.search);
 
   const identifier = getClientIdentifier(request);
-  const isAllowed = await rateLimiter(identifier);
+  const isRateLimitExceed = await rateLimiter(identifier);
 
-  if (!isAllowed) {
+  if (!isRateLimitExceed) {
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
 

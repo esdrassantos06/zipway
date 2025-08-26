@@ -14,26 +14,29 @@ import {
   isReservedAlias,
 } from "@/utils/sanitize";
 
+const ADMIN_API_TOKEN = process.env.ADMIN_API_TOKEN;
+
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const rateLimiter = createRateLimiter(DEFAULT_LIMITS.admin);
   const identifier = getClientIdentifier(req);
-  const isAllowed = await rateLimiter(identifier);
-
-  if (!isAllowed) {
-    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
-  }
+  const isRateLimitExceed = await rateLimiter(identifier);
 
   const session = await getSessionFromHeaders(req.headers);
 
-  if (!session) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  const authHeader = req.headers.get("authorization");
+
+  const isAdmin = session?.user?.role === UserRole.ADMIN;
+  const hasValidToken = authHeader === `Bearer ${ADMIN_API_TOKEN}`;
+
+  if (!isAdmin && !hasValidToken) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (session.user.role !== UserRole.ADMIN) {
-    return NextResponse.json({ error: "Access denied" }, { status: 403 });
+  if (!isRateLimitExceed) {
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
 
   const { id } = await params;
