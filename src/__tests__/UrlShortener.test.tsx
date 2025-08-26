@@ -1,9 +1,10 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { LinkForm } from "@/components/dashboard/LinkForm";
-
 import { toast } from "sonner";
+import axios from "axios";
 
-const mockFetch = global.fetch as jest.MockedFunction<typeof fetch>;
+jest.mock("axios");
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe("ShortenUrlForm", () => {
   beforeEach(() => {
@@ -28,13 +29,13 @@ describe("ShortenUrlForm", () => {
   });
 
   it("should show the shortened URL if the API call succeeds", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
+    mockedAxios.post.mockResolvedValueOnce({
+      status: 200,
+      data: {
         short_url: "https://shly.pt/abc123",
         original_url: "https://valid-url.com",
-      }),
-    } as Response);
+      },
+    });
 
     const input = screen.getByTestId("original-url-input");
 
@@ -47,15 +48,9 @@ describe("ShortenUrlForm", () => {
       expect(toast.success).toHaveBeenCalled();
     });
 
-    expect(mockFetch).toHaveBeenCalledWith("/api/shorten", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        targetUrl: "https://valid-url.com",
-        custom_id: "",
-      }),
+    expect(mockedAxios.post).toHaveBeenCalledWith("/api/shorten", {
+      targetUrl: "https://valid-url.com",
+      custom_id: "",
     });
 
     await waitFor(() => {
@@ -68,11 +63,10 @@ describe("ShortenUrlForm", () => {
   });
 
   it("should handle API errors gracefully", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: false,
+    mockedAxios.post.mockResolvedValueOnce({
       status: 400,
-      json: async () => ({ error: "Invalid request" }),
-    } as Response);
+      data: { error: "Invalid request" },
+    });
 
     const input = screen.getByTestId("original-url-input");
 
@@ -87,7 +81,7 @@ describe("ShortenUrlForm", () => {
   });
 
   it("should handle network errors", async () => {
-    mockFetch.mockRejectedValueOnce(new Error("Network error"));
+    mockedAxios.post.mockRejectedValueOnce(new Error("Network error"));
 
     const input = screen.getByTestId("original-url-input");
     fireEvent.change(input, { target: { value: "https://valid-url.com" } });
