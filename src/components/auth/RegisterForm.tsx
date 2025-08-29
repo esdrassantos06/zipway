@@ -234,6 +234,7 @@ export const RegisterForm = () => {
                   <FormItem className="flex flex-row items-center space-y-0 space-x-1">
                     <FormControl>
                       <Checkbox
+                        id="acceptTerms"
                         checked={field.value}
                         onCheckedChange={(checked) => {
                           if (typeof checked === "boolean") {
@@ -243,6 +244,7 @@ export const RegisterForm = () => {
                           }
                         }}
                         disabled={isPending}
+                        aria-labelledby="acceptTerms"
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
