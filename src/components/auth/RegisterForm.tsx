@@ -277,6 +277,7 @@ export const RegisterForm = () => {
               )}
 
               <Button
+                id="register-button"
                 type="submit"
                 disabled={isPending || !form.formState.isValid}
                 className="w-full"
