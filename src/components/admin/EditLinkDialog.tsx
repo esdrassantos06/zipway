@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -30,18 +30,10 @@ export function EditLinkDialog({
   editingLink,
   onSubmit,
 }: EditLinkDialogProps) {
-  const [editUrl, setEditUrl] = useState("");
-  const [editSlug, setEditSlug] = useState("");
+  const [editUrl, setEditUrl] = useState(editingLink?.targetUrl ?? "");
+  const [editSlug, setEditSlug] = useState(editingLink?.shortId ?? "");
   const [isEditing, setIsEditing] = useState(false);
   const [editAliasWarning, setEditAliasWarning] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (editingLink) {
-      setEditUrl(editingLink.targetUrl);
-      setEditSlug(editingLink.shortId);
-      setEditAliasWarning(null);
-    }
-  }, [editingLink]);
 
   const handleEditSlugChange = (newSlug: string) => {
     const sanitized = sanitizeAlias(newSlug);
@@ -89,7 +81,11 @@ export function EditLinkDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={handleClose}
+      key={editingLink?.id ?? "new"}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Link</DialogTitle>

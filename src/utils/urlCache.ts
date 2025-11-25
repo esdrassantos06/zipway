@@ -5,11 +5,14 @@ export const CACHE_CONFIG = {
   TTL: 3600,
   BATCH_SIZE: 10,
   KEY_PREFIX: "url_exists:",
+  REDIRECT_PREFIX: "url_redirect:",
+  REDIRECT_TTL: 7200,
 } as const;
 
 const getCacheKey = (shortId: string) => `${CACHE_CONFIG.KEY_PREFIX}${shortId}`;
+const getRedirectCacheKey = (shortId: string) =>
+  `${CACHE_CONFIG.REDIRECT_PREFIX}${shortId}`;
 
-// Check if shortId exists with cache and database fallback
 export const checkShortIdExists = async (shortId: string): Promise<boolean> => {
   const cacheKey = getCacheKey(shortId);
 
@@ -19,7 +22,6 @@ export const checkShortIdExists = async (shortId: string): Promise<boolean> => {
       return cached === "true";
     }
 
-    // Cache miss - check database
     const dbExists = await prisma.link.findUnique({
       where: { shortId },
       select: { shortId: true },
@@ -27,7 +29,6 @@ export const checkShortIdExists = async (shortId: string): Promise<boolean> => {
 
     const exists = !!dbExists;
 
-    // Cache the result
     await redis.setex(cacheKey, CACHE_CONFIG.TTL, exists ? "true" : "false");
 
     return exists;
@@ -47,7 +48,6 @@ export const checkShortIdExists = async (shortId: string): Promise<boolean> => {
   }
 };
 
-// Batch check multiple shortIds with cache optimization
 export const checkShortIdsBatch = async (
   shortIds: string[],
 ): Promise<{
@@ -61,7 +61,6 @@ export const checkShortIdsBatch = async (
   let cacheMisses = 0;
 
   try {
-    // Check cache first for all IDs
     const cachedResults = await redis.mget(...cacheKeys);
 
     const uncachedIds: string[] = [];
@@ -112,21 +111,100 @@ export const cacheResults = async (
   }
 };
 
+export const getCachedRedirect = async (
+  shortId: string,
+): Promise<{ targetUrl: string; status: string } | null> => {
+  const cacheKey = getRedirectCacheKey(shortId);
+
+  try {
+    const cached = await redis.get(cacheKey);
+    if (cached === null) {
+      return null;
+    }
+
+    let parsed: { targetUrl: string; status: string };
+    if (typeof cached === "string") {
+      parsed = JSON.parse(cached);
+    } else if (typeof cached === "object" && cached !== null) {
+      parsed = cached as { targetUrl: string; status: string };
+    } else {
+      return null;
+    }
+
+    return {
+      targetUrl: parsed.targetUrl,
+      status: parsed.status,
+    };
+  } catch (error) {
+    console.error("Error getting cached redirect:", shortId, error);
+    return null;
+  }
+};
+
+export const cacheRedirect = async (
+  shortId: string,
+  targetUrl: string,
+  status: string,
+): Promise<void> => {
+  const cacheKey = getRedirectCacheKey(shortId);
+
+  try {
+    const data = JSON.stringify({ targetUrl, status });
+    await redis.setex(cacheKey, CACHE_CONFIG.REDIRECT_TTL, data);
+  } catch (error) {
+    console.error("Error caching redirect:", shortId, error);
+  }
+};
+
+export const invalidateRedirectCache = async (
+  shortId: string,
+): Promise<void> => {
+  const cacheKey = getRedirectCacheKey(shortId);
+  const existsKey = getCacheKey(shortId);
+
+  try {
+    await Promise.all([redis.del(cacheKey), redis.del(existsKey)]);
+  } catch (error) {
+    console.error("Error invalidating redirect cache:", shortId, error);
+  }
+};
+
+export const incrementClicksAsync = async (shortId: string): Promise<void> => {
+  prisma.link
+    .update({
+      where: { shortId },
+      data: {
+        clicks: {
+          increment: 1,
+        },
+      },
+    })
+    .catch((error) => {
+      console.error("Error incrementing clicks:", shortId, error);
+    });
+};
+
 export const getCacheStats = async (): Promise<{
   totalKeys: number;
+  redirectKeys: number;
   memoryUsage: string;
 }> => {
   try {
-    const keys = await redis.keys(`${CACHE_CONFIG.KEY_PREFIX}*`);
+    const [existsKeys, redirectKeys] = await Promise.all([
+      redis.keys(`${CACHE_CONFIG.KEY_PREFIX}*`),
+      redis.keys(`${CACHE_CONFIG.REDIRECT_PREFIX}*`),
+    ]);
 
     return {
-      totalKeys: keys.length,
+      totalKeys: existsKeys.length,
+      redirectKeys: redirectKeys.length,
       memoryUsage: "Not available in Upstash Redis",
     };
   } catch (error) {
     console.error("Error getting cache stats:", error);
     return {
       totalKeys: 0,
+      redirectKeys: 0,
       memoryUsage: "Unknown",
     };
   }

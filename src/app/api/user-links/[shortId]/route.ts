@@ -6,6 +6,7 @@ import {
   DEFAULT_LIMITS,
   getClientIdentifier,
 } from "@/utils/rateLimiter";
+import { invalidateRedirectCache } from "@/utils/urlCache";
 
 export async function DELETE(
   req: NextRequest,
@@ -37,12 +38,6 @@ export async function DELETE(
     });
 
     if (!link) {
-      link = await prisma.link.findUnique({
-        where: { id: shortId },
-      });
-    }
-
-    if (!link) {
       return NextResponse.json({ error: "Link not found" }, { status: 404 });
     }
 
@@ -57,6 +52,9 @@ export async function DELETE(
     await prisma.link.delete({
       where: whereClause,
     });
+
+    const shortIdToInvalidate = link.shortId || link.id;
+    await invalidateRedirectCache(shortIdToInvalidate);
 
     return NextResponse.json({ message: "Link deleted successfully" });
   } catch (error) {

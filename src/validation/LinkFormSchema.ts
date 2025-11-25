@@ -18,9 +18,7 @@ export const linkFormSchema = z.object({
     .transform((val) => sanitizeAlias(val || ""))
     .refine(
       (val) => {
-        // Permite aliases vazios (serão gerados automaticamente com nanoid)
         if (!val) return true;
-        // Só verifica se é reservado quando há um valor
         return !isReservedAlias(val);
       },
       {

@@ -6,6 +6,7 @@ import {
   DEFAULT_LIMITS,
   getClientIdentifier,
 } from "@/utils/rateLimiter";
+import { invalidateRedirectCache, cacheRedirect } from "@/utils/urlCache";
 
 export async function PATCH(
   req: NextRequest,
@@ -79,6 +80,10 @@ export async function PATCH(
       where: whereClause,
       data: { status: status.toUpperCase() as "ACTIVE" | "PAUSED" },
     });
+
+    const shortIdToUpdate = link.shortId || link.id;
+    await invalidateRedirectCache(shortIdToUpdate);
+    await cacheRedirect(shortIdToUpdate, link.targetUrl, updated.status);
 
     return NextResponse.json({
       message: "Status updated",

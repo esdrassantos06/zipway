@@ -1,4 +1,3 @@
-// app/api/admin/delete-link/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
@@ -8,6 +7,7 @@ import {
 } from "@/utils/rateLimiter";
 import { getSessionFromHeaders } from "@/utils/getSession";
 import { UserRole } from "@/generated/prisma";
+import { invalidateRedirectCache } from "@/utils/urlCache";
 
 const ADMIN_API_TOKEN = process.env.ADMIN_API_TOKEN;
 
@@ -62,6 +62,9 @@ export async function DELETE(
     await prisma.link.delete({
       where: whereClause,
     });
+
+    const shortIdToInvalidate = link.shortId || link.id;
+    await invalidateRedirectCache(shortIdToInvalidate);
 
     return NextResponse.json({
       message: "Link deleted successfully",

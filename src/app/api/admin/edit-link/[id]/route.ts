@@ -13,6 +13,7 @@ import {
   validateAlias,
   isReservedAlias,
 } from "@/utils/sanitize";
+import { invalidateRedirectCache, cacheRedirect } from "@/utils/urlCache";
 
 const ADMIN_API_TOKEN = process.env.ADMIN_API_TOKEN;
 
@@ -84,7 +85,7 @@ export async function PATCH(
 
       if (existingLink && existingLink.id !== id) {
         return NextResponse.json(
-          { error: "Este slug já está em uso" },
+          { error: "This slug is already in use" },
           { status: 400 },
         );
       }
@@ -130,6 +131,20 @@ export async function PATCH(
       where: whereClause,
       data: updateData,
     });
+
+    const oldShortId = link.shortId || link.id;
+    await invalidateRedirectCache(oldShortId);
+
+    if (updateData.shortId && updateData.shortId !== oldShortId) {
+      await invalidateRedirectCache(updateData.shortId);
+    }
+
+    const finalShortId = updatedLink.shortId || updatedLink.id;
+    await cacheRedirect(
+      finalShortId,
+      updatedLink.targetUrl,
+      updatedLink.status,
+    );
 
     return NextResponse.json({
       message: "Link updated successfully",

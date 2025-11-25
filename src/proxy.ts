@@ -3,7 +3,7 @@ import { getSessionCookie } from "better-auth/cookies";
 
 const protectedRoutes = ["/profile", "/admin", "/dashboard", "/settings"];
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { nextUrl } = req;
   const pathname = nextUrl.pathname;
   if (pathname.startsWith("/api") || pathname === "/404") {

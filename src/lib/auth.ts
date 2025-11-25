@@ -231,7 +231,7 @@ export const auth = betterAuth({
   },
   socialProviders: {
     github: {
-      prompt: "select_account+consent",
+      prompt: "select_account consent",
       clientId: process.env.GITHUB_CLIENT_ID as string,
       clientSecret: process.env.GITHUB_SECRET as string,
       scopes: [`read:user`, `user:email`],
