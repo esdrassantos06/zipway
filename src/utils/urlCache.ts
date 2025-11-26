@@ -198,7 +198,7 @@ export const getCacheStats = async (): Promise<{
     return {
       totalKeys: existsKeys.length,
       redirectKeys: redirectKeys.length,
-      memoryUsage: "Not available in Upstash Redis",
+      memoryUsage: "Available via Redis INFO command",
     };
   } catch (error) {
     console.error("Error getting cache stats:", error);

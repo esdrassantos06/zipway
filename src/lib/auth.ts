@@ -1,4 +1,4 @@
-import { betterAuth } from "better-auth";
+import { betterAuth } from "better-auth/minimal";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, verifyPassword } from "./argon2";
@@ -7,11 +7,23 @@ import { UserRole } from "@/generated/prisma";
 import { admin } from "better-auth/plugins/admin";
 import { sendResetPasswordEmail } from "./emailActions";
 import { ac, roles } from "./permissions";
+import { redisAdapter } from "@/utils/redis";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
+  secondaryStorage: {
+    get: async (key: string) => {
+      return await redisAdapter.get(key);
+    },
+    set: async (key: string, value: string, ttl?: number) => {
+      await redisAdapter.set(key, value, ttl);
+    },
+    delete: async (key: string) => {
+      await redisAdapter.delete(key);
+    },
+  },
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 6,
@@ -267,6 +279,10 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24 * 30,
     updateAge: 60 * 60 * 24,
+    cookieCache: {
+      enabled: true,
+      maxAge: 2 * 60,
+    },
   },
   plugins: [
     nextCookies(),

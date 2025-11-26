@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV === "development";
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.shly.pt";
 
 const cspHeader = `
   default-src 'self';
@@ -8,7 +9,7 @@ const cspHeader = `
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: https://lh3.googleusercontent.com https://izxvhjdzwjklthewefqj.supabase.co https://pagead2.googlesyndication.com https://avatars.githubusercontent.com https://github.com;
   font-src 'self';
-  connect-src 'self' ${isDev ? "ws://localhost:3000 http://localhost:3000" : ""} https://api.iconify.design https://api.github.com;
+  connect-src 'self' ${isDev ? "ws://localhost:3000 http://localhost:3000" : ""} https://api.iconify.design https://api.github.com ${apiUrl};
   object-src 'none';
   base-uri 'self';
   form-action 'self';

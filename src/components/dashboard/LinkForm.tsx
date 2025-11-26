@@ -18,7 +18,7 @@ import { Copy, Link2Icon, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { copyToClipboard } from "@/utils/AppUtils";
 import z from "zod";
-import axios from "axios";
+import { createShortLink } from "@/lib/api-client";
 
 type LinkFormSchema = z.infer<typeof linkFormSchema>;
 
@@ -39,33 +39,13 @@ export function LinkForm() {
     setShortenedUrl(null);
 
     try {
-      const response = await axios.post("/api/shorten", {
-        targetUrl: data.targetUrl,
-        custom_id: data.customAlias,
-      });
+      const response = await createShortLink(
+        data.targetUrl,
+        data.customAlias || undefined,
+      );
 
-      if (response.status !== 200) {
-        let errorMessage = "Error shortening URL.";
-
-        try {
-          errorMessage = response.data.error || errorMessage;
-        } catch (jsonError) {
-          try {
-            errorMessage = response.data.error || errorMessage;
-          } catch (textError) {
-            console.error(
-              "Failed to parse error response:",
-              jsonError,
-              textError,
-            );
-          }
-        }
-
-        throw new Error(errorMessage);
-      }
-
-      setShortenedUrl(response.data.short_url);
-      toast.success("URL Shortened successfuly!");
+      setShortenedUrl(response.short_url);
+      toast.success("URL Shortened successfully!");
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message);

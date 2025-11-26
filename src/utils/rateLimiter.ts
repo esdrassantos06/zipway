@@ -1,4 +1,4 @@
-import { Ratelimit } from "@upstash/ratelimit";
+import { RateLimiterRedis } from "rate-limiter-flexible";
 import { redis } from "./redis";
 
 export const DEFAULT_LIMITS = {
@@ -9,15 +9,26 @@ export const DEFAULT_LIMITS = {
   admin: 50,
 };
 
-export const createRateLimiter = (limit: number) => {
-  const ratelimit = new Ratelimit({
-    redis: redis,
-    limiter: Ratelimit.slidingWindow(limit, "1 m"),
+export const createRateLimiter = (points: number, duration: number = 60) => {
+  const rateLimiter = new RateLimiterRedis({
+    storeClient: redis,
+    keyPrefix: "ratelimit",
+    points: points,
+    duration: duration,
+    blockDuration: 0,
   });
 
-  return async (identifier: string) => {
-    const { success } = await ratelimit.limit(identifier);
-    return success;
+  return async (identifier: string): Promise<boolean> => {
+    try {
+      await rateLimiter.consume(identifier);
+      return true;
+    } catch (error: any) {
+      if (error.remainingPoints !== undefined) {
+        return false;
+      }
+      console.error("Rate limiter error:", error);
+      return true;
+    }
   };
 };
 
