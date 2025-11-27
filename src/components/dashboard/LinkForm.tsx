@@ -19,10 +19,12 @@ import { toast } from "sonner";
 import { copyToClipboard } from "@/utils/AppUtils";
 import z from "zod";
 import { createShortLink } from "@/lib/api-client";
+import { useRouter } from "next/navigation";
 
 type LinkFormSchema = z.infer<typeof linkFormSchema>;
 
 export function LinkForm() {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -46,6 +48,7 @@ export function LinkForm() {
 
       setShortenedUrl(response.short_url);
       toast.success("URL Shortened successfully!");
+      router.refresh();
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message);

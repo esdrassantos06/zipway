@@ -27,20 +27,6 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  if (isPending)
-    return (
-      <div className="bg-background relative w-16 space-y-4 border-r p-6 lg:w-64">
-        <div className="flex items-center justify-center lg:justify-start">
-          <Skeleton className="h-8 w-8 rounded-md lg:w-32" />
-        </div>
-        <div className="space-y-2">
-          <Skeleton className="h-10 w-full rounded-md" />
-          <Skeleton className="h-10 w-full rounded-md" />
-          <Skeleton className="h-10 w-full rounded-md" />
-        </div>
-      </div>
-    );
-
   const isAdmin = session?.user.role === "ADMIN";
 
   return (
@@ -81,56 +67,66 @@ export default function Sidebar() {
       >
         <div className="p-4 lg:p-6">
           <div className="flex items-center justify-start">
-            <Link
-              href="/"
-              className="flex items-center"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <Link2 className="size-8 text-blue-600" />
-              <span className="ml-2 text-xl font-bold text-gray-900 lg:text-2xl dark:text-white">
-                Zipway
-              </span>
-            </Link>
+            {isPending ? (
+              <Skeleton className="h-8 w-32 rounded-md" />
+            ) : (
+              <Link
+                href="/"
+                className="flex items-center"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Link2 className="size-8 text-blue-600" />
+                <span className="ml-2 text-xl font-bold text-gray-900 lg:text-2xl dark:text-white">
+                  Zipway
+                </span>
+              </Link>
+            )}
           </div>
         </div>
-        <nav className="flex flex-col gap-1 px-2">
-          {menuItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
+        {isPending ? (
+          Array.from({ length: 3 }).map((_, index) => (
+            <Skeleton key={index} className="mt-2 h-10 w-full rounded-md" />
+          ))
+        ) : (
+          <nav className="flex flex-col gap-1 px-2">
+            {menuItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Button
+                    variant={isActive ? "secondary" : "ghost"}
+                    className={cn(
+                      "w-full items-center justify-start",
+                      isActive && "bg-secondary",
+                    )}
+                  >
+                    <item.icon className="mr-2 size-4" />
+                    <span>{item.label}</span>
+                  </Button>
+                </Link>
+              );
+            })}
+
+            {isAdmin && (
               <Link
-                key={item.href}
-                href={item.href}
+                href="/admin/dashboard"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <Button
-                  variant={isActive ? "secondary" : "ghost"}
-                  className={cn(
-                    "w-full items-center justify-start",
-                    isActive && "bg-secondary",
-                  )}
+                  variant="destructive"
+                  className="mt-1 w-full items-center justify-start"
                 >
-                  <item.icon className="mr-2 size-4" />
-                  <span>{item.label}</span>
+                  <ShieldCheck className="mr-2 size-4" />
+                  <span>Admin</span>
                 </Button>
               </Link>
-            );
-          })}
-
-          {isAdmin && (
-            <Link
-              href="/admin/dashboard"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <Button
-                variant="destructive"
-                className="mt-1 w-full items-center justify-start"
-              >
-                <ShieldCheck className="mr-2 size-4" />
-                <span>Admin</span>
-              </Button>
-            </Link>
-          )}
-        </nav>
+            )}
+          </nav>
+        )}
       </div>
     </>
   );

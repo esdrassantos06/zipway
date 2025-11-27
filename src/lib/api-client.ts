@@ -1,26 +1,27 @@
 /**
  * API Client for Go Backend
- * Centralized configuration for API calls to api.shly.pt
+ * Uses Next.js API routes as proxy to forward requests with authentication
  */
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.shly.pt";
 
 /**
  * Create a shortened URL
+ * Calls local Next.js proxy endpoint which forwards to Go API with cookies
  */
 export async function createShortLink(
   targetUrl: string,
   customSlug?: string,
 ): Promise<{ short_url: string; details: any }> {
-  const response = await fetch(`${API_BASE_URL}/api/shorten`, {
+  const response = await fetch("/api/shorten", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     credentials: "include",
     body: JSON.stringify({
-      target_url: targetUrl,
-      custom_slug: customSlug,
+      targetUrl,
+      custom_id: customSlug,
     }),
   });
 
@@ -36,6 +37,7 @@ export async function createShortLink(
 
 /**
  * Resolve a slug to target URL
+ * Note: This is used server-side only, no CORS issues
  */
 export async function resolveSlug(slug: string): Promise<string> {
   const response = await fetch(`${API_BASE_URL}/api/resolve/${slug}`, {

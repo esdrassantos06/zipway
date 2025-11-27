@@ -48,7 +48,7 @@ export default async function SettingsPage() {
             <div className="container mx-auto px-4 md:px-6">
               <div className="mx-auto max-w-4xl space-y-8">
                 {/* Account Information */}
-                <AccountInfo session={session} />
+                <AccountInfo />
 
                 {/* Security Settings */}
                 <SecuritySettings />

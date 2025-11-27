@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -67,6 +68,7 @@ export function LinksTable({
   limit,
   userId,
 }: LinksTableProps) {
+  const router = useRouter();
   const [filteredLinks, setFilteredLinks] = useState<Link[] | null>(null);
   const [confirmLink, setConfirmLink] = useState<Link | null>(null);
 
@@ -93,6 +95,7 @@ export function LinksTable({
 
       await axios.delete(`/api/user-links/${identifier}`);
       toast.success("Link deleted successfully");
+      router.refresh();
     } catch (error) {
       let message = "Error deleting link";
       console.error("Delete error:", error);
@@ -120,6 +123,7 @@ export function LinksTable({
       toast.success(
         `Link ${newStatus === "ACTIVE" ? "activated" : "paused"} successfully`,
       );
+      router.refresh();
     } catch (error) {
       let message = "Error updating status";
       console.error("Toggle status error:", error);
@@ -295,7 +299,7 @@ export function LinksTable({
 
           {/* Desktop Table View */}
           <div className="hidden lg:block">
-            <div className="-mx-4 overflow-x-auto sm:-mx-6">
+            <div className="overflow-x-auto">
               <div className="inline-block min-w-full align-middle">
                 <Table>
                   <TableHeader>

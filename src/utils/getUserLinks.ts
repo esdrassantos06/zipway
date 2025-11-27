@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
+import { unstable_cache } from "next/cache";
 
-export async function getUserLinks(userId: string) {
+async function getUserLinksUncached(userId: string) {
   const links = await prisma.link.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
@@ -13,7 +14,19 @@ export async function getUserLinks(userId: string) {
       status: true,
       userId: true,
     },
+    take: 1000,
   });
 
   return links;
+}
+
+export async function getUserLinks(userId: string) {
+  return unstable_cache(
+    async () => getUserLinksUncached(userId),
+    [`user-links-${userId}`],
+    {
+      revalidate: 30,
+      tags: [`user-links-${userId}`],
+    },
+  )();
 }

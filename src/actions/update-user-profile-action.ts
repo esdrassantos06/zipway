@@ -5,6 +5,7 @@ import { getSessionFromHeaders } from "@/utils/getSession";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { getSupabaseClient } from "@/lib/supabase";
+import { auth } from "@/lib/auth";
 
 const supabase = getSupabaseClient();
 
@@ -63,9 +64,9 @@ export async function updateUserProfileAction({
       imageUrl = urlData.publicUrl;
     }
 
-    await prisma.user.update({
-      where: { id: session.user.id },
-      data: {
+    await auth.api.updateUser({
+      headers: await headers(),
+      body: {
         ...(name && { name }),
         ...(imageUrl && { image: imageUrl }),
       },
@@ -149,16 +150,11 @@ export async function deleteUserProfileImageAction() {
   if (!session) throw new Error("Unauthorized");
 
   try {
-    const currentUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { image: true },
-    });
-
-    if (!currentUser?.image) {
+    if (!session.user.image) {
       return { error: "No images found to delete." };
     }
 
-    const urlParts = currentUser.image.split("/");
+    const urlParts = session.user.image.split("/");
     const imagePath = urlParts[urlParts.length - 1];
 
     if (imagePath && imagePath.includes(session.user.id)) {
@@ -171,9 +167,11 @@ export async function deleteUserProfileImageAction() {
       }
     }
 
-    await prisma.user.update({
-      where: { id: session.user.id },
-      data: { image: null },
+    await auth.api.updateUser({
+      headers: await headers(),
+      body: {
+        image: "",
+      },
     });
 
     revalidatePath("/account");

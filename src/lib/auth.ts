@@ -275,6 +275,9 @@ export const auth = betterAuth({
         input: false,
       },
     },
+    deleteUser: {
+      enabled: true,
+    },
   },
   session: {
     expiresIn: 60 * 60 * 24 * 30,

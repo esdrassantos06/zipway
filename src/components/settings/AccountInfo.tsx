@@ -11,7 +11,7 @@ import {
   updateUserEmailAction,
   deleteUserProfileImageAction,
 } from "@/actions/update-user-profile-action";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,16 +24,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Session } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { accountFormSchema } from "@/validation/accountFormSchema";
-
-type Props = {
-  session: Session;
-};
 
 type AccountFormValues = z.infer<typeof accountFormSchema>;
 
-export const AccountInfo = ({ session }: Props) => {
+export const AccountInfo = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [emailChanged, setEmailChanged] = useState(false);
@@ -41,6 +37,8 @@ export const AccountInfo = ({ session }: Props) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageDeleted, setImageDeleted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { data: session, refetch } = authClient.useSession();
 
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountFormSchema),
@@ -50,6 +48,16 @@ export const AccountInfo = ({ session }: Props) => {
       password: "",
     },
   });
+
+  useEffect(() => {
+    if (session?.user) {
+      form.reset({
+        name: session.user.name || "",
+        email: session.user.email || "",
+        password: "",
+      });
+    }
+  }, [session, form]);
 
   if (!session) return null;
 
@@ -88,6 +96,7 @@ export const AccountInfo = ({ session }: Props) => {
         return;
       }
 
+      await refetch();
       toast.success("Image deleted successfully!");
       setImageDeleted(true);
       setImageFile(null);

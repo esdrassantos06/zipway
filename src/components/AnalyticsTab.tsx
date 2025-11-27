@@ -54,7 +54,8 @@ export function AnalyticsTab({ links }: AnalyticsTabProps) {
               <Tooltip
                 contentStyle={{
                   fontSize: "12px",
-                  backgroundColor: "hsl(var(--background))",
+                  backgroundColor: "hsl(var(--card))",
+                  color: "hsl(var(--card-foreground))",
                   border: "1px solid hsl(var(--border))",
                   borderRadius: "6px",
                 }}

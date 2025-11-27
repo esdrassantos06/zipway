@@ -7,6 +7,7 @@ import {
   getClientIdentifier,
 } from "@/utils/rateLimiter";
 import { invalidateRedirectCache, cacheRedirect } from "@/utils/urlCache";
+import { revalidatePath } from "next/cache";
 
 export async function PATCH(
   req: NextRequest,
@@ -84,6 +85,10 @@ export async function PATCH(
     const shortIdToUpdate = link.shortId || link.id;
     await invalidateRedirectCache(shortIdToUpdate);
     await cacheRedirect(shortIdToUpdate, link.targetUrl, updated.status);
+
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/links");
+    revalidatePath("/dashboard/analytics");
 
     return NextResponse.json({
       message: "Status updated",

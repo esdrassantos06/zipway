@@ -7,6 +7,7 @@ import {
   getClientIdentifier,
 } from "@/utils/rateLimiter";
 import { invalidateRedirectCache } from "@/utils/urlCache";
+import { revalidatePath } from "next/cache";
 
 export async function DELETE(
   req: NextRequest,
@@ -55,6 +56,10 @@ export async function DELETE(
 
     const shortIdToInvalidate = link.shortId || link.id;
     await invalidateRedirectCache(shortIdToInvalidate);
+
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/links");
+    revalidatePath("/dashboard/analytics");
 
     return NextResponse.json({ message: "Link deleted successfully" });
   } catch (error) {

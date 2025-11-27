@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button, buttonVariants } from "../ui/button";
 import { toast } from "sonner";
 import { deleteOwnAccountAction } from "@/actions/delete-own-account";
@@ -20,14 +21,22 @@ import { Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const DangerZone = () => {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const handleDeleteAccount = async () => {
     setLoading(true);
 
     try {
-      await deleteOwnAccountAction();
-      toast.success("Account deleted successfully.");
+      const result = await deleteOwnAccountAction();
+
+      if (result?.error) {
+        toast.error(result.error);
+      } else if (result?.success) {
+        toast.success("Account deleted successfully.");
+        router.push("/auth/login");
+        window.location.reload();
+      }
     } catch {
       toast.error("Error deleting account.");
     } finally {
