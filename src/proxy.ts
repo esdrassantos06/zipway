@@ -1,16 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
-import { cacheRedirect, getCachedRedirect } from "./utils/urlCache";
 
 const protectedRoutes = ["/profile", "/admin", "/dashboard", "/settings"];
-const knownRoutes = [
-  ...protectedRoutes,
-  "/",
-  "/auth",
-  "/privacy",
-  "/terms",
-  "/cookies",
-];
+const knownRoutes = ["/", "/auth", "/privacy", "/terms", "/cookies"];
 
 const reservedSlugs = [
   "api",
@@ -70,19 +62,6 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const cachedRedirect = await getCachedRedirect(potentialSlug);
-  if (cachedRedirect) {
-    const redirectResponse = NextResponse.redirect(
-      cachedRedirect.targetUrl,
-      301,
-    );
-    redirectResponse.headers.set(
-      "Cache-Control",
-      "public, s-maxage=300, stale-while-revalidate=600",
-    );
-    return redirectResponse;
-  }
-
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 500);
@@ -104,17 +83,16 @@ export async function proxy(req: NextRequest) {
     if (response.ok) {
       const data = await response.json();
       if (data.target_url) {
-        await cacheRedirect(
-          potentialSlug,
-          data.target_url,
-          data.status || "active"
-        )
+        const resolvedStatus =
+          typeof data.status === "string"
+            ? data.status.toUpperCase()
+            : "ACTIVE";
 
-        const redirectResponse = NextResponse.redirect(data.target_url, 301);
-        redirectResponse.headers.set(
-          "Cache-Control",
-          "public, s-maxage=60, stale-while-revalidate=300",
-        );
+        if (resolvedStatus !== "ACTIVE") {
+          return NextResponse.next();
+        }
+
+        const redirectResponse = NextResponse.redirect(data.target_url, 302);
         return redirectResponse;
       }
     }

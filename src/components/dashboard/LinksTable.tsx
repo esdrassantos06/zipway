@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -34,10 +34,13 @@ import {
   Calendar,
   MousePointer,
   Link as LinkIcon,
+  ChevronLeft,
+  ChevronRight,
+  ArrowRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
-import { Link, LinkStatus } from "@/generated/prisma";
+import { Link as LinkType, LinkStatus } from "@/generated/prisma";
 import {
   truncateUrl,
   copyToClipboard,
@@ -54,25 +57,40 @@ import {
   AlertDialogTitle,
 } from "../ui/alert-dialog";
 import SearchBar from "./SearchBar";
+import { authClient } from "@/lib/auth-client";
+import Link from "next/link";
 
-type LinksTableProps = {
-  links: Link[];
+interface LinksTableProps {
+  links: LinkType[];
   isLoading?: boolean;
+  userId?: string;
   limit?: number;
-  userId: string;
-};
+  total?: number;
+  page?: number;
+  totalPages?: number;
+  pageSize?: number;
+}
 
 export function LinksTable({
-  links,
+  links = [],
   isLoading = false,
-  limit,
   userId,
+  limit,
+  total,
+  page = 1,
+  totalPages,
+  pageSize = 10,
 }: LinksTableProps) {
   const router = useRouter();
-  const [filteredLinks, setFilteredLinks] = useState<Link[] | null>(null);
-  const [confirmLink, setConfirmLink] = useState<Link | null>(null);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const handleSearchResults = (results: Link[] | null) => {
+  const currentUserId = userId ?? "";
+
+  const [filteredLinks, setFilteredLinks] = useState<LinkType[] | null>(null);
+  const [confirmLink, setConfirmLink] = useState<LinkType | null>(null);
+
+  const handleSearchResults = (results: LinkType[] | null) => {
     if (results === null) {
       setFilteredLinks(null);
     } else {
@@ -80,15 +98,22 @@ export function LinksTable({
     }
   };
 
-  const displayedLinks = filteredLinks
-    ? limit
-      ? filteredLinks.slice(0, limit)
-      : filteredLinks
-    : limit
-      ? links.slice(0, limit)
-      : links;
+  const isLinksPage = pathname === "/dashboard/links";
+  const maxItemsWhenNotLinksPage = 5;
 
-  const deleteLink = async (link: Link) => {
+  const getDisplayedLinks = () => {
+    const linksToDisplay = filteredLinks !== null ? filteredLinks : links;
+
+    if (!isLinksPage) {
+      return linksToDisplay.slice(0, maxItemsWhenNotLinksPage);
+    }
+
+    return linksToDisplay;
+  };
+
+  const displayedLinks = getDisplayedLinks();
+
+  const deleteLink = async (link: LinkType) => {
     try {
       const identifier =
         link.shortId && link.shortId.trim() ? link.shortId : link.id;
@@ -108,8 +133,8 @@ export function LinksTable({
     }
   };
 
-  const toggleLinkStatus = async (link: Link) => {
-    const newStatus: Link["status"] =
+  const toggleLinkStatus = async (link: LinkType) => {
+    const newStatus: LinkType["status"] =
       link.status === LinkStatus.ACTIVE ? LinkStatus.PAUSED : LinkStatus.ACTIVE;
 
     try {
@@ -160,7 +185,10 @@ export function LinksTable({
           <CardDescription>Manage all your shortened links</CardDescription>
         </CardHeader>
         <CardContent className="px-4 sm:px-6">
-          <SearchBar userId={userId} onSearchResults={handleSearchResults} />
+          <SearchBar
+            userId={currentUserId}
+            onSearchResults={handleSearchResults}
+          />
 
           {/* Mobile & Tablet Card View */}
           <div className="space-y-3 lg:hidden">
@@ -437,6 +465,62 @@ export function LinksTable({
               </div>
             </div>
           </div>
+
+          {isLinksPage &&
+            filteredLinks === null &&
+            totalPages &&
+            totalPages > 1 && (
+              <div className="mt-6 flex items-center justify-between border-t pt-4">
+                <div className="text-muted-foreground text-sm">
+                  Showing{" "}
+                  {displayedLinks.length > 0 ? (page - 1) * pageSize + 1 : 0} to{" "}
+                  {Math.min(page * pageSize, total || 0)} of {total || 0} links
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const newPage = Math.max(1, page - 1);
+                      router.push(`/dashboard/links?page=${newPage}`);
+                    }}
+                    disabled={page <= 1}
+                  >
+                    <ChevronLeft className="size-4" />
+                    Previous
+                  </Button>
+                  <div className="text-muted-foreground text-sm">
+                    Page {page} of {totalPages}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const newPage = Math.min(totalPages, page + 1);
+                      router.push(`/dashboard/links?page=${newPage}`);
+                    }}
+                    disabled={page >= totalPages}
+                  >
+                    Next
+                    <ChevronRight className="size-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+
+          {!isLinksPage &&
+            (filteredLinks === null
+              ? links.length > maxItemsWhenNotLinksPage
+              : filteredLinks.length > maxItemsWhenNotLinksPage) && (
+              <div className="mt-6 flex items-center justify-center border-t pt-4">
+                <Button asChild variant="outline" className="w-full">
+                  <Link href="/dashboard/links" className="w-full">
+                    View All Links
+                    <ArrowRight className="ml-2 size-4" />
+                  </Link>
+                </Button>
+              </div>
+            )}
         </CardContent>
       </Card>
 

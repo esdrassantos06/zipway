@@ -44,7 +44,6 @@ export default async function DashboardPage() {
                   links={links}
                   isLoading={false}
                   userId={session.user.id}
-                  limit={5}
                 />
               </div>
             </main>

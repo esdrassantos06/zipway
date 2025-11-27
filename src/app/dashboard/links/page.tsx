@@ -1,13 +1,18 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { getSessionFromHeaders } from "@/utils/getSession";
-import { getUserLinks } from "@/utils/getUserLinks";
-import { LinkForm } from "@/components/dashboard/LinkForm";
 import { LinksTable } from "@/components/dashboard/LinksTable";
 import { Header } from "../HeaderDashboard";
 import Sidebar from "@/components/dashboard/Sidebar";
+import { getUserLinksPage } from "@/utils/getUserLinks";
 
-export default async function LinksPage() {
+type LinksPageProps = {
+  searchParams?: Promise<{
+    page?: string;
+  }>;
+};
+
+export default async function LinksPage({ searchParams }: LinksPageProps) {
   const headersList = await headers();
   const session = await getSessionFromHeaders(headersList);
 
@@ -16,7 +21,14 @@ export default async function LinksPage() {
     return redirect("/auth/login");
   }
 
-  const links = await getUserLinks(session.user.id);
+  const resolvedSearchParams = await searchParams;
+  const currentPage = parseInt(resolvedSearchParams?.page || "1", 10);
+  const pageSize = 10;
+  const { links, total, page, totalPages } = await getUserLinksPage(
+    session.user.id,
+    currentPage,
+    pageSize,
+  );
 
   return (
     <div className="bg-background flex h-screen">
@@ -35,11 +47,14 @@ export default async function LinksPage() {
                     View and manage all your recent shortened links
                   </p>
                 </div>
-                <LinkForm />
                 <LinksTable
                   links={links}
-                  userId={session.user.id}
                   isLoading={false}
+                  userId={session.user.id}
+                  total={total}
+                  page={page}
+                  totalPages={totalPages}
+                  pageSize={pageSize}
                 />
               </div>
             </main>

@@ -13,7 +13,7 @@ import {
   validateAlias,
   isReservedAlias,
 } from "@/utils/sanitize";
-import { invalidateRedirectCache, cacheRedirect } from "@/utils/urlCache";
+import { invalidateRedirectCache } from "@/utils/urlCache";
 
 export async function PATCH(
   req: NextRequest,
@@ -131,13 +131,6 @@ export async function PATCH(
     if (updateData.shortId && updateData.shortId !== oldShortId) {
       await invalidateRedirectCache(updateData.shortId);
     }
-
-    const finalShortId = updatedLink.shortId || updatedLink.id;
-    await cacheRedirect(
-      finalShortId,
-      updatedLink.targetUrl,
-      updatedLink.status,
-    );
 
     return NextResponse.json({
       message: "Link updated successfully",

@@ -5,13 +5,9 @@ export const CACHE_CONFIG = {
   TTL: 3600,
   BATCH_SIZE: 10,
   KEY_PREFIX: "url_exists:",
-  REDIRECT_PREFIX: "url_redirect:",
-  REDIRECT_TTL: 7200,
 } as const;
 
 const getCacheKey = (shortId: string) => `${CACHE_CONFIG.KEY_PREFIX}${shortId}`;
-const getRedirectCacheKey = (shortId: string) =>
-  `${CACHE_CONFIG.REDIRECT_PREFIX}${shortId}`;
 
 export const checkShortIdExists = async (shortId: string): Promise<boolean> => {
   const cacheKey = getCacheKey(shortId);
@@ -111,59 +107,13 @@ export const cacheResults = async (
   }
 };
 
-export const getCachedRedirect = async (
-  shortId: string,
-): Promise<{ targetUrl: string; status: string } | null> => {
-  const cacheKey = getRedirectCacheKey(shortId);
-
-  try {
-    const cached = await redis.get(cacheKey);
-    if (cached === null) {
-      return null;
-    }
-
-    let parsed: { targetUrl: string; status: string };
-    if (typeof cached === "string") {
-      parsed = JSON.parse(cached);
-    } else if (typeof cached === "object" && cached !== null) {
-      parsed = cached as { targetUrl: string; status: string };
-    } else {
-      return null;
-    }
-
-    return {
-      targetUrl: parsed.targetUrl,
-      status: parsed.status,
-    };
-  } catch (error) {
-    console.error("Error getting cached redirect:", shortId, error);
-    return null;
-  }
-};
-
-export const cacheRedirect = async (
-  shortId: string,
-  targetUrl: string,
-  status: string,
-): Promise<void> => {
-  const cacheKey = getRedirectCacheKey(shortId);
-
-  try {
-    const data = JSON.stringify({ targetUrl, status });
-    await redis.setex(cacheKey, CACHE_CONFIG.REDIRECT_TTL, data);
-  } catch (error) {
-    console.error("Error caching redirect:", shortId, error);
-  }
-};
-
 export const invalidateRedirectCache = async (
   shortId: string,
 ): Promise<void> => {
-  const cacheKey = getRedirectCacheKey(shortId);
   const existsKey = getCacheKey(shortId);
 
   try {
-    await Promise.all([redis.del(cacheKey), redis.del(existsKey)]);
+    await redis.del(existsKey);
   } catch (error) {
     console.error("Error invalidating redirect cache:", shortId, error);
   }
@@ -175,14 +125,11 @@ export const getCacheStats = async (): Promise<{
   memoryUsage: string;
 }> => {
   try {
-    const [existsKeys, redirectKeys] = await Promise.all([
-      redis.keys(`${CACHE_CONFIG.KEY_PREFIX}*`),
-      redis.keys(`${CACHE_CONFIG.REDIRECT_PREFIX}*`),
-    ]);
+    const existsKeys = await redis.keys(`${CACHE_CONFIG.KEY_PREFIX}*`);
 
     return {
       totalKeys: existsKeys.length,
-      redirectKeys: redirectKeys.length,
+      redirectKeys: 0,
       memoryUsage: "Available via Redis INFO command",
     };
   } catch (error) {

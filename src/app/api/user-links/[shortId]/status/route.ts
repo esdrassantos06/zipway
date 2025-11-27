@@ -6,7 +6,7 @@ import {
   DEFAULT_LIMITS,
   getClientIdentifier,
 } from "@/utils/rateLimiter";
-import { invalidateRedirectCache, cacheRedirect } from "@/utils/urlCache";
+import { invalidateRedirectCache } from "@/utils/urlCache";
 import { revalidatePath } from "next/cache";
 
 export async function PATCH(
@@ -84,7 +84,6 @@ export async function PATCH(
 
     const shortIdToUpdate = link.shortId || link.id;
     await invalidateRedirectCache(shortIdToUpdate);
-    await cacheRedirect(shortIdToUpdate, link.targetUrl, updated.status);
 
     revalidatePath("/dashboard");
     revalidatePath("/dashboard/links");

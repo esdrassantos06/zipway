@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
   if (session?.user?.role !== UserRole.ADMIN) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  
+
   if (!isRateLimitExceed) {
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }

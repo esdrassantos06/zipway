@@ -32,13 +32,8 @@ export async function updateUserProfileAction({
       const arrayBuffer = await imageFile.arrayBuffer();
       const fileBuffer = new Uint8Array(arrayBuffer);
 
-      const currentUser = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { image: true },
-      });
-
-      if (currentUser?.image) {
-        const urlParts = currentUser.image.split("/");
+      if (session.user.image) {
+        const urlParts = session.user.image.split("/");
         const currentImagePath = urlParts[urlParts.length - 1];
         if (currentImagePath && currentImagePath.includes(session.user.id)) {
           await supabase.storage.from("avatars").remove([currentImagePath]);
