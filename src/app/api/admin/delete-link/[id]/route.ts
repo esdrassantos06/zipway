@@ -9,8 +9,6 @@ import { getSessionFromHeaders } from "@/utils/getSession";
 import { UserRole } from "@/generated/prisma";
 import { invalidateRedirectCache } from "@/utils/urlCache";
 
-const ADMIN_API_TOKEN = process.env.ADMIN_API_TOKEN;
-
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -21,12 +19,7 @@ export async function DELETE(
 
   const session = await getSessionFromHeaders(req.headers);
 
-  const authHeader = req.headers.get("authorization");
-
-  const isAdmin = session?.user?.role === UserRole.ADMIN;
-  const hasValidToken = authHeader === `Bearer ${ADMIN_API_TOKEN}`;
-
-  if (!isAdmin && !hasValidToken) {
+  if (session?.user?.role !== UserRole.ADMIN) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

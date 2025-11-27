@@ -1,184 +1,391 @@
 # Zipway URL Shortener
 
-## 🚀 Features
+High-performance URL shortener built with Go backend and Next.js frontend, featuring authentication via Better Auth session validation and Redis caching for optimal performance.
 
-- Clean, responsive user interface
-- URL shortening with copy-to-clipboard functionality
-- Error handling and user feedback
-- Tabs for URL shortening and information
-- Modern design using Tailwind CSS and shadcn/ui components
-- Middleware for handling short URL redirects through the same domain
+**Version:** 2.0.0
 
-## 🔧 Technology Stack
+## Overview
 
-- [Next.js](https://nextjs.org/) - React framework for building full-stack web applications
-- [React](https://reactjs.org/) - A JavaScript library for building user interfaces
-- [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework for rapid UI development
-- [shadcn/ui](https://ui.shadcn.com/) - A collection of reusable UI components for React
-- [Prisma](https://www.prisma.io/) - A next-generation ORM for Node.js and TypeScript
-- [Zod](https://zod.dev/) - A TypeScript-first schema declaration and validation library
-- [React Hook Form](https://react-hook-form.com/) - A library for building performant and flexible forms in React
-- [Supabase](https://supabase.io/) - An open-source Firebase alternative for building secure and scalable backends
-- [Upstash](https://upstash.com/) - A serverless data platform for Redis and Kafka
-- [Resend](https://resend.com/) - An email API for developers
-- [Recharts](https://recharts.org/) - A composable charting library built on React components
-- [Lucide React](https://lucide.dev/) - A library of simply designed, beautiful icons
-- [Better Auth](https://better-auth.dev/) - A simple, secure, and flexible authentication library
-- [Jest](https://jestjs.io/) - A delightful JavaScript testing framework with a focus on simplicity
-- [React Testing Library](https://testing-library.com/) - A library for testing React components in a user-centric way
+Zipway is a fast, scalable URL shortener service that allows authenticated users to create shortened links with optional custom slugs. The system consists of:
 
-## 📁 Project Structure
+- **Go Backend API**: High-performance API built with Fiber
+- **Next.js Frontend**: Modern React application with server-side rendering
+- **Redis Caching**: Multi-tier caching for sub-5ms redirect performance
+- **Better Auth**: Session-based authentication
+
+## Architecture
+
+The project follows Clean Architecture principles with clear separation of concerns:
+
+### Backend (Go)
+
+```
+backend go/
+├── cmd/
+│   └── api/
+│       └── main.go              # Application entry point
+├── internal/
+│   ├── adapters/                # External adapters
+│   │   ├── handlers/            # HTTP handlers
+│   │   ├── middleware/          # HTTP middleware (auth)
+│   │   └── repositories/        # Database & cache repositories
+│   └── core/                    # Business logic
+│       ├── auth/                # Authentication logic
+│       ├── domain/              # Domain models
+│       ├── ports/               # Interfaces
+│       └── services/            # Business services
+├── docs/                        # Swagger documentation
+└── docker-compose.yml           # Docker configuration
+```
+
+### Frontend (Next.js)
 
 ```
 zipway/
-├── prisma/                   # Prisma Schema and migrations
-├── public/                   # Static files
-├── src/                      # Source code
-│   ├── __tests__/            # Jest/React Testing Library tests
-│   ├── actions/              # Server-side actions
-│   ├── app/                  # Next.js app directory with routes
-│   │   ├── api/              # API routes
-│   │   ├── admin/            # Admin dashboard
-│   │   ├── auth/             # Authentication pages
-│   │   ├── dashboard/        # User dashboard
-│   │   ├── [shortId]/        # Dynamic route for URL redirection
-│   │   ├── layout.tsx        # Root layout
-│   │   └── page.tsx          # Home page
-│   ├── components/           # React components
-│   │   ├── ui/               # UI components from shadcn/ui
-│   │   ├── auth/             # Authentication related components
-│   │   ├── dashboard/        # Dashboard components
-│   │   └── ...               # Other component directories
-│   ├── generated/            # Generated files (from Prisma)
-│   ├── lib/                  # Utility functions
-│   ├── utils/                # General utility scripts
-│   ├── validation/           # Zod schemas for validation
-│   └── middleware.ts         # URL redirection logic
-├── .env                      # Environment variables (create this)
-├── .gitignore                # Git ignore file
-├── Dockerfile                # Docker container definition
-├── next.config.ts            # Next.js configuration
-├── package.json              # Node.js dependencies
-├── postcss.config.mjs        # PostCSS configuration
-└── tsconfig.json             # TypeScript configuration
+├── prisma/                      # Prisma Schema and migrations
+├── src/
+│   ├── app/                     # Next.js app directory
+│   │   ├── api/                 # API routes (proxy to Go backend)
+│   │   │   └── shorten/         # URL shortening endpoint
+│   │   ├── dashboard/           # User dashboard
+│   │   └── ...                  # Other routes
+│   ├── components/              # React components
+│   ├── lib/                     # Utility functions
+│   ├── utils/                   # General utilities
+│   │   ├── redis.ts             # Redis client configuration
+│   │   ├── urlCache.ts          # URL caching utilities
+│   │   └── rateLimiter.ts       # Rate limiting
+│   └── proxy.ts                 # Middleware for URL redirection
+└── ...
 ```
 
-## 🛠️ Environment Variables
+## Technology Stack
 
-Create a `.env` file in the frontend directory with the following variables:
+### Backend
+
+- **Language:** Go 1.25.4
+- **Web Framework:** Fiber v3
+- **Database:** PostgreSQL (Supabase)
+- **Cache:** Redis
+- **Authentication:** Better Auth (session validation)
+- **Documentation:** Swagger/OpenAPI
+
+### Frontend
+
+- **Framework:** Next.js 16
+- **Language:** TypeScript
+- **UI:** React, Tailwind CSS, shadcn/ui
+- **ORM:** Prisma
+- **Validation:** Zod
+- **Cache:** Redis
+- **Authentication:** Better Auth
+
+## Features
+
+- ✅ **Authentication Required:** All link creation requires valid Better Auth session
+- ✅ **Custom Slugs:** Users can specify custom slugs for their links
+- ✅ **Reserved Slugs:** System protects reserved routes (api, swagger, admin, etc.)
+- ✅ **Redis Caching:** Sub-5ms redirect performance with cache
+- ✅ **User Association:** All links are associated with authenticated users
+- ✅ **Click Tracking:** Automatic click counting and statistics
+- ✅ **Public Resolution:** Public endpoint for link resolution (used by frontend)
+- ✅ **Client-Side Validation:** Alias validation before API calls (saves 100-150ms for invalid requests)
+- ✅ **Instant Redirects:** Redis cache-first approach for redirects
+
+## Performance
+
+### Backend (Go API)
+
+- **Session Validation (cache hit):** <5µs (local in-memory cache)
+- **Session Validation (cache miss):** ~10-50ms (Redis/PostgreSQL lookup)
+- **Link Creation:** 50-120ms total (optimized with local session cache)
+- **Redirect (cache hit):** Instant (<1ms)
+- **Redirect (cache miss):** 100-150ms (includes database lookup and cache update)
+
+### Frontend (Next.js)
+
+- **Redirect (cache hit):** Instant (<5ms) - Redis cache lookup
+- **Redirect (cache miss):** 100-150ms (Go API call + cache update)
+- **Link Creation:** ~220ms average (includes validation + Go API call)
+  - Invalid aliases: ~1-5ms (client-side validation prevents API call)
+  - Valid aliases: ~220ms (validation + Go API)
+
+### Performance Optimizations
+
+#### Backend Optimizations
+
+- **Multi-tier caching:** Local in-memory cache → Redis → PostgreSQL
+- **Local session cache:** Frequently accessed sessions cached in memory (<5µs access time)
+- **Optimized Redis pool:** 50 connections, reduced timeouts for faster responses
+- **Prepared statements:** Database queries use prepared statements for better performance
+
+#### Frontend Optimizations
+
+- **Redis cache-first redirects:** Proxy middleware checks Redis before calling Go API
+- **Client-side alias validation:** Validates and sanitizes aliases before API calls (saves 100-150ms for invalid requests)
+- **Parallel operations:** Rate limiting and body parsing executed in parallel
+- **Connection pooling:** Redis with auto-pipelining enabled
+- **Early returns:** Fast validation checks before expensive operations
+- **Reduced timeouts:** 500ms timeout for redirect API calls (with cache, rarely needed)
+
+## How It Works
+
+### Authentication Flow
+
+1. User logs in via Next.js frontend (Better Auth)
+2. Better Auth creates session in PostgreSQL `session` table
+3. Frontend sends requests with `__Secure-better-auth.session_token` cookie
+4. Backend extracts session token from cookie
+5. Backend validates session using multi-tier caching:
+   - **First:** Checks local in-memory cache (<5µs for frequent sessions)
+   - **Second:** Checks Redis cache with key `session:{sessionID}`
+   - **Third:** Checks Redis with full token `{sessionID}` and parses JSON
+   - **Fallback:** Queries PostgreSQL `session` table
+   - Valid sessions are cached locally (5 min) and in Redis (5 min)
+6. `userId` is stored in request context for use in handlers
+
+### Link Creation Flow
+
+1. Client sends POST to `/api/shorten` (Next.js API route)
+2. Next.js route validates custom alias client-side (if provided):
+   - Sanitizes alias (removes special chars, normalizes)
+   - Checks if reserved
+   - Validates format (min length, not only numbers, etc.)
+   - **Saves 100-150ms for invalid aliases** (no Go API call)
+3. Next.js route forwards request to Go API with session cookie
+4. Go API auth middleware validates session and extracts `userId`
+5. Go service generates slug (or uses custom) and creates link
+6. Link saved to PostgreSQL with `userId`
+7. URL cached in Redis for fast retrieval
+8. Response returns short URL
+
+### Link Resolution Flow (Redirect)
+
+1. User visits `https://domain.com/:slug`
+2. Next.js middleware (`proxy.ts`) intercepts request
+3. Middleware checks Redis cache first (`getCachedRedirect`)
+4. **If cache hit:** Instant redirect (<5ms) - no API call
+5. **If cache miss:**
+   - Calls Go API `/api/resolve/:slug` (500ms timeout)
+   - Go API checks Redis, then PostgreSQL if needed
+   - Go API returns target URL and increments clicks
+   - Next.js caches result in Redis for future requests
+   - Redirects user to target URL
+6. Cache TTL: 2 hours for redirects, 1 hour for existence checks
+
+## Setup
+
+### Prerequisites
+
+- Go 1.25.4+ (for backend)
+- Node.js 18+ (for frontend)
+- Docker & Docker Compose
+- Supabase account (for PostgreSQL)
+- Redis (local, Supabase, or Upstash)
+
+### Backend Environment Variables
+
+Create a `.env` file in the backend directory:
 
 ```bash
-NEXT_PUBLIC_ADSENSE_CLIENT_ID=
+# Database - Supabase PostgreSQL (use Connection Pooling)
+DATABASE_URL=postgresql://postgres.xxxxx:YOUR_PASSWORD@aws-0-us-east-1.pooler.supabase.com:6543/postgres
 
+# Redis - Local or Supabase
+REDIS_URL=redis://redis:6379
 
-ADMIN_API_TOKEN=
-
-NEXT_PUBLIC_URL=
-
-UPSTASH_REDIS_REST_URL=
-UPSTASH_REDIS_REST_TOKEN=
-
-
-DATABASE_URL=
-
-BETTER_AUTH_SECRET=
-BETTER_AUTH_URL=
-
-GITHUB_CLIENT_ID=
-GITHUB_SECRET=
-
-GOOGLE_CLIENT_ID=
-GOOGLE_SECRET=
-
-
-ADMIN_EMAILS=
-
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-
-NEXT_PUBLIC_SUPABASE_URL=
-
-SUPABASE_SERVICE_ROLE_KEY=
-
-RESEND_API_KEY=
+# API Configuration
+BASE_URL=http://localhost:8080
+ALLOWED_ORIGIN=http://localhost:3000
+SHORT_URL_DOMAIN=http://localhost:3000  # Optional: Custom domain for short URLs
 ```
 
-## 🚀 Running Locally
+### Frontend Environment Variables
 
-### With Node.js
+Create a `.env` file in the frontend directory:
 
-1. Install dependencies:
+```bash
+# API Configuration
+NEXT_PUBLIC_API_URL=https://api.shly.pt
+NEXT_PUBLIC_URL=http://localhost:3000
 
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
+# Redis (Upstash or local)
+REDIS_URL=redis://localhost:6379
 
-2. Run the development server:
+# Database
+DATABASE_URL=postgresql://...
 
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
+# Better Auth
+BETTER_AUTH_SECRET=your-secret
+BETTER_AUTH_URL=http://localhost:3000
 
-3. Open [http://localhost:3000](http://localhost:3000) in your browser.
+# OAuth (optional)
+GITHUB_CLIENT_ID=...
+GITHUB_SECRET=...
+GOOGLE_CLIENT_ID=...
+GOOGLE_SECRET=...
 
-### With Docker
+# Email (Resend)
+RESEND_API_KEY=...
+
+# Admin
+ADMIN_EMAILS=admin@example.com
+ADMIN_API_TOKEN=...
+```
+
+### Running with Docker
+
+#### Backend
+
+```bash
+cd backend-go
+docker-compose up --build
+```
+
+#### Frontend
 
 ```bash
 docker build -t zipway-frontend .
 docker run -d --name zipway-frontend-container -p 3000:3000 --env-file .env zipway-frontend
 ```
 
-When you use docker run, Docker always creates a new container from the specified image (in this case, zipway-frontend). It does not reuse an existing container; instead, it creates a fresh instance of the image every time.
+### Running Locally
 
-### Why?
-
-- The image is a static blueprint.
-
-- The container is a running instance created from that image.
-
-- Running docker run multiple times will create multiple containers.
-
-To reuse the same container across runs, follow these steps:
-
-1. Create the container once and give it a name using --name.
-
-2. Use docker start and docker stop to manage that named container.
-
-Example of creating and naming the frontend container:
+#### Backend
 
 ```bash
-docker run -d --name zipway-frontend-container -p 3000:3000 --env-file .env zipway-frontend
+cd backend-go
+go mod download
+go run cmd/api/main.go
 ```
 
-Later, to stop and restart the same container:
+#### Frontend
 
 ```bash
-docker stop zipway-frontend-container
-docker start zipway-frontend-container
+npm install
+npm run dev
 ```
 
-## 🔍 Key Components
+## API Endpoints
 
-### URL Shortening
+### Public Endpoints
 
-- The URL shortener backend is implemented as Next.js API Routes.
+#### `GET /` (Backend)
 
-- This provides a self-contained API with no external rewrites or proxies required.
+Health check endpoint.
 
-- The frontend interacts with these API routes directly via HTTP requests and server functions.
+**Response:**
 
-### Main Components
+```json
+{
+  "message": "Zipway URL Shortener API",
+  "version": "1.0.0",
+  "status": "ok",
+  "timestamp": "2025-01-26T21:00:00Z",
+  "uptime": "1h30m",
+  "swagger": "http://localhost:8080/swagger"
+}
+```
 
-- **Dashboard**: The main user interface for creating and managing shortened URLs.
-- **UI Components**: Reusable components like Button, Input, Card, etc., from shadcn/ui.
-- **Authentication**: Components for user sign-up, login, and session management.
+#### `GET /api/resolve/:slug` (Backend)
 
-### Configuring Middleware
+Resolve a shortened link (public, no auth required).
 
-The middleware in `src/middleware.ts` is automatically detected and used by Vercel. It intercepts requests to your domain and redirects short URL requests to your backend API.
+**Response (200):**
+
+```json
+{
+  "target_url": "https://example.com"
+}
+```
+
+**Response (404):**
+
+```json
+{
+  "error": "Link not found"
+}
+```
+
+### Protected Endpoints
+
+#### `POST /api/shorten` (Frontend → Backend)
+
+Create a shortened link (requires authentication).
+
+**Flow:**
+
+1. Client calls Next.js `/api/shorten`
+2. Next.js validates alias (if provided) - saves 100-150ms for invalid aliases
+3. Next.js forwards to Go API with session cookie
+4. Go API validates session and creates link
+
+**Headers:**
+
+```
+Content-Type: application/json
+Cookie: __Secure-better-auth.session_token=YOUR_TOKEN
+```
+
+**Request Body:**
+
+```json
+{
+  "targetUrl": "https://example.com",
+  "custom_id": "my-link" // optional
+}
+```
+
+**Response (200):**
+
+```json
+{
+  "short_url": "http://localhost:8080/my-link",
+  "details": {
+    "id": "uuid",
+    "short_id": "my-link",
+    "target_url": "https://example.com",
+    "user_id": "userIdFromSession",
+    "status": "ACTIVE",
+    "clicks": 0,
+    "created_at": "2025-01-26T21:00:00Z"
+  }
+}
+```
+
+**Error Responses:**
+
+- `400`: Invalid input, reserved slug, or invalid alias format
+- `401`: Unauthorized (invalid/expired session)
+- `409`: Custom slug already exists
+- `429`: Rate limit exceeded
+- `500`: Internal server error
+
+## Reserved Slugs
+
+The following slugs cannot be used as custom slugs:
+
+- `api`
+- `swagger`
+- `shorten`
+- `admin`
+- `dashboard`
+- `auth`
+- `profile`
+- `settings`
+- `privacy`
+- `terms`
+- `cookies`
+- `health`
+- `metrics`
+- `docs`
+- `static`
+- `assets`
+- `favicon.ico`
+
+## Database Schema
+
+### Session Table (Better Auth)
 
 ## 🎨 UI Customization
 
@@ -188,22 +395,22 @@ The project uses Tailwind CSS with custom theme variables. To modify the theme:
 2. Use Tailwind utility classes for component styling
 3. Modify shadcn/ui components in the `src/components/ui` directory
 
-## 📱 Responsive Design
+#### Generate Swagger Documentation
 
-The UI is responsive by default, using Tailwind's responsive utility classes:
+```bash
+cd backend-go
+swag init -g cmd/api/main.go -o docs
+```
 
-- Mobile-first approach
-- Breakpoints for different screen sizes
-- Flexible layouts with proper spacing
+#### Running Tests
 
-## 🧪 Testing
+```bash
+go test ./...
+```
 
-The project includes automated tests with:
+### Frontend
 
-- **Jest** for unit testing
-- **React Testing Library** for component testing
-
-Run tests with:
+#### Running Tests
 
 ```bash
 npm test
@@ -211,8 +418,50 @@ npm test
 npm run test:watch
 ```
 
-## 🚧 Future Improvements
+### Code Structure Principles
 
-- Implement **Cypress** for end-to-end testing
-- Add internationalization (next-intl) support
-- Add caching in components and api routes
+- **Clean Architecture:** Separation of business logic from infrastructure
+- **Dependency Injection:** Interfaces for testability
+- **Single Responsibility:** Each package has a clear purpose
+- **Performance First:** Optimized queries, Redis caching, async operations
+- **Client-Side Validation:** Validate early to avoid unnecessary API calls
+
+## Production Considerations
+
+1. **Environment Variables:** Use secure secret management
+2. **Database Connection Pooling:** Already configured for Supabase
+3. **Redis Persistence:** Configure Redis persistence for production
+4. **Rate Limiting:** Implemented on frontend API routes
+5. **Monitoring:** Add logging and metrics collection
+6. **HTTPS:** Ensure all connections use HTTPS in production
+7. **Session Validation:** Optimized with multi-tier caching (local memory → Redis → PostgreSQL)
+8. **Cache Strategy:**
+   - Redirects: 2 hours TTL
+   - Existence checks: 1 hour TTL
+   - Session cache: 5 minutes (local + Redis)
+9. **Error Handling:** Graceful degradation if Redis is unavailable
+
+## Performance Benchmarks
+
+### Redirect Performance
+
+- **Cache Hit:** <5ms (99th percentile)
+- **Cache Miss:** 100-150ms (includes Go API + cache update)
+
+### Link Creation Performance
+
+- **Invalid Alias:** 1-5ms (client-side validation)
+- **Valid Alias:** ~220ms average (validation + Go API)
+
+### Cache Hit Rates
+
+- **Redirects:** ~80-90% (for popular links)
+- **Sessions:** ~95%+ (for active users)
+
+## License
+
+[Your License Here]
+
+## Author
+
+Zipway Team

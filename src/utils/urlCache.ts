@@ -169,21 +169,6 @@ export const invalidateRedirectCache = async (
   }
 };
 
-export const incrementClicksAsync = async (shortId: string): Promise<void> => {
-  prisma.link
-    .update({
-      where: { shortId },
-      data: {
-        clicks: {
-          increment: 1,
-        },
-      },
-    })
-    .catch((error) => {
-      console.error("Error incrementing clicks:", shortId, error);
-    });
-};
-
 export const getCacheStats = async (): Promise<{
   totalKeys: number;
   redirectKeys: number;

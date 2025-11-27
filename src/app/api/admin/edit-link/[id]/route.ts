@@ -15,8 +15,6 @@ import {
 } from "@/utils/sanitize";
 import { invalidateRedirectCache, cacheRedirect } from "@/utils/urlCache";
 
-const ADMIN_API_TOKEN = process.env.ADMIN_API_TOKEN;
-
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -27,12 +25,7 @@ export async function PATCH(
 
   const session = await getSessionFromHeaders(req.headers);
 
-  const authHeader = req.headers.get("authorization");
-
-  const isAdmin = session?.user?.role === UserRole.ADMIN;
-  const hasValidToken = authHeader === `Bearer ${ADMIN_API_TOKEN}`;
-
-  if (!isAdmin && !hasValidToken) {
+  if (session?.user?.role !== UserRole.ADMIN) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -15,6 +15,12 @@ function getRedisClient(): Redis {
       const delay = Math.min(times * 50, 2000);
       return delay;
     },
+    enableReadyCheck: true,
+    enableOfflineQueue: true,
+    connectTimeout: 5000,
+    lazyConnect: false,
+    enableAutoPipelining: true,
+    keepAlive: 30000,
   });
 
   redisClient.on("error", (err: Error) => {

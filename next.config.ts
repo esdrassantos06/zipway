@@ -2,12 +2,13 @@ import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV === "development";
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.shly.pt";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 
 const cspHeader = `
   default-src 'self';
   script-src 'self' ${isDev ? "http://localhost:3000" : ""} https://pagead2.googlesyndication.com 'unsafe-inline' 'unsafe-eval';
   style-src 'self' 'unsafe-inline';
-  img-src 'self' data: https://lh3.googleusercontent.com https://izxvhjdzwjklthewefqj.supabase.co https://pagead2.googlesyndication.com https://avatars.githubusercontent.com https://github.com;
+  img-src 'self' data: https://lh3.googleusercontent.com ${supabaseUrl} https://pagead2.googlesyndication.com https://avatars.githubusercontent.com https://github.com https://ui-avatars.com;
   font-src 'self';
   connect-src 'self' ${isDev ? "ws://localhost:3000 http://localhost:3000" : ""} https://api.iconify.design https://api.github.com ${apiUrl};
   object-src 'none';

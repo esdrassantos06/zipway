@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
+import { cacheRedirect, getCachedRedirect } from "./utils/urlCache";
 
 const protectedRoutes = ["/profile", "/admin", "/dashboard", "/settings"];
 const knownRoutes = [
@@ -59,10 +60,8 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Extract potential slug (remove leading slash)
   const potentialSlug = pathname.slice(1);
 
-  // Skip if it's a reserved slug or contains slashes (not a valid slug)
   if (
     !potentialSlug ||
     reservedSlugs.includes(potentialSlug.toLowerCase()) ||
@@ -71,11 +70,22 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Try to resolve the slug via Go API
-  // Using cache and timeout for performance
+  const cachedRedirect = await getCachedRedirect(potentialSlug);
+  if (cachedRedirect) {
+    const redirectResponse = NextResponse.redirect(
+      cachedRedirect.targetUrl,
+      301,
+    );
+    redirectResponse.headers.set(
+      "Cache-Control",
+      "public, s-maxage=300, stale-while-revalidate=600",
+    );
+    return redirectResponse;
+  }
+
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 500);
 
     const response = await fetch(
       `${API_BASE_URL}/api/resolve/${potentialSlug}`,
@@ -86,8 +96,6 @@ export async function proxy(req: NextRequest) {
         },
         redirect: "manual",
         signal: controller.signal,
-        // Cache for 1 minute to reduce API calls
-        next: { revalidate: 60 },
       },
     );
 
@@ -96,9 +104,13 @@ export async function proxy(req: NextRequest) {
     if (response.ok) {
       const data = await response.json();
       if (data.target_url) {
-        // Redirect to the target URL with cache headers
+        await cacheRedirect(
+          potentialSlug,
+          data.target_url,
+          data.status || "active"
+        )
+
         const redirectResponse = NextResponse.redirect(data.target_url, 301);
-        // Cache the redirect for 1 minute
         redirectResponse.headers.set(
           "Cache-Control",
           "public, s-maxage=60, stale-while-revalidate=300",
@@ -107,13 +119,11 @@ export async function proxy(req: NextRequest) {
       }
     }
   } catch (error) {
-    // If API call fails or times out, continue to next handler
     if (error instanceof Error && error.name !== "AbortError") {
       console.error("Error resolving slug:", error);
     }
   }
 
-  // If not found or error, continue to next handler
   return NextResponse.next();
 }
 

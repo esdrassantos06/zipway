@@ -8,23 +8,17 @@ import {
 import { getSessionFromHeaders } from "@/utils/getSession";
 import { UserRole } from "@/generated/prisma";
 
-const ADMIN_API_TOKEN = process.env.ADMIN_API_TOKEN;
-
 export async function GET(req: NextRequest) {
   const rateLimiter = createRateLimiter(DEFAULT_LIMITS.admin);
   const identifier = getClientIdentifier(req);
   const isRateLimitExceed = await rateLimiter(identifier);
 
   const session = await getSessionFromHeaders(req.headers);
-  const authHeader = req.headers.get("authorization");
 
-  const isAdmin = session?.user?.role === UserRole.ADMIN;
-  const hasValidToken = authHeader === `Bearer ${ADMIN_API_TOKEN}`;
-
-  if (!isAdmin && !hasValidToken) {
+  if (session?.user?.role !== UserRole.ADMIN) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
+  
   if (!isRateLimitExceed) {
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
