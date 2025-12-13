@@ -1,14 +1,19 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { LinkForm } from "@/components/dashboard/LinkForm";
 import { toast } from "sonner";
-import axios from "axios";
 
-jest.mock("axios");
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+const mockRefresh = jest.fn();
+const mockCreateShortLink = jest.fn();
+
+jest.mock("@/lib/api-client", () => ({
+  createShortLink: (...args: any[]) => mockCreateShortLink(...args),
+}));
 
 describe("ShortenUrlForm", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCreateShortLink.mockClear();
+    mockRefresh.mockClear();
     jest.spyOn(console, "error").mockImplementation(() => {});
     render(<LinkForm />);
   });
@@ -29,12 +34,9 @@ describe("ShortenUrlForm", () => {
   });
 
   it("should show the shortened URL if the API call succeeds", async () => {
-    mockedAxios.post.mockResolvedValueOnce({
-      status: 200,
-      data: {
-        short_url: "https://shly.pt/abc123",
-        original_url: "https://valid-url.com",
-      },
+    mockCreateShortLink.mockResolvedValueOnce({
+      short_url: "https://shly.pt/abc123",
+      details: { original_url: "https://valid-url.com" },
     });
 
     const input = screen.getByTestId("original-url-input");
@@ -48,10 +50,10 @@ describe("ShortenUrlForm", () => {
       expect(toast.success).toHaveBeenCalled();
     });
 
-    expect(mockedAxios.post).toHaveBeenCalledWith("/api/shorten", {
-      targetUrl: "https://valid-url.com",
-      custom_id: "",
-    });
+    expect(mockCreateShortLink).toHaveBeenCalledWith(
+      "https://valid-url.com",
+      undefined,
+    );
 
     await waitFor(() => {
       expect(screen.getByTestId("shortened-url-display")).toBeInTheDocument();
@@ -63,10 +65,7 @@ describe("ShortenUrlForm", () => {
   });
 
   it("should handle API errors gracefully", async () => {
-    mockedAxios.post.mockResolvedValueOnce({
-      status: 400,
-      data: { error: "Invalid request" },
-    });
+    mockCreateShortLink.mockRejectedValueOnce(new Error("Invalid request"));
 
     const input = screen.getByTestId("original-url-input");
 
@@ -81,7 +80,7 @@ describe("ShortenUrlForm", () => {
   });
 
   it("should handle network errors", async () => {
-    mockedAxios.post.mockRejectedValueOnce(new Error("Network error"));
+    mockCreateShortLink.mockRejectedValueOnce(new Error("Network error"));
 
     const input = screen.getByTestId("original-url-input");
     fireEvent.change(input, { target: { value: "https://valid-url.com" } });

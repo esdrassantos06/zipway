@@ -14,16 +14,6 @@ Object.defineProperty(global, "matchMedia", {
   })),
 });
 
-jest.mock("nanoid", () => ({
-  customAlphabet: jest.fn(() => jest.fn(() => "test123")),
-}));
-
-jest.mock("nanostores", () => ({
-  atom: jest.fn(),
-  computed: jest.fn(),
-  map: jest.fn(),
-}));
-
 jest.mock("better-auth/react", () => ({
   useSession: jest.fn(() => ({ data: null, status: "loading" })),
 }));
@@ -44,6 +34,22 @@ jest.mock("sonner", () => ({
     error: jest.fn(),
     success: jest.fn(),
   },
+}));
+
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    refresh: jest.fn(),
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+    back: jest.fn(),
+    forward: jest.fn(),
+  }),
+}));
+
+jest.mock("@/lib/api-client", () => ({
+  createShortLink: jest.fn(),
+  resolveSlug: jest.fn(),
 }));
 
 global.fetch = jest.fn();

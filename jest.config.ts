@@ -9,10 +9,7 @@ const config: Config = {
   coverageProvider: "v8",
   testEnvironment: "jsdom",
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
-  transformIgnorePatterns: [
-    "node_modules/(?!(nanoid)/)",
-    "node_modules/(?!(nanostores|better-auth|@better-auth)/)",
-  ],
+  transformIgnorePatterns: [],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
