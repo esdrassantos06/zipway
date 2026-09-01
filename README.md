@@ -1,14 +1,14 @@
 # Zipway URL Shortener
 
-High-performance URL shortener built with Go backend and Next.js frontend, featuring authentication via Better Auth session validation and Redis caching for optimal performance.
+URL shortener with a Go API and a Next.js frontend. Better Auth issues the session in the frontend; the Go service only validates the cookie. Redis sits in front of Postgres so redirects don't pay for a database round trip.
 
 **Version:** 2.0.0
 
 ## Overview
 
-Zipway is a fast, scalable URL shortener service that allows authenticated users to create shortened links with optional custom slugs. The system consists of:
+Signed-in users create short links, optionally picking their own slug. Anyone can resolve one. Four pieces:
 
-- **Go Backend API**: High-performance API built with Fiber
+- **Go Backend API**: built with Fiber
 - **Next.js Frontend**: Modern React application with server-side rendering
 - **Redis Caching**: Multi-tier caching for sub-5ms redirect performance
 - **Better Auth**: Session-based authentication
@@ -82,15 +82,15 @@ zipway/
 
 ## Features
 
-- ✅ **Authentication Required:** All link creation requires valid Better Auth session
-- ✅ **Custom Slugs:** Users can specify custom slugs for their links
-- ✅ **Reserved Slugs:** System protects reserved routes (api, swagger, admin, etc.)
-- ✅ **Redis Caching:** Sub-5ms redirect performance with cache
-- ✅ **User Association:** All links are associated with authenticated users
-- ✅ **Click Tracking:** Automatic click counting and statistics
-- ✅ **Public Resolution:** Public endpoint for link resolution (used by frontend)
-- ✅ **Client-Side Validation:** Alias validation before API calls (saves 100-150ms for invalid requests)
-- ✅ **Instant Redirects:** Redis cache-first approach for redirects
+- **Authentication Required:** All link creation requires valid Better Auth session
+- **Custom Slugs:** Users can specify custom slugs for their links
+- **Reserved Slugs:** System protects reserved routes (api, swagger, admin, etc.)
+- **Redis Caching:** Sub-5ms redirect performance with cache
+- **User Association:** All links are associated with authenticated users
+- **Click Tracking:** Automatic click counting and statistics
+- **Public Resolution:** Public endpoint for link resolution (used by frontend)
+- **Client-Side Validation:** Alias validation before API calls (saves 100-150ms for invalid requests)
+- **Instant Redirects:** Redis cache-first approach for redirects
 
 ## Performance
 
@@ -387,7 +387,7 @@ The following slugs cannot be used as custom slugs:
 
 ### Session Table (Better Auth)
 
-## 🎨 UI Customization
+## UI Customization
 
 The project uses Tailwind CSS with custom theme variables. To modify the theme:
 
@@ -460,8 +460,8 @@ npm run test:watch
 
 ## License
 
-[Your License Here]
+MIT, see [LICENSE](LICENSE).
 
 ## Author
 
-Zipway Team
+[Esdras Santos](https://github.com/esdrassantos06)
