@@ -1,16 +1,18 @@
 # Zipway URL Shortener
 
-URL shortener with a Go API and a Next.js frontend. Better Auth issues the session in the frontend; the Go service only validates the cookie. Redis sits in front of Postgres so redirects don't pay for a database round trip.
+URL shortener with a Go API and a Next.js frontend, running in production at [shly.pt](https://shly.pt). Better Auth issues the session in the frontend; the Go service only validates the cookie. Redis sits in front of Postgres so redirects don't pay for a database round trip.
+
+The Go API lives in its own repository: [shly-backend-go](https://github.com/esdrassantos06/shly-backend-go).
 
 **Version:** 2.0.0
 
 ## Overview
 
-Signed-in users create short links, optionally picking their own slug. Anyone can resolve one. Four pieces:
+Signed-in users create short links, optionally picking their own slug, pause or delete them, and follow each link's clicks on a dashboard. Anyone can resolve one. Four pieces:
 
-- **Go Backend API**: built with Fiber
+- **Go Backend API**: built with Fiber v3, organised in Clean Architecture and documented in OpenAPI (Swagger)
 - **Next.js Frontend**: Modern React application with server-side rendering
-- **Redis Caching**: Multi-tier caching for sub-5ms redirect performance
+- **Redis Caching**: Redirects are served from Redis before PostgreSQL, and sessions are validated through an in-memory → Redis → PostgreSQL cascade
 - **Better Auth**: Session-based authentication
 
 ## Architecture
@@ -85,12 +87,13 @@ zipway/
 - **Authentication Required:** All link creation requires valid Better Auth session
 - **Custom Slugs:** Users can specify custom slugs for their links
 - **Reserved Slugs:** System protects reserved routes (api, swagger, admin, etc.)
-- **Redis Caching:** Sub-5ms redirect performance with cache
+- **Redis Caching:** Links stay cached in Redis for 24 hours, so most redirects never reach PostgreSQL
 - **User Association:** All links are associated with authenticated users
-- **Click Tracking:** Automatic click counting and statistics
+- **Click Tracking:** Clicks are counted in a background goroutine, so the redirect never waits on the write
+- **Pause and Delete:** Users can pause a link (it stops resolving) or delete it from the dashboard
 - **Public Resolution:** Public endpoint for link resolution (used by frontend)
 - **Client-Side Validation:** Alias validation before API calls (saves 100-150ms for invalid requests)
-- **Instant Redirects:** Redis cache-first approach for redirects
+- **Instant Redirects:** Redis cache-first lookup in the Go API, with a 500ms timeout on the frontend side
 
 ## Performance
 
@@ -104,8 +107,7 @@ zipway/
 
 ### Frontend (Next.js)
 
-- **Redirect (cache hit):** Instant (<5ms) - Redis cache lookup
-- **Redirect (cache miss):** 100-150ms (Go API call + cache update)
+- **Redirect:** One call from `proxy.ts` to the Go API (`/api/resolve/:slug`), capped by a 500ms timeout. Redirect latency is the Go API's (see above) plus one network hop
 - **Link Creation:** ~220ms average (includes validation + Go API call)
   - Invalid aliases: ~1-5ms (client-side validation prevents API call)
   - Valid aliases: ~220ms (validation + Go API)
@@ -121,12 +123,12 @@ zipway/
 
 #### Frontend Optimizations
 
-- **Redis cache-first redirects:** Proxy middleware checks Redis before calling Go API
+- **Single-hop redirects:** Proxy middleware makes one call to the Go API, which answers from Redis whenever it can
 - **Client-side alias validation:** Validates and sanitizes aliases before API calls (saves 100-150ms for invalid requests)
-- **Parallel operations:** Rate limiting and body parsing executed in parallel
+- **Parallel operations:** Rate limit identifier and request body are resolved in parallel
 - **Connection pooling:** Redis with auto-pipelining enabled
 - **Early returns:** Fast validation checks before expensive operations
-- **Reduced timeouts:** 500ms timeout for redirect API calls (with cache, rarely needed)
+- **Reduced timeouts:** 500ms timeout for redirect API calls
 
 ## How It Works
 
@@ -162,16 +164,15 @@ zipway/
 ### Link Resolution Flow (Redirect)
 
 1. User visits `https://domain.com/:slug`
-2. Next.js middleware (`proxy.ts`) intercepts request
-3. Middleware checks Redis cache first (`getCachedRedirect`)
-4. **If cache hit:** Instant redirect (<5ms) - no API call
-5. **If cache miss:**
-   - Calls Go API `/api/resolve/:slug` (500ms timeout)
-   - Go API checks Redis, then PostgreSQL if needed
-   - Go API returns target URL and increments clicks
-   - Next.js caches result in Redis for future requests
-   - Redirects user to target URL
-6. Cache TTL: 2 hours for redirects, 1 hour for existence checks
+2. Next.js middleware (`proxy.ts`) intercepts request and skips known app routes and reserved slugs
+3. Middleware calls Go API `/api/resolve/:slug` (500ms timeout)
+4. Go API checks Redis first (key `url{slug}`)
+   - **If cache hit:** returns the target URL straight from Redis (<1ms server-side)
+   - **If cache miss:** queries PostgreSQL with a prepared statement and caches the link in Redis
+5. Paused links are rejected, so the user falls through to the 404 page
+6. Go API counts the click in a background goroutine (Redis counter + PostgreSQL `clicks`)
+7. Middleware redirects the user to the target URL (302)
+8. Cache TTL: 24 hours for redirects (Go API), 1 hour for existence checks (Next.js)
 
 ## Setup
 
@@ -363,29 +364,28 @@ Cookie: __Secure-better-auth.session_token=YOUR_TOKEN
 
 ## Reserved Slugs
 
-The following slugs cannot be used as custom slugs:
+Reserved slugs are blocked in two places:
 
-- `api`
-- `swagger`
-- `shorten`
-- `admin`
-- `dashboard`
-- `auth`
-- `profile`
-- `settings`
-- `privacy`
-- `terms`
-- `cookies`
-- `health`
-- `metrics`
-- `docs`
-- `static`
-- `assets`
-- `favicon.ico`
+- **Go API** (`internal/adapters/handlers/http_handler.go`): `api`, `swagger`, `shorten`, `admin`, `health`, `metrics`, `docs`, `static`, `assets`, `favicon.ico`
+- **Next.js** (`src/utils/sanitize.ts`): a longer list that also covers every app route (`dashboard`, `auth`, `profile`, `settings`, `privacy`, `terms`...), framework paths (`_next`, `robots.txt`, `sitemap.xml`...), common system names (`www`, `mail`, `webhook`, `oauth`...) and locale codes (`pt`, `en`, `es`, `fr`, `de`). Invalid aliases are rejected here, before the Go API is called
 
 ## Database Schema
 
-### Session Table (Better Auth)
+The schema is managed with Prisma (`prisma/schema.prisma`). Better Auth owns the `user`, `session`, `account` and `verification` tables; the Go API reads `session` to validate cookies.
+
+### Links Table (`urls`)
+
+| Column       | Type                 | Notes                      |
+| ------------ | -------------------- | -------------------------- |
+| `id`         | `String`             | Primary key (UUID)         |
+| `shortId`    | `String`             | Unique slug                |
+| `target_url` | `String`             | Destination URL            |
+| `userId`     | `String?`            | Owner (Better Auth user)   |
+| `clicks`     | `Int`                | Defaults to 0              |
+| `status`     | `ACTIVE` \| `PAUSED` | Paused links don't resolve |
+| `createdAt`  | `DateTime`           | Defaults to now            |
+
+Indexes on `userId`, `status`, `(userId, status)` and `(userId, createdAt desc)` keep the dashboard queries fast.
 
 ## UI Customization
 
@@ -395,6 +395,10 @@ The project uses Tailwind CSS with custom theme variables. To modify the theme:
 2. Use Tailwind utility classes for component styling
 3. Modify shadcn/ui components in the `src/components/ui` directory
 
+## Development
+
+### Backend
+
 #### Generate Swagger Documentation
 
 ```bash
@@ -402,15 +406,11 @@ cd backend-go
 swag init -g cmd/api/main.go -o docs
 ```
 
-#### Running Tests
-
-```bash
-go test ./...
-```
-
 ### Frontend
 
 #### Running Tests
+
+32 Jest tests, run in CI together with ESLint, Prettier and a production build.
 
 ```bash
 npm test
@@ -436,7 +436,7 @@ npm run test:watch
 6. **HTTPS:** Ensure all connections use HTTPS in production
 7. **Session Validation:** Optimized with multi-tier caching (local memory → Redis → PostgreSQL)
 8. **Cache Strategy:**
-   - Redirects: 2 hours TTL
+   - Redirects: 24 hours TTL (Go API)
    - Existence checks: 1 hour TTL
    - Session cache: 5 minutes (local + Redis)
 9. **Error Handling:** Graceful degradation if Redis is unavailable
@@ -445,8 +445,8 @@ npm run test:watch
 
 ### Redirect Performance
 
-- **Cache Hit:** <5ms (99th percentile)
-- **Cache Miss:** 100-150ms (includes Go API + cache update)
+- **Cache Hit (Go API, server-side):** <1ms
+- **Cache Miss:** 100-150ms (includes PostgreSQL lookup + cache update)
 
 ### Link Creation Performance
 
