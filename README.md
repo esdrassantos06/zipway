@@ -1,6 +1,6 @@
 # Zipway URL Shortener
 
-URL shortener with a Go API and a Next.js frontend, running in production at [shly.pt](https://shly.pt). Better Auth issues the session in the frontend; the Go service only validates the cookie. Redis sits in front of Postgres so redirects don't pay for a database round trip.
+URL shortener with a Go API and a Next.js frontend. It used to run at shly.pt, which is offline now. Better Auth issues the session in the frontend; the Go service only validates the cookie. Redis sits in front of Postgres so redirects don't pay for a database round trip.
 
 The Go API lives in its own repository: [shly-backend-go](https://github.com/esdrassantos06/shly-backend-go).
 
